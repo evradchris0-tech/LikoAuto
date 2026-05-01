@@ -74,194 +74,188 @@ class _ListingCardState extends State<ListingCard> {
             ),
           ],
         ),
-        // IntrinsicHeight : la ligne prend la hauteur max de ses enfants
-        // ce qui force l'image à s'étirer à 100% de la hauteur de la carte
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Image gauche — remplit toute la hauteur de la carte ──
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(AppRadius.card),
-                  bottomLeft: Radius.circular(AppRadius.card),
-                ),
-                child: SizedBox(
-                  width: 120,
-                  // Pas de height fixe — IntrinsicHeight + crossAxisAlignment.stretch
-                  // font que le SizedBox prend la hauteur complète de la Row
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Fond coloré derrière l'image (évite le blanc si PNG transparent)
-                      const ColoredBox(color: Color(0xFFEEEEEE)),
-                      // Image — BoxFit.cover garantit qu'elle remplit tout le cadre
-                      Image.asset(
-                        d.imageAsset,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        errorBuilder: (_, __, ___) => const ColoredBox(
-                          color: AppColors.primarySoft,
-                          child: Center(
-                            child: Icon(
-                              Icons.directions_car_rounded,
-                              color: AppColors.primary,
-                              size: 36,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Dégradé bas pour le badge photo
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        height: 36,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withValues(alpha: 0.45),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Compteur photos
-                      Positioned(
-                        left: 6,
-                        bottom: 6,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.camera_alt_outlined,
-                              size: 11,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '${d.photoCount}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        child: Row(
+          children: [
+            // ── Image gauche ──
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(AppRadius.card),
+                bottomLeft: Radius.circular(AppRadius.card),
               ),
-              // ── Infos droite ──────────────────────────────────────────
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    AppSpacing.sm,
-                    AppSpacing.md,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Titre + favori
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              d.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.textStyles.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.trust,
-                              ),
-                            ),
+              child: SizedBox(
+                width: 125,
+                height: 125,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Fond coloré derrière l'image (évite le blanc)
+                    const ColoredBox(color: Color(0xFFEEEEEE)),
+                    // Image
+                    Image.asset(
+                      d.imageAsset,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const ColoredBox(
+                        color: AppColors.primarySoft,
+                        child: Center(
+                          child: Icon(
+                            Icons.directions_car_rounded,
+                            color: AppColors.primary,
+                            size: 36,
                           ),
-                          GestureDetector(
-                            onTap: _toggleFavorite,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: Icon(
-                                _isFavorited
-                                    ? Icons.favorite_rounded
-                                    : Icons.favorite_border_rounded,
-                                key: ValueKey(_isFavorited),
-                                size: 20,
-                                color: _isFavorited
-                                    ? AppColors.primary
-                                    : AppColors.neutral,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Prix
-                      Text(
-                        d.priceFcfa.toFcfa(),
-                        style: context.textStyles.headlineMedium?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 17,
-                          height: 1.1,
                         ),
                       ),
-                      // Badges VIN + Pro
-                      Row(
-                        children: [
-                          if (d.isVinVerified)
-                            _Badge(
-                              label: 'VIN',
-                              icon: Icons.verified_rounded,
-                              color: AppColors.success,
-                              bg: AppColors.successSoft,
-                            ),
-                          if (d.isVinVerified && d.isPro)
-                            const SizedBox(width: 6),
-                          if (d.isPro)
-                            _Badge(
-                              label: 'Pro',
-                              color: AppColors.trust,
-                              bg: AppColors.primarySoft,
-                            ),
-                        ],
+                    ),
+                    // Dégradé bas pour le badge photo
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: 36,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.55),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
                       ),
-                      // Localisation + km
-                      Row(
+                    ),
+                    // Compteur photos
+                    Positioned(
+                      left: 6,
+                      bottom: 6,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.location_on_outlined,
-                            size: 13,
-                            color: AppColors.neutral,
+                            Icons.camera_alt_outlined,
+                            size: 11,
+                            color: Colors.white,
                           ),
                           const SizedBox(width: 3),
-                          Expanded(
-                            child: Text(
-                              '${d.location} · ${d.mileageKm.toGroupedString()} km',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.textStyles.bodySmall?.copyWith(
-                                color: AppColors.neutral,
-                              ),
+                          Text(
+                            '${d.photoCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            // ── Infos droite ──
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Titre + favori
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            d.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textStyles.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.trust,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: _toggleFavorite,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(
+                              _isFavorited
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              key: ValueKey(_isFavorited),
+                              size: 20,
+                              color: _isFavorited
+                                  ? AppColors.primary
+                                  : AppColors.neutral,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    AppSpacing.gapXs,
+                    // Prix
+                    Text(
+                      d.priceFcfa.toFcfa(),
+                      style: context.textStyles.headlineMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                        height: 1.1,
+                      ),
+                    ),
+                    AppSpacing.gapSm,
+                    // Badges VIN + Pro
+                    Row(
+                      children: [
+                        if (d.isVinVerified)
+                          _Badge(
+                            label: 'VIN',
+                            icon: Icons.verified_rounded,
+                            color: AppColors.success,
+                            bg: AppColors.successSoft,
+                          ),
+                        if (d.isVinVerified && d.isPro)
+                          const SizedBox(width: 6),
+                        if (d.isPro)
+                          _Badge(
+                            label: 'Pro',
+                            color: AppColors.trust,
+                            bg: AppColors.primarySoft,
+                          ),
+                      ],
+                    ),
+                    AppSpacing.gapSm,
+                    // Localisation + km
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 13,
+                          color: AppColors.neutral,
+                        ),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            '${d.location} · ${d.mileageKm.toGroupedString()} km',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textStyles.bodySmall?.copyWith(
+                              color: AppColors.neutral,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
