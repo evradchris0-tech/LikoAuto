@@ -1,0 +1,21 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.dart"
+      run: fvm dart format --set-exit-if-changed {staged_files}
+    analyze:
+      glob: "*.dart"
+      run: fvm flutter analyze --no-pub
+
+pre-push:
+  commands:
+    test:
+      run: fvm flutter test --no-pub
+
+commit-msg:
+  commands:
+    conventional:
+      run: |
+        head -1 {1} | grep -qE '^(feat|fix|chore|docs|refactor|test|ci|build|perf|style|revert)(\(.+\))?!?: .+' || \
+        (echo "Conventional Commits required (feat:, fix:, chore:, etc.)"; exit 1)

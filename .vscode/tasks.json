@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "flutter: clean",
+      "type": "shell",
+      "command": "fvm flutter clean"
+    },
+    {
+      "label": "flutter: pub get",
+      "type": "shell",
+      "command": "fvm flutter pub get"
+    },
+    {
+      "label": "build_runner: build",
+      "type": "shell",
+      "command": "fvm dart run build_runner build --delete-conflicting-outputs"
+    },
+    {
+      "label": "build_runner: watch",
+      "type": "shell",
+      "command": "fvm dart run build_runner watch --delete-conflicting-outputs",
+      "isBackground": true
+    },
+    {
+      "label": "flutter: test",
+      "type": "shell",
+      "command": "fvm flutter test --coverage",
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "flutter: analyze",
+      "type": "shell",
+      "command": "fvm flutter analyze"
+    },
+    {
+      "label": "flutter: build APK release (split-per-abi)",
+      "type": "shell",
+      "command": "fvm flutter build apk --release --split-per-abi",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "flutter: build appbundle release",
+      "type": "shell",
+      "command": "fvm flutter build appbundle --release"
+    }
+  ]
+}
