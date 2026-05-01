@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liko_auto/features/home/home_screen.dart';
+import 'package:liko_auto/features/onboarding/onboarding_screen.dart';
 import 'package:liko_auto/features/showcase/showcase_screen.dart';
 
-/// Routes de l'application. Pour l'instant : showcase du Design System.
-/// Sera enrichi au Sprint 3 avec onboarding, home, search, etc.
+/// Toutes les routes de l'application Liko Auto.
 abstract final class AppRoutes {
+  static const String onboarding = '/onboarding';
+  static const String home = '/home';
   static const String showcase = '/_showcase';
 }
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.showcase,
+  // L'onboarding s'affiche en premier au lancement.
+  initialLocation: AppRoutes.onboarding,
   routes: [
+    GoRoute(
+      path: AppRoutes.onboarding,
+      name: 'onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.home,
+      name: 'home',
+      builder: (context, state) => const HomeScreen(),
+    ),
     GoRoute(
       path: AppRoutes.showcase,
       name: 'showcase',
