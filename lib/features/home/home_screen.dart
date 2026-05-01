@@ -9,8 +9,10 @@ import 'package:liko_auto/features/home/widgets/home_search_bar.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/features/home/widgets/promo_banner.dart';
 import 'package:liko_auto/shared/widgets/branding/liko_logo.dart';
+import 'package:liko_auto/shared/widgets/skeleton/skeleton_widgets.dart';
 
 /// Page d'accueil de Liko Auto — search + filtres + hero promo + annonces.
+/// Inclut un skeleton de chargement (2s simulé) + animations d'apparition.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,9 +20,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedFilter = 0;
   int _selectedTab = 0;
+  bool _isLoading = true;
+
+  late final AnimationController _contentController;
+  late final Animation<double> _contentFade;
+  late final Animation<Offset> _contentSlide;
 
   static const _filterOptions = [
     HomeFilterOption('Tous'),
@@ -43,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
       isPro: true,
     ),
     ListingCardData(
-      title: 'Hyundai Tucson...',
+      title: 'Hyundai Tucson 2019',
       priceFcfa: 11200000,
       location: 'Bonanjo, Douala',
       mileageKm: 65000,
@@ -73,6 +80,43 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    _contentController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _contentFade = CurvedAnimation(
+      parent: _contentController,
+      curve: Curves.easeOut,
+    );
+
+    _contentSlide = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _contentController,
+      curve: Curves.easeOut,
+    ));
+
+    // Simule un chargement réseau de 1,8s
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _contentController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -83,88 +127,29 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              // ── AppBar custom ──────────────────────────────────────────
-              _HomeAppBar(),
-              // ── Contenu scrollable ────────────────────────────────────
+              // ── AppBar ────────────────────────────────────────────────
+              const _HomeAppBar(),
+              // ── Contenu ───────────────────────────────────────────────
               Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    // Search bar
-                    SliverToBoxAdapter(
-                      child: HomeSearchBar(
-                        unreadNotifications: 2,
-                        onMenu: () {},
-                        onSearch: () {},
-                        onNotifications: () {},
-                      ),
-                    ),
-                    // Filter chips
-                    SliverToBoxAdapter(
-                      child: FilterChipsRow(
-                        options: _filterOptions,
-                        selectedIndex: _selectedFilter,
-                        onSelected: (i) =>
-                            setState(() => _selectedFilter = i),
-                      ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-                    // Hero promo banner
-                    SliverToBoxAdapter(child: PromoBanner(onTap: () {})),
-                    const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
-                    // Section header "Dernières annonces"
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.lg,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Dernières annonces',
-                              style:
-                                  context.textStyles.headlineMedium?.copyWith(
-                                color: AppColors.trust,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Text(
-                                'Voir tout',
-                                style: context.textStyles.labelMedium?.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
+                child: _isLoading
+                    ? const _SkeletonHome()
+                    : SlideTransition(
+                        position: _contentSlide,
+                        child: FadeTransition(
+                          opacity: _contentFade,
+                          child: _HomeContent(
+                            filterOptions: _filterOptions,
+                            selectedFilter: _selectedFilter,
+                            onFilterSelected: (i) =>
+                                setState(() => _selectedFilter = i),
+                            listings: _listings,
+                          ),
                         ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-                    // Liste des annonces
-                    SliverList.separated(
-                      itemCount: _listings.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, i) =>
-                          ListingCard(data: _listings[i]),
-                    ),
-                    // Bottom padding (nav bar)
-                    const SliverToBoxAdapter(child: SizedBox(height: 90)),
-                  ],
-                ),
               ),
             ],
           ),
         ),
-        // ── Bottom Navigation ──────────────────────────────────────────
         bottomNavigationBar: _BottomNav(
           selectedIndex: _selectedTab,
           onTap: (i) => setState(() => _selectedTab = i),
@@ -175,9 +160,207 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// AppBar personnalisée
+// Skeleton Home — s'affiche pendant 1,8s
+// ────────────────────────────────────────────────────────────────────────────
+class _SkeletonHome extends StatelessWidget {
+  const _SkeletonHome();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      slivers: [
+        // Search bar skeleton
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: SkeletonBox(
+              width: double.infinity,
+              height: 48,
+              borderRadius: BorderRadius.all(Radius.circular(999)),
+            ),
+          ),
+        ),
+        // Filter chips skeleton
+        const SliverToBoxAdapter(child: SkeletonFilterChips()),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+        // Banner skeleton
+        const SliverToBoxAdapter(child: SkeletonBanner()),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+        // Section header skeleton
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SkeletonBox(width: 160, height: 20),
+                const SkeletonBox(width: 56, height: 16),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+        // Listing cards skeleton
+        SliverList.separated(
+          itemCount: 3,
+          separatorBuilder: (_, __) =>
+              const SizedBox(height: AppSpacing.sm),
+          itemBuilder: (_, __) => const SkeletonListingCard(),
+        ),
+      ],
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Contenu réel
+// ────────────────────────────────────────────────────────────────────────────
+class _HomeContent extends StatelessWidget {
+  const _HomeContent({
+    required this.filterOptions,
+    required this.selectedFilter,
+    required this.onFilterSelected,
+    required this.listings,
+  });
+
+  final List<HomeFilterOption> filterOptions;
+  final int selectedFilter;
+  final ValueChanged<int> onFilterSelected;
+  final List<ListingCardData> listings;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        // Search bar
+        SliverToBoxAdapter(
+          child: HomeSearchBar(
+            unreadNotifications: 2,
+            onMenu: () {},
+            onSearch: () {},
+            onNotifications: () {},
+          ),
+        ),
+        // Filter chips
+        SliverToBoxAdapter(
+          child: FilterChipsRow(
+            options: filterOptions,
+            selectedIndex: selectedFilter,
+            onSelected: onFilterSelected,
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+        // Hero promo
+        SliverToBoxAdapter(child: PromoBanner(onTap: () {})),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+        // Section header
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Dernières annonces',
+                  style: context.textStyles.headlineMedium?.copyWith(
+                    color: AppColors.trust,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: Text(
+                    'Voir tout',
+                    style: context.textStyles.labelMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+        // Annonces avec animation staggerée
+        SliverList.separated(
+          itemCount: listings.length,
+          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+          itemBuilder: (context, i) => _AnimatedCard(
+            index: i,
+            child: ListingCard(data: listings[i]),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 90)),
+      ],
+    );
+  }
+}
+
+/// Carte avec animation staggerée au chargement.
+class _AnimatedCard extends StatefulWidget {
+  const _AnimatedCard({required this.index, required this.child});
+  final int index;
+  final Widget child;
+
+  @override
+  State<_AnimatedCard> createState() => _AnimatedCardState();
+}
+
+class _AnimatedCardState extends State<_AnimatedCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _fade = CurvedAnimation(parent: _c, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOut));
+
+    Future.delayed(Duration(milliseconds: widget.index * 80), () {
+      if (mounted) _c.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// AppBar
 // ────────────────────────────────────────────────────────────────────────────
 class _HomeAppBar extends StatelessWidget {
+  const _HomeAppBar();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -201,6 +384,33 @@ class _HomeAppBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
+          // Badge de localisation
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.location_on_rounded,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Douala',
+                  style: context.textStyles.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.person_outline_rounded),
@@ -251,7 +461,8 @@ class _BottomNav extends StatelessWidget {
             ),
             NavigationDestination(
               icon: Icon(Icons.search_outlined),
-              selectedIcon: Icon(Icons.search_rounded, color: AppColors.primary),
+              selectedIcon:
+                  Icon(Icons.search_rounded, color: AppColors.primary),
               label: 'Recherche',
             ),
             NavigationDestination(
@@ -272,10 +483,8 @@ class _BottomNav extends StatelessWidget {
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(
-                Icons.person_rounded,
-                color: AppColors.primary,
-              ),
+              selectedIcon:
+                  Icon(Icons.person_rounded, color: AppColors.primary),
               label: 'Profil',
             ),
           ],

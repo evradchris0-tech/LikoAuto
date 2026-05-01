@@ -1,0 +1,184 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:liko_auto/app/router.dart';
+import 'package:liko_auto/core/constants/app_assets.dart';
+import 'package:liko_auto/core/theme/app_colors.dart';
+
+/// Splash screen Flutter — fond Spicy Paprika + logo animé + tagline.
+/// Dure 2,5s puis redirige vers l'onboarding.
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnim;
+  late final Animation<double> _scaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Statut bar transparent blanc sur fond orange
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+
+    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _scaleAnim = Tween<double>(begin: 0.72, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    );
+
+    _controller.forward();
+
+    // Navigation après 2,8s
+    Timer(const Duration(milliseconds: 2800), () {
+      if (mounted) context.go(AppRoutes.onboarding);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.primary,
+        body: Center(
+          child: FadeTransition(
+            opacity: _fadeAnim,
+            child: ScaleTransition(
+              scale: _scaleAnim,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Logo
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: Image.asset(
+                      AppAssets.logo,
+                      width: 140,
+                      height: 140,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Tagline
+                  const Text(
+                    'LIKO AUTO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 3,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'La marketplace auto du Cameroun',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Barre de chargement en bas
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(48, 0, 48, 32),
+            child: FadeTransition(
+              opacity: _fadeAnim,
+              child: _PulsingDots(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 3 points pulsants animés — indicateur de chargement premium.
+class _PulsingDots extends StatefulWidget {
+  @override
+  State<_PulsingDots> createState() => _PulsingDotsState();
+}
+
+class _PulsingDotsState extends State<_PulsingDots>
+    with TickerProviderStateMixin {
+  final List<AnimationController> _controllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    for (var i = 0; i < 3; i++) {
+      final c = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 600),
+      )..repeat(reverse: true);
+      Future.delayed(Duration(milliseconds: i * 180), () {
+        if (mounted) c.forward();
+      });
+      _controllers.add(c);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(3, (i) {
+        return AnimatedBuilder(
+          animation: _controllers[i],
+          builder: (_, __) => Container(
+            margin: const EdgeInsets.symmetric(horizontal: 5),
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(
+                alpha: 0.4 + _controllers[i].value * 0.6,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
