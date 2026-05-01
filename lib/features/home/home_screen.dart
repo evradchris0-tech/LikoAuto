@@ -21,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedFilter = 0;
-  int _selectedTab = 0;
   bool _isLoading = true;
 
   // Scroll scroll-aware AppBar
@@ -154,11 +153,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
             ),
           ],
-        ),
-        bottomNavigationBar: _BottomNav(
-          selectedIndex: _selectedTab,
-          onTap: (i) => setState(() => _selectedTab = i),
-          isScrolled: _isScrolled,
         ),
       ),
     );
@@ -465,97 +459,6 @@ class _AnimatedCardState extends State<_AnimatedCard>
     return FadeTransition(
       opacity: _fade,
       child: SlideTransition(position: _slide, child: widget.child),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Bottom Navigation
-// ────────────────────────────────────────────────────────────────────────────
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({
-    required this.selectedIndex,
-    required this.onTap,
-    required this.isScrolled,
-  });
-
-  final int selectedIndex;
-  final ValueChanged<int> onTap;
-  final bool isScrolled;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.trust.withValues(alpha: isScrolled ? 0.14 : 0.07),
-            blurRadius: isScrolled ? 28 : 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-        // Liseré dégradé orange en haut de la nav quand scrollé
-        border: isScrolled
-            ? Border(
-                top: BorderSide(
-                  color: AppColors.primary.withValues(alpha: 0.18),
-                  width: 1.5,
-                ),
-              )
-            : const Border(),
-      ),
-      child: SafeArea(
-        top: false,
-        child: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onTap,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          indicatorColor: AppColors.primarySoft,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
-              label: 'Accueil',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.search_outlined),
-              selectedIcon: Icon(
-                Icons.search_rounded,
-                color: AppColors.primary,
-              ),
-              label: 'Recherche',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.add_circle_outline_rounded),
-              selectedIcon: Icon(
-                Icons.add_circle_rounded,
-                color: AppColors.primary,
-              ),
-              label: 'Publier',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.chat_bubble_outline_rounded),
-              selectedIcon: Icon(
-                Icons.chat_bubble_rounded,
-                color: AppColors.primary,
-              ),
-              label: 'Messages',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(
-                Icons.person_rounded,
-                color: AppColors.primary,
-              ),
-              label: 'Profil',
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
