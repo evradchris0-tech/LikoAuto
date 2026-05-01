@@ -33,6 +33,7 @@ class HeroImagePlaceholder extends StatelessWidget {
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.zero,
       child: Container(
+        width: double.infinity,
         height: height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
