@@ -11,8 +11,7 @@ import 'package:liko_auto/features/home/widgets/promo_banner.dart';
 import 'package:liko_auto/shared/widgets/branding/liko_logo.dart';
 import 'package:liko_auto/shared/widgets/skeleton/skeleton_widgets.dart';
 
-/// Page d'accueil de Liko Auto — search + filtres + hero promo + annonces.
-/// Inclut un skeleton de chargement (2s simulé) + animations d'apparition.
+/// Page d'accueil de Liko Auto.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -25,6 +24,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedTab = 0;
   bool _isLoading = true;
 
+  // Scroll scroll-aware AppBar
+  final _scrollController = ScrollController();
+  bool _isScrolled = false;
+
   late final AnimationController _contentController;
   late final Animation<double> _contentFade;
   late final Animation<Offset> _contentSlide;
@@ -32,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   static const _filterOptions = [
     HomeFilterOption('Tous'),
     HomeFilterOption('VIN vérifié'),
-    HomeFilterOption('Moins 10M'),
+    HomeFilterOption('< 10M FCFA'),
     HomeFilterOption('Toyota'),
     HomeFilterOption('SUV'),
     HomeFilterOption('Douala'),
@@ -87,12 +90,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-
     _contentFade = CurvedAnimation(
       parent: _contentController,
       curve: Curves.easeOut,
     );
-
     _contentSlide = Tween<Offset>(
       begin: const Offset(0, 0.04),
       end: Offset.zero,
@@ -101,7 +102,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeOut,
     ));
 
-    // Simule un chargement réseau de 1,8s
+    // Scroll listener → AppBar ombre
+    _scrollController.addListener(() {
+      final scrolled = _scrollController.offset > 24;
+      if (scrolled != _isScrolled) {
+        setState(() => _isScrolled = scrolled);
+      }
+    });
+
+    // Simule 1,8s chargement
     Future.delayed(const Duration(milliseconds: 1800), () {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -113,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _contentController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -124,35 +134,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              // ── AppBar ────────────────────────────────────────────────
-              const _HomeAppBar(),
-              // ── Contenu ───────────────────────────────────────────────
-              Expanded(
-                child: _isLoading
-                    ? const _SkeletonHome()
-                    : SlideTransition(
-                        position: _contentSlide,
-                        child: FadeTransition(
-                          opacity: _contentFade,
-                          child: _HomeContent(
-                            filterOptions: _filterOptions,
-                            selectedFilter: _selectedFilter,
-                            onFilterSelected: (i) =>
-                                setState(() => _selectedFilter = i),
-                            listings: _listings,
-                          ),
+        body: Column(
+          children: [
+            // ── AppBar scroll-aware ───────────────────────────────────────
+            _ScrollAwareAppBar(isScrolled: _isScrolled),
+            // ── Contenu ───────────────────────────────────────────────────
+            Expanded(
+              child: _isLoading
+                  ? const _SkeletonHome()
+                  : SlideTransition(
+                      position: _contentSlide,
+                      child: FadeTransition(
+                        opacity: _contentFade,
+                        child: _HomeContent(
+                          scrollController: _scrollController,
+                          filterOptions: _filterOptions,
+                          selectedFilter: _selectedFilter,
+                          onFilterSelected: (i) =>
+                              setState(() => _selectedFilter = i),
+                          listings: _listings,
                         ),
                       ),
-              ),
-            ],
-          ),
+                    ),
+            ),
+          ],
         ),
         bottomNavigationBar: _BottomNav(
           selectedIndex: _selectedTab,
           onTap: (i) => setState(() => _selectedTab = i),
+          isScrolled: _isScrolled,
         ),
       ),
     );
@@ -160,7 +170,121 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Skeleton Home — s'affiche pendant 1,8s
+// AppBar scroll-aware — shadow + dégradé quand scrollé
+// ────────────────────────────────────────────────────────────────────────────
+class _ScrollAwareAppBar extends StatelessWidget {
+  const _ScrollAwareAppBar({required this.isScrolled});
+  final bool isScrolled;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: isScrolled
+              ? [
+                  BoxShadow(
+                    color: AppColors.trust.withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          children: [
+            // Logo + titre + localisation + profil
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.sm,
+                AppSpacing.xs,
+              ),
+              child: Row(
+                children: [
+                  const LikoLogo.app(),
+                  const SizedBox(width: AppSpacing.sm),
+                  Builder(
+                    builder: (context) => Text(
+                      'Liko Auto',
+                      style: context.textStyles.headlineSmall?.copyWith(
+                        color: AppColors.trust,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Badge localisation
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isScrolled
+                          ? AppColors.primary.withValues(alpha: 0.12)
+                          : AppColors.primarySoft,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.location_on_rounded,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          'Douala',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.notifications_none_rounded),
+                    color: AppColors.trust,
+                  ),
+                ],
+              ),
+            ),
+            // Liseré dégradé bas quand scrollé
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              height: isScrolled ? 3 : 0,
+              decoration: BoxDecoration(
+                gradient: isScrolled
+                    ? LinearGradient(
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.15),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )
+                    : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Skeleton
 // ────────────────────────────────────────────────────────────────────────────
 class _SkeletonHome extends StatelessWidget {
   const _SkeletonHome();
@@ -170,7 +294,6 @@ class _SkeletonHome extends StatelessWidget {
     return CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
       slivers: [
-        // Search bar skeleton
         const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(
@@ -184,31 +307,26 @@ class _SkeletonHome extends StatelessWidget {
             ),
           ),
         ),
-        // Filter chips skeleton
         const SliverToBoxAdapter(child: SkeletonFilterChips()),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-        // Banner skeleton
         const SliverToBoxAdapter(child: SkeletonBanner()),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
-        // Section header skeleton
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SkeletonBox(width: 160, height: 20),
-                const SkeletonBox(width: 56, height: 16),
+              children: const [
+                SkeletonBox(width: 160, height: 20),
+                SkeletonBox(width: 56, height: 16),
               ],
             ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-        // Listing cards skeleton
         SliverList.separated(
           itemCount: 3,
-          separatorBuilder: (_, __) =>
-              const SizedBox(height: AppSpacing.sm),
+          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (_, __) => const SkeletonListingCard(),
         ),
       ],
@@ -221,12 +339,14 @@ class _SkeletonHome extends StatelessWidget {
 // ────────────────────────────────────────────────────────────────────────────
 class _HomeContent extends StatelessWidget {
   const _HomeContent({
+    required this.scrollController,
     required this.filterOptions,
     required this.selectedFilter,
     required this.onFilterSelected,
     required this.listings,
   });
 
+  final ScrollController scrollController;
   final List<HomeFilterOption> filterOptions;
   final int selectedFilter;
   final ValueChanged<int> onFilterSelected;
@@ -235,8 +355,8 @@ class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
-        // Search bar
         SliverToBoxAdapter(
           child: HomeSearchBar(
             unreadNotifications: 2,
@@ -245,7 +365,6 @@ class _HomeContent extends StatelessWidget {
             onNotifications: () {},
           ),
         ),
-        // Filter chips
         SliverToBoxAdapter(
           child: FilterChipsRow(
             options: filterOptions,
@@ -254,13 +373,12 @@ class _HomeContent extends StatelessWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-        // Hero promo
         SliverToBoxAdapter(child: PromoBanner(onTap: () {})),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
-        // Section header
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -279,7 +397,7 @@ class _HomeContent extends StatelessWidget {
                     padding: EdgeInsets.zero,
                   ),
                   child: Text(
-                    'Voir tout',
+                    'Voir tout →',
                     style: context.textStyles.labelMedium?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
@@ -291,10 +409,10 @@ class _HomeContent extends StatelessWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-        // Annonces avec animation staggerée
         SliverList.separated(
           itemCount: listings.length,
-          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+          separatorBuilder: (_, __) =>
+              const SizedBox(height: AppSpacing.sm),
           itemBuilder: (context, i) => _AnimatedCard(
             index: i,
             child: ListingCard(data: listings[i]),
@@ -306,7 +424,7 @@ class _HomeContent extends StatelessWidget {
   }
 }
 
-/// Carte avec animation staggerée au chargement.
+/// Carte avec stagger d'apparition.
 class _AnimatedCard extends StatefulWidget {
   const _AnimatedCard({required this.index, required this.child});
   final int index;
@@ -327,15 +445,15 @@ class _AnimatedCardState extends State<_AnimatedCard>
     super.initState();
     _c = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 420),
     );
     _fade = CurvedAnimation(parent: _c, curve: Curves.easeOut);
     _slide = Tween<Offset>(
-      begin: const Offset(0, 0.08),
+      begin: const Offset(0, 0.10),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
 
-    Future.delayed(Duration(milliseconds: widget.index * 80), () {
+    Future.delayed(Duration(milliseconds: widget.index * 90), () {
       if (mounted) _c.forward();
     });
   }
@@ -356,94 +474,43 @@ class _AnimatedCardState extends State<_AnimatedCard>
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// AppBar
-// ────────────────────────────────────────────────────────────────────────────
-class _HomeAppBar extends StatelessWidget {
-  const _HomeAppBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.background,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          const LikoLogo.app(),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            'Liko Auto',
-            style: context.textStyles.headlineSmall?.copyWith(
-              color: AppColors.trust,
-              fontWeight: FontWeight.w800,
-              fontSize: 20,
-            ),
-          ),
-          const Spacer(),
-          // Badge de localisation
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.location_on_rounded,
-                  size: 14,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Douala',
-                  style: context.textStyles.labelSmall?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.person_outline_rounded),
-            color: AppColors.trust,
-            tooltip: 'Profil',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Bottom Navigation Bar
+// Bottom Navigation
 // ────────────────────────────────────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.selectedIndex, required this.onTap});
+  const _BottomNav({
+    required this.selectedIndex,
+    required this.onTap,
+    required this.isScrolled,
+  });
 
   final int selectedIndex;
   final ValueChanged<int> onTap;
+  final bool isScrolled;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.trust.withValues(alpha: 0.1),
-            blurRadius: 20,
+            color: AppColors.trust
+                .withValues(alpha: isScrolled ? 0.14 : 0.07),
+            blurRadius: isScrolled ? 28 : 16,
             offset: const Offset(0, -4),
           ),
         ],
+        // Liseré dégradé orange en haut de la nav quand scrollé
+        border: isScrolled
+            ? Border(
+                top: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.18),
+                  width: 1.5,
+                ),
+              )
+            : const Border(),
       ),
       child: SafeArea(
         top: false,
@@ -456,7 +523,8 @@ class _BottomNav extends StatelessWidget {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
+              selectedIcon:
+                  Icon(Icons.home_rounded, color: AppColors.primary),
               label: 'Accueil',
             ),
             NavigationDestination(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/onboarding/widgets/onboarding_page_layout.dart';
@@ -22,23 +21,20 @@ class WelcomePage extends StatelessWidget {
     return OnboardingPageLayout(
       step: 1,
       totalSteps: 4,
-      title: 'Bienvenue sur Liko Auto.',
-      body:
-          'La marketplace de voitures la plus fiable du Cameroun — de Douala à Yaoundé.',
-      primaryLabel: 'Continuer',
+      title: 'La marketplace auto\nla plus fiable du Cameroun.',
+      body: 'Achetez et vendez en toute confiance,\nde Douala à Yaoundé.',
+      primaryLabel: 'Commencer',
       onPrimary: onContinue,
-      tertiaryLabel: "Passer l'introduction",
-      onTertiary: onSkip,
-      visual: _WelcomeVisual(onSkip: onSkip),
+      visual: const _WelcomeVisual(),
       extra: const StatsCard(
         items: [
-          StatItem(value: '187', label: 'Véhicules en ligne'),
+          StatItem(value: '187', label: 'Véhicules'),
           StatItem(
             value: '92%',
             label: 'VIN vérifiés',
             valueColor: AppColors.success,
           ),
-          StatItem(value: '48', label: 'Garages partenaires'),
+          StatItem(value: '48', label: 'Garages'),
         ],
       ),
     );
@@ -46,13 +42,12 @@ class WelcomePage extends StatelessWidget {
 }
 
 class _WelcomeVisual extends StatelessWidget {
-  const _WelcomeVisual({required this.onSkip});
-  final VoidCallback onSkip;
+  const _WelcomeVisual();
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 320,
+      height: 300,
       child: Stack(
         children: [
           const Positioned.fill(
@@ -61,9 +56,10 @@ class _WelcomeVisual extends StatelessWidget {
               label: 'Toyota Land Cruiser · Douala',
             ),
           ),
+          // Chips en bas à gauche
           Positioned(
-            top: AppSpacing.lg,
             left: AppSpacing.lg,
+            bottom: AppSpacing.lg,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -73,7 +69,7 @@ class _WelcomeVisual extends StatelessWidget {
                   background: AppColors.success,
                   foreground: Colors.white,
                 ),
-                AppSpacing.gapSm,
+                const SizedBox(height: 6),
                 _Chip(
                   icon: Icons.location_on_rounded,
                   label: 'DOUALA',
@@ -81,31 +77,6 @@ class _WelcomeVisual extends StatelessWidget {
                   foreground: AppColors.trust,
                 ),
               ],
-            ),
-          ),
-          Positioned(
-            top: AppSpacing.lg,
-            right: AppSpacing.lg,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onSkip,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  child: Text(
-                    'Passer',
-                    style: context.textStyles.labelMedium?.copyWith(
-                      color: Colors.white,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
             ),
           ),
         ],
@@ -134,15 +105,22 @@ class _Chip extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: foreground),
+          Icon(icon, size: 13, color: foreground),
           const SizedBox(width: 4),
           Text(
             label,
-            style: context.textStyles.labelSmall?.copyWith(
+            style: TextStyle(
               color: foreground,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
