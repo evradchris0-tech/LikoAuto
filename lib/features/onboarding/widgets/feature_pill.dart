@@ -19,7 +19,7 @@ class FeaturePill extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.lg,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.primarySoft,
         borderRadius: AppRadius.rCard,
       ),

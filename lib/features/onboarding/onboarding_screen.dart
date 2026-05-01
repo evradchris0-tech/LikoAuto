@@ -64,11 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // ── Bouton "Passer" — haut droit — caché sur dernière page ───
             if (_currentPage < _pageCount - 1)
-              Positioned(
-                top: 8,
-                right: 16,
-                child: _SkipButton(onTap: _finish),
-              ),
+              Positioned(top: 8, right: 16, child: _SkipButton(onTap: _finish)),
 
             // ── Dots de progression — bas de page ─────────────────────────
             Positioned(
@@ -77,10 +73,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               bottom: 0,
               child: SafeArea(
                 top: false,
-                child: _PageDots(
-                  count: _pageCount,
-                  current: _currentPage,
-                ),
+                child: _PageDots(count: _pageCount, current: _currentPage),
               ),
             ),
           ],
@@ -102,8 +95,8 @@ class _SkipButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Text(
             'Passer',
             style: TextStyle(

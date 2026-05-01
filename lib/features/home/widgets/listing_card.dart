@@ -213,7 +213,7 @@ class _ListingCardState extends State<ListingCard> {
                     Row(
                       children: [
                         if (d.isVinVerified)
-                          _Badge(
+                          const _Badge(
                             label: 'VIN',
                             icon: Icons.verified_rounded,
                             color: AppColors.success,
@@ -222,7 +222,7 @@ class _ListingCardState extends State<ListingCard> {
                         if (d.isVinVerified && d.isPro)
                           const SizedBox(width: 6),
                         if (d.isPro)
-                          _Badge(
+                          const _Badge(
                             label: 'Pro',
                             color: AppColors.trust,
                             bg: AppColors.primarySoft,

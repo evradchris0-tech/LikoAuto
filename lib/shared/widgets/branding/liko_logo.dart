@@ -8,14 +8,10 @@ class LikoLogo extends StatelessWidget {
   const LikoLogo({this.size = 48, this.rounded = true, super.key});
 
   /// Variante carrée arrondie pour app bar / splash.
-  const LikoLogo.app({super.key})
-      : size = 40,
-        rounded = true;
+  const LikoLogo.app({super.key}) : size = 40, rounded = true;
 
   /// Variante grande pour splash.
-  const LikoLogo.large({super.key})
-      : size = 120,
-        rounded = true;
+  const LikoLogo.large({super.key}) : size = 120, rounded = true;
 
   final double size;
   final bool rounded;

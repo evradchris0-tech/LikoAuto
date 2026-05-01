@@ -88,36 +88,44 @@ class SkeletonListingCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: const Row(
         children: [
           // Image placeholder
           ClipRRect(
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(AppRadius.card),
               bottomLeft: Radius.circular(AppRadius.card),
             ),
-            child: const SkeletonBox(width: 120, height: 110),
+            child: SkeletonBox(width: 120, height: 110),
           ),
           // Infos
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SkeletonBox(width: 140, height: 14),
-                  const SizedBox(height: AppSpacing.sm),
-                  const SkeletonBox(width: 100, height: 18),
-                  const SizedBox(height: AppSpacing.sm),
+                  SkeletonBox(width: 140, height: 14),
+                  SizedBox(height: AppSpacing.sm),
+                  SkeletonBox(width: 100, height: 18),
+                  SizedBox(height: AppSpacing.sm),
                   Row(
                     children: [
-                      const SkeletonBox(width: 40, height: 20, borderRadius: BorderRadius.all(Radius.circular(6))),
-                      const SizedBox(width: 6),
-                      const SkeletonBox(width: 32, height: 20, borderRadius: BorderRadius.all(Radius.circular(6))),
+                      SkeletonBox(
+                        width: 40,
+                        height: 20,
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      ),
+                      SizedBox(width: 6),
+                      SkeletonBox(
+                        width: 32,
+                        height: 20,
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  const SkeletonBox(width: 110, height: 12),
+                  SizedBox(height: AppSpacing.sm),
+                  SkeletonBox(width: 110, height: 12),
                 ],
               ),
             ),
@@ -157,13 +165,29 @@ class SkeletonFilterChips extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         children: const [
-          SkeletonBox(width: 60, height: 36, borderRadius: BorderRadius.all(Radius.circular(999))),
+          SkeletonBox(
+            width: 60,
+            height: 36,
+            borderRadius: BorderRadius.all(Radius.circular(999)),
+          ),
           SizedBox(width: 8),
-          SkeletonBox(width: 90, height: 36, borderRadius: BorderRadius.all(Radius.circular(999))),
+          SkeletonBox(
+            width: 90,
+            height: 36,
+            borderRadius: BorderRadius.all(Radius.circular(999)),
+          ),
           SizedBox(width: 8),
-          SkeletonBox(width: 72, height: 36, borderRadius: BorderRadius.all(Radius.circular(999))),
+          SkeletonBox(
+            width: 72,
+            height: 36,
+            borderRadius: BorderRadius.all(Radius.circular(999)),
+          ),
           SizedBox(width: 8),
-          SkeletonBox(width: 64, height: 36, borderRadius: BorderRadius.all(Radius.circular(999))),
+          SkeletonBox(
+            width: 64,
+            height: 36,
+            borderRadius: BorderRadius.all(Radius.circular(999)),
+          ),
         ],
       ),
     );

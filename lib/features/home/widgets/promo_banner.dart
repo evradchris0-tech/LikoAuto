@@ -19,7 +19,7 @@ class PromoBanner extends StatelessWidget {
       child: Container(
         height: 180,
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           borderRadius: AppRadius.rCard,
           color: AppColors.trust,
         ),
@@ -52,7 +52,10 @@ class PromoBanner extends StatelessWidget {
               top: AppSpacing.md,
               right: AppSpacing.md,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.success,
                   borderRadius: BorderRadius.circular(999),

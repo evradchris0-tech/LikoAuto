@@ -40,9 +40,10 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _scaleAnim = Tween<double>(begin: 0.72, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 0.72,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
     _controller.forward();
 
@@ -115,10 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(48, 0, 48, 32),
-            child: FadeTransition(
-              opacity: _fadeAnim,
-              child: _PulsingDots(),
-            ),
+            child: FadeTransition(opacity: _fadeAnim, child: _PulsingDots()),
           ),
         ),
       ),

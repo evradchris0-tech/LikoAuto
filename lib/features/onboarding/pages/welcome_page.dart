@@ -46,11 +46,11 @@ class _WelcomeVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return const SizedBox(
       height: 300,
       child: Stack(
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             child: HeroImagePlaceholder(
               icon: Icons.directions_car_rounded,
               label: 'Toyota Land Cruiser · Douala',
@@ -69,7 +69,7 @@ class _WelcomeVisual extends StatelessWidget {
                   background: AppColors.success,
                   foreground: Colors.white,
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 _Chip(
                   icon: Icons.location_on_rounded,
                   label: 'DOUALA',

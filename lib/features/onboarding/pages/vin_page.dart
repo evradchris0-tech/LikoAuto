@@ -23,19 +23,19 @@ class VinPage extends StatelessWidget {
       primaryLabel: 'Continuer',
       onPrimary: onContinue,
       visual: const _VinVisual(),
-      extra: Column(
+      extra: const Column(
         children: [
-          const FeaturePill(
+          FeaturePill(
             icon: Icons.shield_outlined,
             label: 'Protège acheteurs et vendeurs',
           ),
           AppSpacing.gapMd,
-          const FeaturePill(
+          FeaturePill(
             icon: Icons.fingerprint_rounded,
             label: 'Révèle les duplicatas et fraudes',
           ),
           AppSpacing.gapMd,
-          const FeaturePill(
+          FeaturePill(
             icon: Icons.qr_code_scanner_rounded,
             label: 'Un simple scan suffit',
           ),

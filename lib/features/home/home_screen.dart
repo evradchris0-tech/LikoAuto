@@ -78,7 +78,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       mileageKm: 78000,
       imageAsset: AppAssets.logo,
       photoCount: 6,
-      isVinVerified: false,
     ),
   ];
 
@@ -94,13 +93,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       parent: _contentController,
       curve: Curves.easeOut,
     );
-    _contentSlide = Tween<Offset>(
-      begin: const Offset(0, 0.04),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _contentController,
-      curve: Curves.easeOut,
-    ));
+    _contentSlide =
+        Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
+          CurvedAnimation(parent: _contentController, curve: Curves.easeOut),
+        );
 
     // Scroll listener → AppBar ombre
     _scrollController.addListener(() {
@@ -223,15 +219,17 @@ class _ScrollAwareAppBar extends StatelessWidget {
                   // Badge localisation
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isScrolled
                           ? AppColors.primary.withValues(alpha: 0.12)
                           : AppColors.primarySoft,
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
@@ -239,7 +237,7 @@ class _ScrollAwareAppBar extends StatelessWidget {
                           size: 14,
                           color: AppColors.primary,
                         ),
-                        const SizedBox(width: 3),
+                        SizedBox(width: 3),
                         Text(
                           'Douala',
                           style: TextStyle(
@@ -311,12 +309,12 @@ class _SkeletonHome extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         const SliverToBoxAdapter(child: SkeletonBanner()),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
-        SliverToBoxAdapter(
+        const SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 SkeletonBox(width: 160, height: 20),
                 SkeletonBox(width: 56, height: 16),
               ],
@@ -377,8 +375,7 @@ class _HomeContent extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
         SliverToBoxAdapter(
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -411,8 +408,7 @@ class _HomeContent extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
         SliverList.separated(
           itemCount: listings.length,
-          separatorBuilder: (_, __) =>
-              const SizedBox(height: AppSpacing.sm),
+          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (context, i) => _AnimatedCard(
             index: i,
             child: ListingCard(data: listings[i]),
@@ -496,8 +492,7 @@ class _BottomNav extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.trust
-                .withValues(alpha: isScrolled ? 0.14 : 0.07),
+            color: AppColors.trust.withValues(alpha: isScrolled ? 0.14 : 0.07),
             blurRadius: isScrolled ? 28 : 16,
             offset: const Offset(0, -4),
           ),
@@ -523,14 +518,15 @@ class _BottomNav extends StatelessWidget {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
-              selectedIcon:
-                  Icon(Icons.home_rounded, color: AppColors.primary),
+              selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
               label: 'Accueil',
             ),
             NavigationDestination(
               icon: Icon(Icons.search_outlined),
-              selectedIcon:
-                  Icon(Icons.search_rounded, color: AppColors.primary),
+              selectedIcon: Icon(
+                Icons.search_rounded,
+                color: AppColors.primary,
+              ),
               label: 'Recherche',
             ),
             NavigationDestination(
@@ -551,8 +547,10 @@ class _BottomNav extends StatelessWidget {
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
-              selectedIcon:
-                  Icon(Icons.person_rounded, color: AppColors.primary),
+              selectedIcon: Icon(
+                Icons.person_rounded,
+                color: AppColors.primary,
+              ),
               label: 'Profil',
             ),
           ],

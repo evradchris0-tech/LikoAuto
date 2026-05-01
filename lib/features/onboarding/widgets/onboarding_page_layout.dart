@@ -77,14 +77,17 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
     );
 
     // Helper — crée un interval normalisé
-    CurvedAnimation interval(double begin, double end, {Curve curve = Curves.easeOut}) =>
-        CurvedAnimation(
-          parent: _masterCtrl,
-          curve: Interval(begin, end, curve: curve),
-        );
+    CurvedAnimation interval(
+      double begin,
+      double end, {
+      Curve curve = Curves.easeOut,
+    }) => CurvedAnimation(
+      parent: _masterCtrl,
+      curve: Interval(begin, end, curve: curve),
+    );
 
     // Visuel — t 0..35%
-    final v = interval(0.0, 0.35);
+    final v = interval(0, 0.35);
     _visualFade = v;
     _visualSlide = Tween<Offset>(
       begin: const Offset(0, -0.06),
@@ -105,7 +108,7 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
       parent: _masterCtrl,
       curve: const Interval(0.20, 0.55, curve: Curves.easeOut),
     );
-    _titleScale = Tween<double>(begin: 0.88, end: 1.0).animate(t);
+    _titleScale = Tween<double>(begin: 0.88, end: 1).animate(t);
 
     // Body — t 32..62%
     final b = interval(0.32, 0.62);
@@ -126,13 +129,13 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
     // CTA bouton — t 58..88%
     final c = interval(0.58, 0.88);
     _ctaFade = c;
-    _ctaSlide = Tween<Offset>(
-      begin: const Offset(0, 0.8),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _masterCtrl,
-      curve: const Interval(0.58, 0.88, curve: Curves.easeOutBack),
-    ));
+    _ctaSlide = Tween<Offset>(begin: const Offset(0, 0.8), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _masterCtrl,
+            curve: const Interval(0.58, 0.88, curve: Curves.easeOutBack),
+          ),
+        );
 
     // ── Breathing du visuel ──────────────────────────────────────────────
     _breathCtrl = AnimationController(
@@ -140,9 +143,10 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
       duration: const Duration(seconds: 5),
     )..repeat(reverse: true);
 
-    _breathScale = Tween<double>(begin: 1.0, end: 1.04).animate(
-      CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut),
-    );
+    _breathScale = Tween<double>(
+      begin: 1,
+      end: 1.04,
+    ).animate(CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut));
 
     // Lancer
     _masterCtrl.forward();
@@ -164,10 +168,7 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
           opacity: _visualFade,
           child: SlideTransition(
             position: _visualSlide,
-            child: ScaleTransition(
-              scale: _breathScale,
-              child: widget.visual,
-            ),
+            child: ScaleTransition(scale: _breathScale, child: widget.visual),
           ),
         ),
 
@@ -183,7 +184,6 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
                 AppSpacing.md,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Step indicator
                   FadeTransition(
@@ -241,7 +241,7 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
                       opacity: _extraFade,
                       child: SlideTransition(
                         position: _extraSlide,
-                        child: widget.extra!,
+                        child: widget.extra,
                       ),
                     ),
                   ],

@@ -32,13 +32,15 @@ class ChatBubble extends StatelessWidget {
     );
 
     return Row(
-      mainAxisAlignment:
-          isReceived ? MainAxisAlignment.start : MainAxisAlignment.end,
+      mainAxisAlignment: isReceived
+          ? MainAxisAlignment.start
+          : MainAxisAlignment.end,
       children: [
         Flexible(
           child: Column(
-            crossAxisAlignment:
-                isReceived ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            crossAxisAlignment: isReceived
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(

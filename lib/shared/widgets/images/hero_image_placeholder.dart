@@ -28,7 +28,8 @@ class HeroImagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors =
-        gradientColors ?? [AppColors.trust, AppColors.trust.withValues(alpha: 0.55)];
+        gradientColors ??
+        [AppColors.trust, AppColors.trust.withValues(alpha: 0.55)];
 
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.zero,
@@ -57,11 +58,17 @@ class HeroImagePlaceholder extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null)
-                    Icon(icon, size: 56, color: Colors.white.withValues(alpha: 0.85)),
+                    Icon(
+                      icon,
+                      size: 56,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
                   if (label != null) ...[
                     AppSpacing.gapSm,
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
                       child: Text(
                         label!,
                         textAlign: TextAlign.center,

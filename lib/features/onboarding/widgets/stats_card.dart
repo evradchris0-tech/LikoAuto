@@ -4,11 +4,7 @@ import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 
 class StatItem {
-  const StatItem({
-    required this.value,
-    required this.label,
-    this.valueColor,
-  });
+  const StatItem({required this.value, required this.label, this.valueColor});
 
   final String value;
   final String label;
@@ -34,7 +30,6 @@ class StatsCard extends StatelessWidget {
         borderRadius: AppRadius.rCard,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           for (var i = 0; i < items.length; i++) ...[
             Expanded(child: _StatColumn(item: items[i])),

@@ -18,7 +18,7 @@ class GaragesPage extends StatelessWidget {
       totalSteps: 4,
       title: 'Trouvez le bon garage en un clic.',
       body:
-          'Fini les devinettes. Accédez directement aux meilleurs spécialistes de votre quartier pour l\'entretien et la réparation.',
+          "Fini les devinettes. Accédez directement aux meilleurs spécialistes de votre quartier pour l'entretien et la réparation.",
       primaryLabel: 'Continuer',
       onPrimary: onContinue,
       visual: const _GaragesVisual(),
@@ -32,7 +32,7 @@ class _GaragesVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return const SizedBox(
       height: 320,
       child: Stack(
         children: [
@@ -40,21 +40,21 @@ class _GaragesVisual extends StatelessWidget {
             child: HeroImagePlaceholder(
               icon: Icons.map_rounded,
               label: 'Cameroun · Douala / Yaoundé / Bafoussam',
-              gradientColors: const [Color(0xFFCFD7DD), Color(0xFFE8EEF1)],
+              gradientColors: [Color(0xFFCFD7DD), Color(0xFFE8EEF1)],
             ),
           ),
           // Pins simulés
-          const Positioned(top: 80, left: 110, child: _Pin()),
-          const Positioned(top: 120, left: 210, child: _Pin(filled: false)),
-          const Positioned(top: 170, left: 150, child: _Pin()),
-          const Positioned(top: 210, left: 250, child: _Pin(filled: false)),
+          Positioned(top: 80, left: 110, child: _Pin()),
+          Positioned(top: 120, left: 210, child: _Pin(filled: false)),
+          Positioned(top: 170, left: 150, child: _Pin()),
+          Positioned(top: 210, left: 250, child: _Pin(filled: false)),
           // Specialty chips en bas du visuel
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: Wrap(
                 alignment: WrapAlignment.center,
                 spacing: AppSpacing.sm,
@@ -85,7 +85,9 @@ class _Pin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Icon(
       Icons.location_on_rounded,
-      color: filled ? AppColors.primary : AppColors.primary.withValues(alpha: 0.45),
+      color: filled
+          ? AppColors.primary
+          : AppColors.primary.withValues(alpha: 0.45),
       size: filled ? 32 : 24,
       shadows: const [
         Shadow(blurRadius: 4, color: Colors.black26, offset: Offset(0, 2)),
@@ -109,7 +111,9 @@ class _SpecialtyChip extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: selected ? AppColors.primary : AppColors.primary.withValues(alpha: 0.3),
+          color: selected
+              ? AppColors.primary
+              : AppColors.primary.withValues(alpha: 0.3),
           width: selected ? 1.5 : 1,
         ),
       ),
@@ -142,7 +146,7 @@ class _GaragesStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.primarySoft,
         borderRadius: AppRadius.rCard,
       ),
