@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
 
 /// Modèle de données d'une annonce pour l'affichage en liste.
 class ListingCardData {
@@ -31,7 +33,7 @@ class ListingCardData {
 }
 
 /// Carte d'annonce — image gauche + info droite + badges VIN/Pro.
-class ListingCard extends StatefulWidget {
+class ListingCard extends ConsumerWidget {
   const ListingCard({
     required this.data,
     this.onTap,
@@ -43,39 +45,30 @@ class ListingCard extends StatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onFavorite;
 
-  @override
-  State<ListingCard> createState() => _ListingCardState();
-}
-
-class _ListingCardState extends State<ListingCard> {
-  bool _isFavorited = false;
-
-  void _toggleFavorite() {
-    setState(() => _isFavorited = !_isFavorited);
-    
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isFavorited 
-              ? 'Ajouté aux favoris' 
-              : 'Retiré des favoris',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+  void _toggleFavorite(BuildContext context, WidgetRef ref) {
+    final added = ref.read(favoritesProvider.notifier).toggle(data);
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            added ? 'Ajouté aux favoris' : 'Retiré des favoris',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: added ? AppColors.success : AppColors.trust,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
         ),
-        backgroundColor: _isFavorited ? AppColors.success : AppColors.trust,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    
-    widget.onFavorite?.call();
+      );
+    onFavorite?.call();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final d = widget.data;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final d = data;
+    final isFavorited = ref.watch(isFavoriteProvider(d));
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -201,16 +194,16 @@ class _ListingCardState extends State<ListingCard> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: _toggleFavorite,
+                          onTap: () => _toggleFavorite(context, ref),
                           child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
                             child: Icon(
-                              _isFavorited
+                              isFavorited
                                   ? Icons.favorite_rounded
                                   : Icons.favorite_border_rounded,
-                              key: ValueKey(_isFavorited),
+                              key: ValueKey(isFavorited),
                               size: 20,
-                              color: _isFavorited
+                              color: isFavorited
                                   ? AppColors.primary
                                   : AppColors.neutral,
                             ),

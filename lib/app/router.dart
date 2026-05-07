@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liko_auto/features/account_settings/account_settings_screen.dart';
 import 'package:liko_auto/features/auth/forgot_password_screen.dart';
 import 'package:liko_auto/features/auth/login_screen.dart';
 import 'package:liko_auto/features/auth/otp_verification_screen.dart';
@@ -8,8 +9,12 @@ import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/features/auth/register_screen.dart';
 import 'package:liko_auto/features/chat/chat_detail_screen.dart';
 import 'package:liko_auto/features/chat/chat_list_screen.dart';
+import 'package:liko_auto/features/favorites/favorites_screen.dart';
+import 'package:liko_auto/features/history/history_screen.dart';
 import 'package:liko_auto/features/home/home_screen.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:liko_auto/features/my_listings/my_listings_screen.dart';
+import 'package:liko_auto/features/notifications_settings/notification_settings_screen.dart';
 import 'package:liko_auto/features/onboarding/onboarding_screen.dart';
 import 'package:liko_auto/features/profile/profile_screen.dart';
 import 'package:liko_auto/features/search/search_screen.dart';
@@ -17,6 +22,7 @@ import 'package:liko_auto/features/sell/sell_screen.dart';
 import 'package:liko_auto/features/shell/app_shell.dart';
 import 'package:liko_auto/features/showcase/showcase_screen.dart';
 import 'package:liko_auto/features/splash/splash_screen.dart';
+import 'package:liko_auto/features/support/support_screen.dart';
 import 'package:liko_auto/features/vehicle_details/vehicle_detail_screen.dart';
 
 /// Toutes les routes de l'application Liko Auto.
@@ -35,9 +41,25 @@ abstract final class AppRoutes {
   static const String otpVerification = '/otp_verification';
   static const String forgotPassword = '/forgot_password';
   static const String chatDetail = '/chat_detail';
+  static const String myListings = '/my_listings';
+  static const String favorites = '/favorites';
+  static const String history = '/history';
+  static const String accountSettings = '/account_settings';
+  static const String notificationSettings = '/notification_settings';
+  static const String support = '/support';
 
   /// Routes nécessitant une session utilisateur.
-  static const Set<String> guarded = {sell, chat, profile, chatDetail};
+  static const Set<String> guarded = {
+    sell,
+    chat,
+    profile,
+    chatDetail,
+    myListings,
+    favorites,
+    history,
+    accountSettings,
+    notificationSettings,
+  };
 }
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -130,6 +152,36 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.sell,
         name: 'sell',
         builder: (context, state) => const SellScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.myListings,
+        name: 'myListings',
+        builder: (context, state) => const MyListingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.favorites,
+        name: 'favorites',
+        builder: (context, state) => const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.history,
+        name: 'history',
+        builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountSettings,
+        name: 'accountSettings',
+        builder: (context, state) => const AccountSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        name: 'notificationSettings',
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.support,
+        name: 'support',
+        builder: (context, state) => const SupportScreen(),
       ),
 
       // Shell stateful — persiste le BottomNav entre les onglets visibles.

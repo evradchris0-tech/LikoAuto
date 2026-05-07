@@ -8,6 +8,8 @@ import 'package:liko_auto/core/providers/package_info_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
+import 'package:liko_auto/features/my_listings/providers/my_listings_provider.dart';
 import 'package:liko_auto/features/profile/widgets/profile_menu_item.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -17,6 +19,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final packageInfo = ref.watch(packageInfoProvider);
     final authState = ref.watch(authStateChangesProvider);
+    final activeListings = ref.watch(activeListingsCountProvider);
+    final favoritesCount = ref.watch(favoritesCountProvider);
 
     return Column(
       children: [
@@ -50,20 +54,20 @@ class ProfileScreen extends ConsumerWidget {
                     items: [
                       ProfileMenuItem(
                         icon: Icons.directions_car_outlined,
-                        label: 'Mes annonces actives',
-                        badgeCount: 0,
-                        onTap: () {},
+                        label: 'Mes annonces',
+                        badgeCount: activeListings,
+                        onTap: () => context.push(AppRoutes.myListings),
                       ),
                       ProfileMenuItem(
                         icon: Icons.favorite_border_rounded,
                         label: 'Mes favoris',
-                        badgeCount: 0,
-                        onTap: () {},
+                        badgeCount: favoritesCount,
+                        onTap: () => context.push(AppRoutes.favorites),
                       ),
                       ProfileMenuItem(
                         icon: Icons.history_rounded,
                         label: 'Historique des vues',
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.history),
                       ),
                     ],
                   ),
@@ -73,17 +77,18 @@ class ProfileScreen extends ConsumerWidget {
                       ProfileMenuItem(
                         icon: Icons.settings_outlined,
                         label: 'Paramètres du compte',
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.accountSettings),
                       ),
                       ProfileMenuItem(
                         icon: Icons.notifications_none_rounded,
                         label: 'Préférences de notification',
-                        onTap: () {},
+                        onTap: () =>
+                            context.push(AppRoutes.notificationSettings),
                       ),
                       ProfileMenuItem(
                         icon: Icons.help_outline_rounded,
                         label: 'Aide & Support',
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.support),
                       ),
                     ],
                   ),

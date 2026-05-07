@@ -1,16 +1,36 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/history/providers/view_history_provider.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
 
-class VehicleDetailScreen extends StatelessWidget {
+class VehicleDetailScreen extends ConsumerStatefulWidget {
   const VehicleDetailScreen({required this.data, super.key});
 
   final ListingCardData data;
+
+  @override
+  ConsumerState<VehicleDetailScreen> createState() =>
+      _VehicleDetailScreenState();
+}
+
+class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(viewHistoryProvider.notifier).record(widget.data);
+      }
+    });
+  }
+
+  ListingCardData get data => widget.data;
 
   @override
   Widget build(BuildContext context) {
