@@ -14,6 +14,7 @@ class ListingCardData {
     required this.mileageKm,
     required this.imageAsset,
     required this.photoCount,
+    this.year = '2021',
     this.isVinVerified = false,
     this.isPro = false,
   });
@@ -24,6 +25,7 @@ class ListingCardData {
   final int mileageKm;
   final String imageAsset;
   final int photoCount;
+  final String year;
   final bool isVinVerified;
   final bool isPro;
 }
@@ -50,6 +52,22 @@ class _ListingCardState extends State<ListingCard> {
 
   void _toggleFavorite() {
     setState(() => _isFavorited = !_isFavorited);
+    
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isFavorited 
+              ? 'Ajouté aux favoris' 
+              : 'Retiré des favoris',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: _isFavorited ? AppColors.success : AppColors.trust,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    
     widget.onFavorite?.call();
   }
 
@@ -91,16 +109,19 @@ class _ListingCardState extends State<ListingCard> {
                     // Fond coloré derrière l'image (évite le blanc)
                     const ColoredBox(color: Color(0xFFEEEEEE)),
                     // Image
-                    Image.asset(
-                      d.imageAsset,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const ColoredBox(
-                        color: AppColors.primarySoft,
-                        child: Center(
-                          child: Icon(
-                            Icons.directions_car_rounded,
-                            color: AppColors.primary,
-                            size: 36,
+                    Hero(
+                      tag: 'car_image_${d.title}_${d.priceFcfa}',
+                      child: Image.asset(
+                        d.imageAsset,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const ColoredBox(
+                          color: AppColors.primarySoft,
+                          child: Center(
+                            child: Icon(
+                              Icons.directions_car_rounded,
+                              color: AppColors.primary,
+                              size: 36,
+                            ),
                           ),
                         ),
                       ),

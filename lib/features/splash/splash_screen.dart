@@ -2,21 +2,23 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/constants/app_assets.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 
 /// Splash screen Flutter — fond Spicy Paprika + logo animé + tagline.
-/// Dure 2,5s puis redirige vers l'onboarding.
-class SplashScreen extends StatefulWidget {
+/// Dure 2,5s puis redirige vers l'onboarding (1ère fois) ou /home (sinon).
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fadeAnim;
@@ -26,7 +28,6 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Statut bar transparent blanc sur fond orange
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -47,9 +48,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigation après 2,8s
     Timer(const Duration(milliseconds: 2800), () {
-      if (mounted) context.go(AppRoutes.onboarding);
+      if (!mounted) return;
+      final seen = ref.read(onboardingSeenProvider);
+      context.go(seen ? AppRoutes.home : AppRoutes.onboarding);
     });
   }
 
@@ -76,7 +78,6 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Logo
                   ClipRRect(
                     borderRadius: BorderRadius.circular(28),
                     child: Image.asset(
@@ -87,7 +88,6 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Tagline
                   const Text(
                     'LIKO AUTO',
                     style: TextStyle(
@@ -112,7 +112,6 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
         ),
-        // Barre de chargement en bas
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(48, 0, 48, 32),
@@ -124,7 +123,6 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-/// 3 points pulsants animés — indicateur de chargement premium.
 class _PulsingDots extends StatefulWidget {
   @override
   State<_PulsingDots> createState() => _PulsingDotsState();

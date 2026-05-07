@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
-import 'package:liko_auto/features/onboarding/widgets/step_indicator.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/buttons/tertiary_button.dart';
-
-/// Layout animé commun aux 4 pages onboarding.
-/// Chaque élément entre séquentiellement avec un stagger :
-///   visuel → step → titre → body → extra → CTA
 class OnboardingPageLayout extends StatefulWidget {
   const OnboardingPageLayout({
     required this.visual,
@@ -46,9 +41,6 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
   // ── 6 animations staggerées ───────────────────────────────────────────────
   late final Animation<double> _visualFade;
   late final Animation<Offset> _visualSlide;
-
-  late final Animation<double> _stepFade;
-  late final Animation<Offset> _stepSlide;
 
   late final Animation<double> _titleFade;
   late final Animation<double> _titleScale;
@@ -93,14 +85,6 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
       begin: const Offset(0, -0.06),
       end: Offset.zero,
     ).animate(v);
-
-    // Step indicator — t 10..40%
-    final s = interval(0.10, 0.42);
-    _stepFade = s;
-    _stepSlide = Tween<Offset>(
-      begin: const Offset(0, 0.4),
-      end: Offset.zero,
-    ).animate(s);
 
     // Titre — t 20..55% avec easeOutBack pour le scale
     final t = interval(0.20, 0.55, curve: Curves.easeOutBack);
@@ -185,19 +169,6 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
               ),
               child: Column(
                 children: [
-                  // Step indicator
-                  FadeTransition(
-                    opacity: _stepFade,
-                    child: SlideTransition(
-                      position: _stepSlide,
-                      child: StepIndicator(
-                        current: widget.step,
-                        total: widget.totalSteps,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
                   // Titre
                   FadeTransition(
                     opacity: _titleFade,

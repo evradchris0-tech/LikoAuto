@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/onboarding/pages/chat_page.dart';
 import 'package:liko_auto/features/onboarding/pages/garages_page.dart';
 import 'package:liko_auto/features/onboarding/pages/vin_page.dart';
 import 'package:liko_auto/features/onboarding/pages/welcome_page.dart';
 
-/// Container des 4 pages d'onboarding.
-/// - PageView avec transition fluide (500ms, fastEaseInToSlowEaseOut)
-/// - Dots de progression animés (le dot actif s'élargit)
-/// - Bouton "Passer" unique en haut à droite
-class OnboardingScreen extends StatefulWidget {
+/// 4 pages swipeables — Welcome / VIN / Garages / Chat. Une fois terminé,
+/// `onboardingSeenProvider` est marqué et l'utilisateur ne reverra plus
+/// l'onboarding au prochain lancement.
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _controller = PageController();
-  int _currentPage = 0;
-
-  static const _pageCount = 4;
+  int _index = 0;
+  static const _totalPages = 4;
 
   @override
   void dispose() {
@@ -30,16 +31,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _next() {
-    _controller.nextPage(
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.fastEaseInToSlowEaseOut,
-    );
+  Future<void> _markSeen() async {
+    await ref.read(onboardingSeenProvider.notifier).markSeen();
   }
 
-  void _finish() {
-    if (!mounted) return;
-    context.go(AppRoutes.home);
+  void _next() {
+    if (_index < _totalPages - 1) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _finish();
+    }
+  }
+
+  Future<void> _finish() async {
+    await _markSeen();
+    if (mounted) context.go(AppRoutes.home);
+  }
+
+  Future<void> _goLogin() async {
+    await _markSeen();
+    if (mounted) context.go(AppRoutes.login);
+  }
+
+  Future<void> _skip() async {
+    await _markSeen();
+    if (mounted) context.go(AppRoutes.home);
   }
 
   @override
@@ -48,32 +67,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
-        child: Stack(
+        child: Column(
           children: [
-            // ── PageView ──────────────────────────────────────────────────
-            PageView(
-              controller: _controller,
-              onPageChanged: (i) => setState(() => _currentPage = i),
-              children: [
-                WelcomePage(onContinue: _next, onSkip: _finish),
-                VinPage(onContinue: _next),
-                GaragesPage(onContinue: _next),
-                ChatOnboardingPage(onStart: _finish, onLogin: _finish),
-              ],
+            _TopBar(
+              currentIndex: _index,
+              total: _totalPages,
+              onSkip: _index < _totalPages - 1 ? _skip : null,
             ),
-
-            // ── Bouton "Passer" — haut droit — caché sur dernière page ───
-            if (_currentPage < _pageCount - 1)
-              Positioned(top: 8, right: 16, child: _SkipButton(onTap: _finish)),
-
-            // ── Dots de progression — bas de page ─────────────────────────
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: SafeArea(
-                top: false,
-                child: _PageDots(count: _pageCount, current: _currentPage),
+            Expanded(
+              child: PageView(
+                controller: _controller,
+                onPageChanged: (i) => setState(() => _index = i),
+                children: [
+                  WelcomePage(onContinue: _next),
+                  VinPage(onContinue: _next),
+                  GaragesPage(onContinue: _next),
+                  ChatOnboardingPage(onStart: _finish, onLogin: _goLogin),
+                ],
               ),
             ),
           ],
@@ -83,63 +93,66 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-/// Bouton "Passer" discret avec ripple.
-class _SkipButton extends StatelessWidget {
-  const _SkipButton({required this.onTap});
-  final VoidCallback onTap;
+class _TopBar extends StatelessWidget {
+  const _TopBar({
+    required this.currentIndex,
+    required this.total,
+    this.onSkip,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            'Passer',
-            style: TextStyle(
-              color: AppColors.neutral,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Dots de progression avec animation.
-class _PageDots extends StatelessWidget {
-  const _PageDots({required this.count, required this.current});
-  final int count;
-  final int current;
+  final int currentIndex;
+  final int total;
+  final VoidCallback? onSkip;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(count, (i) {
-          final isActive = i == current;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeInOut,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: isActive ? 24 : 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.primary
-                  : AppColors.primary.withValues(alpha: 0.25),
-              borderRadius: BorderRadius.circular(4),
+        children: [
+          Expanded(
+            child: Row(
+              children: List.generate(total, (i) {
+                final isActive = i == currentIndex;
+                final isPast = i < currentIndex;
+                return Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 280),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isActive || isPast
+                          ? AppColors.primary
+                          : AppColors.outline,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }),
             ),
-          );
-        }),
+          ),
+          AppSpacing.gapMd,
+          if (onSkip != null)
+            TextButton(
+              onPressed: onSkip,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.neutral,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              child: const Text(
+                'Passer',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+        ],
       ),
     );
   }

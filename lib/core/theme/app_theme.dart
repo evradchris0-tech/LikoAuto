@@ -170,6 +170,12 @@ abstract final class AppTheme {
         ),
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.rButton),
       ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 }
