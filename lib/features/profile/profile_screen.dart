@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/providers/package_info_provider.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
@@ -161,6 +162,7 @@ class ProfileScreen extends ConsumerWidget {
     );
     if (confirmed != true) return;
     await ref.read(authRepositoryProvider).signOut();
+    await ref.read(mockSignedInProvider.notifier).signOut();
     if (context.mounted) context.go(AppRoutes.login);
   }
 }

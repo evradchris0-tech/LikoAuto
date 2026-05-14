@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/features/account_settings/account_settings_screen.dart';
 import 'package:liko_auto/features/auth/forgot_password_screen.dart';
 import 'package:liko_auto/features/auth/login_screen.dart';
@@ -10,14 +11,17 @@ import 'package:liko_auto/features/auth/register_screen.dart';
 import 'package:liko_auto/features/chat/chat_detail_screen.dart';
 import 'package:liko_auto/features/chat/chat_list_screen.dart';
 import 'package:liko_auto/features/favorites/favorites_screen.dart';
+import 'package:liko_auto/features/garage_detail/garage_detail_screen.dart';
 import 'package:liko_auto/features/history/history_screen.dart';
 import 'package:liko_auto/features/home/home_screen.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/features/my_listings/my_listings_screen.dart';
 import 'package:liko_auto/features/notifications_settings/notification_settings_screen.dart';
 import 'package:liko_auto/features/onboarding/onboarding_screen.dart';
+import 'package:liko_auto/features/photo_gallery/photo_gallery_screen.dart';
 import 'package:liko_auto/features/profile/profile_screen.dart';
 import 'package:liko_auto/features/search/search_screen.dart';
+import 'package:liko_auto/features/search/widgets/garage_result_card.dart';
 import 'package:liko_auto/features/sell/sell_screen.dart';
 import 'package:liko_auto/features/shell/app_shell.dart';
 import 'package:liko_auto/features/showcase/showcase_screen.dart';
@@ -47,6 +51,8 @@ abstract final class AppRoutes {
   static const String accountSettings = '/account_settings';
   static const String notificationSettings = '/notification_settings';
   static const String support = '/support';
+  static const String garageDetail = '/garage_detail';
+  static const String photoGallery = '/photo_gallery';
 
   /// Routes nécessitant une session utilisateur.
   static const Set<String> guarded = {
@@ -67,12 +73,13 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 /// Router exposé via Riverpod pour réagir aux changements d'auth.
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
+  final mockSignedIn = ref.watch(mockSignedInProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
-      final isLoggedIn = authState.value != null;
+      final isLoggedIn = authState.value != null || mockSignedIn;
       final loc = state.matchedLocation;
 
       final needsAuth = AppRoutes.guarded.any(
@@ -182,6 +189,32 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.support,
         name: 'support',
         builder: (context, state) => const SupportScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.garageDetail,
+        name: 'garageDetail',
+        builder: (context, state) {
+          final card = state.extra as GarageCardData?;
+          if (card == null) {
+            return const Scaffold(
+              body: Center(child: Text('Erreur : garage introuvable')),
+            );
+          }
+          return GarageDetailScreen(card: card);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.photoGallery,
+        name: 'photoGallery',
+        builder: (context, state) {
+          final args = state.extra as PhotoGalleryArgs?;
+          if (args == null || args.assets.isEmpty) {
+            return const Scaffold(
+              body: Center(child: Text('Erreur : aucune photo')),
+            );
+          }
+          return PhotoGalleryScreen(args: args);
+        },
       ),
 
       // Shell stateful — persiste le BottomNav entre les onglets visibles.

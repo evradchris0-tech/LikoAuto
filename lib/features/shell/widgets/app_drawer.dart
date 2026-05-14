@@ -1,14 +1,23 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/providers/user_role_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
+
+  void _navTo(BuildContext context, String route) {
+    context
+      ..pop() // ferme le drawer
+      ..push<void>(route);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,68 +33,78 @@ class AppDrawer extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               children: [
                 _DrawerItem(
-                  icon: Icons.space_dashboard_rounded,
-                  label: 'Tableau de bord',
-                  onTap: () {},
+                  icon: Icons.home_rounded,
+                  label: 'Accueil',
+                  onTap: () => _navTo(context, AppRoutes.home),
                 ),
                 _DrawerItem(
                   icon: Icons.search_rounded,
                   label: 'Parcourir les annonces',
-                  onTap: () {
-                    context.pop(); // Fermer le drawer
-                    context.go(AppRoutes.search);
-                  },
+                  onTap: () => _navTo(context, AppRoutes.search),
                 ),
                 if (role == UserRole.seller || role == UserRole.garage)
                   _DrawerItem(
                     icon: Icons.directions_car_rounded,
                     label: 'Mes Annonces',
-                    onTap: () {},
+                    onTap: () => _navTo(context, AppRoutes.myListings),
                   ),
                 if (role == UserRole.garage)
                   _DrawerItem(
                     icon: Icons.analytics_rounded,
                     label: 'Statistiques Garage',
-                    onTap: () {},
+                    onTap: () {
+                      context.pop();
+                      AppSnack.info(
+                        context,
+                        'Statistiques pro : Sprint 7 (à venir).',
+                      );
+                    },
                   ),
                 _DrawerItem(
                   icon: Icons.favorite_rounded,
                   label: 'Mes Favoris',
-                  onTap: () {},
+                  onTap: () => _navTo(context, AppRoutes.favorites),
                 ),
                 _DrawerItem(
                   icon: Icons.storefront_rounded,
                   label: 'Garages Partenaires',
-                  onTap: () {},
+                  onTap: () => _navTo(context, AppRoutes.search),
                 ),
                 const Divider(indent: 20, endIndent: 20, height: 40),
                 _DrawerItem(
                   icon: Icons.notifications_active_rounded,
                   label: 'Alertes Prix',
-                  onTap: () {},
+                  onTap: () =>
+                      _navTo(context, AppRoutes.notificationSettings),
                 ),
                 _DrawerItem(
                   icon: Icons.shield_rounded,
-                  label: 'VÃ©rification VIN',
-                  onTap: () {},
+                  label: 'Vérification VIN',
+                  onTap: () {
+                    context.pop();
+                    AppSnack.info(
+                      context,
+                      'Scanner VIN : Sprint 7 (à venir).',
+                    );
+                  },
                 ),
                 const Divider(indent: 20, endIndent: 20, height: 40),
                 _DrawerItem(
                   icon: Icons.settings_suggest_rounded,
-                  label: 'ParamÃ¨tres',
-                  onTap: () {},
+                  label: 'Paramètres',
+                  onTap: () => _navTo(context, AppRoutes.accountSettings),
                 ),
                 _DrawerItem(
                   icon: Icons.help_center_rounded,
                   label: "Centre d'aide",
-                  onTap: () {},
+                  onTap: () => _navTo(context, AppRoutes.support),
                 ),
                 // Demo Role Switcher
                 const Divider(indent: 20, endIndent: 20, height: 40),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'MODE DÃ‰MO (CHANGER DE PROFIL)',
+                    'MODE DÉMO (CHANGER DE PROFIL)',
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
@@ -146,7 +165,7 @@ class AppDrawer extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'CÃ©dric N.',
+                  'Cédric N.',
                   style: context.textStyles.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -171,29 +190,38 @@ class AppDrawer extends ConsumerWidget {
   Widget _buildFooter(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        children: [
-          OutlinedButton.icon(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-              side: const BorderSide(color: AppColors.primary),
-              foregroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+      child: Consumer(
+        builder: (context, ref, _) => Column(
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => _logout(context, ref),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                side: const BorderSide(color: AppColors.primary),
+                foregroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              label: const Text('Déconnexion'),
             ),
-            icon: const Icon(Icons.logout_rounded, size: 18),
-            label: const Text('DÃ©connexion'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          const Text(
-            'Version 1.0.0',
-            style: TextStyle(color: Colors.grey, fontSize: 10),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.md),
+            const Text(
+              'Version 1.0.0',
+              style: TextStyle(color: Colors.grey, fontSize: 10),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    context.pop(); // ferme le drawer
+    await ref.read(authRepositoryProvider).signOut();
+    await ref.read(mockSignedInProvider.notifier).signOut();
+    if (context.mounted) context.go(AppRoutes.login);
   }
 }
 

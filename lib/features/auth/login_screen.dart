@@ -1,12 +1,11 @@
-﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
-import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
 
@@ -34,43 +33,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  // TODO(api): Restaurer l'auth Firebase (Phone OTP + Email/Password) une
+  // fois que le backend NestJS est livré. Pour l'instant on accepte n'importe
+  // quelle saisie et on set le flag `mockSignedIn` pour passer les guards.
   Future<void> _handleLogin() async {
     setState(() => _isLoading = true);
-
-    try {
-      if (_selectedTab == 0) {
-        // Phone Auth
-        final phone = _phoneController.text.trim();
-        if (phone.isEmpty) return;
-        
-        await ref.read(authRepositoryProvider).verifyPhoneNumber(
-          phoneNumber: phone.startsWith('+') ? phone : '+237$phone',
-          onCodeSent: (verificationId) {
-            if (mounted) {
-              context.push('${AppRoutes.otpVerification}?phone=${Uri.encodeComponent(phone)}&verificationId=$verificationId');
-            }
-          },
-          onError: (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ${e.message}'), backgroundColor: AppColors.error));
-            }
-          },
-        );
-      } else {
-        // Email Auth
-        await ref.read(authRepositoryProvider).signInWithEmail(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
-        if (mounted) context.go(AppRoutes.home);
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ${e.message}'), backgroundColor: AppColors.error));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await ref.read(mockSignedInProvider.notifier).signIn();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    context.go(AppRoutes.home);
   }
 
   @override
@@ -107,7 +79,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             AppSpacing.gapSm,
             Text(
-              'Connectez-vous pour accÃ©der Ã  vos annonces, messages et favoris.',
+              'Connectez-vous pour accéder à vos annonces, messages et favoris.',
               style: context.textStyles.bodyLarge?.copyWith(
                 color: AppColors.neutral,
                 height: 1.5,
@@ -137,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               : [],
                         ),
                         child: Text(
-                          'TÃ©lÃ©phone',
+                          'Téléphone',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: _selectedTab == 0 ? AppColors.trust : AppColors.neutral,
@@ -178,14 +150,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             if (_selectedTab == 0) ...[
               LikoTextField(
                 controller: _phoneController,
-                hintText: 'NumÃ©ro de tÃ©lÃ©phone',
+                hintText: 'Numéro de téléphone',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('ðŸ‡¨ðŸ‡² +237', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text('🇨🇲 +237', style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(width: 8),
                       Container(width: 1, height: 24, color: AppColors.outline),
                       const SizedBox(width: 8),
@@ -225,7 +197,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text(
-                  'Mot de passe oubliÃ© ?',
+                  'Mot de passe oublié ?',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -252,7 +224,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   GestureDetector(
                     onTap: () => context.pushReplacement(AppRoutes.register),
                     child: Text(
-                      'CrÃ©er un compte',
+                      'Créer un compte',
                       style: context.textStyles.bodyLarge?.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,

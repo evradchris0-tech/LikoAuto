@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/search/models/search_filters.dart';
 import 'package:liko_auto/features/search/widgets/empty_results.dart';
@@ -34,7 +36,14 @@ class GaragesTab extends StatelessWidget {
         SliverList.separated(
           itemCount: results.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-          itemBuilder: (context, i) => GarageResultCard(data: results[i]),
+          itemBuilder: (context, i) => GarageResultCard(
+            data: results[i],
+            onTap: () => context.push(
+              AppRoutes.garageDetail,
+              extra: results[i],
+            ),
+            onContact: () => context.push(AppRoutes.chat),
+          ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],

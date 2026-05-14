@@ -6,6 +6,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/providers/package_info_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class SupportScreen extends ConsumerWidget {
   const SupportScreen({super.key});
@@ -151,15 +152,7 @@ class SupportScreen extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(
-                  const SnackBar(
-                    content: Text('Merci, votre rapport est bien noté.'),
-                    backgroundColor: AppColors.success,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+              AppSnack.success(context, 'Merci, votre rapport est bien noté.');
             },
             child: const Text(
               'Envoyer',
@@ -364,15 +357,7 @@ class _ContactButton extends StatelessWidget {
         onTap: () async {
           await Clipboard.setData(ClipboardData(text: copyValue));
           if (context.mounted) {
-            ScaffoldMessenger.of(context)
-              ..clearSnackBars()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text('$copyMessage : $copyValue'),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: AppColors.success,
-                ),
-              );
+            AppSnack.info(context, '$copyMessage : $copyValue');
           }
         },
         borderRadius: BorderRadius.circular(12),

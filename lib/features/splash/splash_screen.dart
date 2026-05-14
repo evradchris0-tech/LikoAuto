@@ -70,53 +70,67 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
       child: Scaffold(
         backgroundColor: AppColors.primary,
-        body: Center(
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: ScaleTransition(
-              scale: _scaleAnim,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: Image.asset(
-                      AppAssets.logo,
-                      width: 140,
-                      height: 140,
-                      fit: BoxFit.cover,
-                    ),
+        body: Stack(
+          children: [
+            // Logo + tagline VRAIMENT au centre de l'écran (pas du body).
+            Center(
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: ScaleTransition(
+                  scale: _scaleAnim,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: Image.asset(
+                          AppAssets.logo,
+                          width: 140,
+                          height: 140,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'LIKO AUTO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'La marketplace auto du Cameroun',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'LIKO AUTO',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 3,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'La marketplace auto du Cameroun',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(48, 0, 48, 32),
-            child: FadeTransition(opacity: _fadeAnim, child: _PulsingDots()),
-          ),
+            // Pulsing dots posés en overlay au-dessus de la nav système.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(48, 0, 48, 32),
+                  child: FadeTransition(
+                    opacity: _fadeAnim,
+                    child: _PulsingDots(),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

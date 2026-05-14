@@ -7,6 +7,7 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   const OtpVerificationScreen({
@@ -65,11 +66,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       if (mounted) {
         context.go(AppRoutes.home); // Success! Redirection.
       }
-    } catch (e) {
+    } on Exception catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Code invalide. Veuillez réessayer.'), backgroundColor: AppColors.error),
-        );
+        AppSnack.error(context, 'Code invalide. Veuillez réessayer.');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -6,6 +6,7 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 /// Modèle de données d'une annonce pour l'affichage en liste.
 class ListingCardData {
@@ -47,19 +48,11 @@ class ListingCard extends ConsumerWidget {
 
   void _toggleFavorite(BuildContext context, WidgetRef ref) {
     final added = ref.read(favoritesProvider.notifier).toggle(data);
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            added ? 'Ajouté aux favoris' : 'Retiré des favoris',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: added ? AppColors.success : AppColors.trust,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+    if (added) {
+      AppSnack.success(context, 'Ajouté aux favoris');
+    } else {
+      AppSnack.info(context, 'Retiré des favoris');
+    }
     onFavorite?.call();
   }
 

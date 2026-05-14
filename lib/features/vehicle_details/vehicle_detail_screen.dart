@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
@@ -8,6 +9,8 @@ import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/history/providers/view_history_provider.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:liko_auto/features/photo_gallery/photo_gallery_screen.dart';
+import 'package:liko_auto/features/report/report_listing_sheet.dart';
 
 class VehicleDetailScreen extends ConsumerStatefulWidget {
   const VehicleDetailScreen({required this.data, super.key});
@@ -31,6 +34,53 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
   }
 
   ListingCardData get data => widget.data;
+
+  Widget _buildReportLink(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Center(
+        child: TextButton.icon(
+          onPressed: () => showReportListingSheet(context, listing: data),
+          icon: const Icon(
+            Icons.flag_outlined,
+            size: 16,
+            color: AppColors.neutral,
+          ),
+          label: const Text(
+            'Signaler cette annonce',
+            style: TextStyle(
+              color: AppColors.neutral,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 10,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: AppColors.outline),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openGallery(BuildContext context, {required int initialIndex}) {
+    // En attendant l'API, on synthétise une galerie en répétant l'asset.
+    final assets = List<String>.filled(data.photoCount, data.imageAsset);
+    context.push(
+      AppRoutes.photoGallery,
+      extra: PhotoGalleryArgs(
+        assets: assets,
+        initialIndex: initialIndex,
+        heroTagPrefix: 'car_image_${data.title}_${data.priceFcfa}',
+        title: data.title,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +108,12 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
                     _buildSectionHeader(context, 'DESCRIPTION'),
                     _buildDescription(context),
                     AppSpacing.gapXl,
-                    _buildSectionHeader(context, 'VÃ‰HICULE EN DÃ‰TAILS'),
+                    _buildSectionHeader(context, 'VÉHICULE EN DÉTAILS'),
                     _buildSpecsGrid(context),
                     AppSpacing.gapXl,
                     _buildSellerInfo(context),
+                    AppSpacing.gapLg,
+                    _buildReportLink(context),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -87,7 +139,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
             duration: const Duration(milliseconds: 200),
             opacity: isCollapsed ? 1.0 : 0.0,
             child: Text(
-              '${data.title} â€¢ ${data.year}',
+              '${data.title} • ${data.year}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -126,51 +178,65 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
         const SizedBox(width: AppSpacing.md),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            Hero(
-              tag: 'car_image_${data.title}_${data.priceFcfa}',
-              child: Image.asset(
-                data.imageAsset,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => ColoredBox(
-                  color: AppColors.primarySoft,
-                  child: const Center(
-                    child: Icon(Icons.directions_car_rounded, size: 64, color: AppColors.primary),
+        background: GestureDetector(
+          onTap: () => _openGallery(context, initialIndex: 0),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Hero(
+                tag: 'car_image_${data.title}_${data.priceFcfa}',
+                child: Image.asset(
+                  data.imageAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => ColoredBox(
+                    color: AppColors.primarySoft,
+                    child: const Center(
+                      child: Icon(
+                        Icons.directions_car_rounded,
+                        size: 64,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Photo counter overlay
-            Positioned(
-              bottom: AppSpacing.md,
-              right: AppSpacing.md,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
-                    const SizedBox(width: 6),
-                    Text(
-                      '1/${data.photoCount}',
-                      style: const TextStyle(
+              // Photo counter overlay — tap = ouvre galerie
+              Positioned(
+                bottom: AppSpacing.md,
+                right: AppSpacing.md,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.collections_rounded,
+                        size: 14,
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        '1/${data.photoCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -185,7 +251,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
           if (data.isVinVerified)
             const _TagChip(
               icon: Icons.verified_rounded,
-              label: 'VIN VÃ‰RIFIÃ‰',
+              label: 'VIN VÉRIFIÉ',
               textColor: AppColors.success,
               bgColor: AppColors.successSoft,
             ),
@@ -193,7 +259,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
           if (data.isPro)
             _TagChip(
               icon: Icons.verified_user_rounded,
-              label: 'GARAGE CERTIFIÃ‰',
+              label: 'GARAGE CERTIFIÉ',
               textColor: Colors.blue[700]!,
               bgColor: Colors.blue[50]!,
             ),
@@ -274,7 +340,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
             ),
             const SizedBox(height: 2),
             const Text(
-              'Prix nÃ©gociable â€¢ Financement possible',
+              'Prix négociable • Financement possible',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 12,
@@ -296,9 +362,9 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
           AppSpacing.gapSm,
           const Expanded(child: _StatBox(icon: Icons.local_gas_station_rounded, value: 'Diesel', label: 'CARB.')),
           AppSpacing.gapSm,
-          const Expanded(child: _StatBox(icon: Icons.settings_rounded, value: 'Auto', label: 'BOÃŽTE')),
+          const Expanded(child: _StatBox(icon: Icons.settings_rounded, value: 'Auto', label: 'BOÎTE')),
           AppSpacing.gapSm,
-          Expanded(child: _StatBox(icon: Icons.calendar_month_rounded, value: data.year, label: 'ANNÃ‰E')),
+          Expanded(child: _StatBox(icon: Icons.calendar_month_rounded, value: data.year, label: 'ANNÉE')),
         ],
       ),
     );
@@ -323,7 +389,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Text(
-        "VÃ©hicule en parfait Ã©tat, premiÃ¨re main au Cameroun. Entretien complet effectuÃ© chez le concessionnaire. Peinture d'origine, aucune rayure. IntÃ©rieur cuir noir comme neuf. Toutes options : CamÃ©ra 360Â°, toit ouvrant, climatisation bi-zone, GPS Afrique.\n\nIdÃ©al pour les longs trajets et une utilisation urbaine prestigieuse. Disponible pour essai immÃ©diat sur Douala.",
+        "Véhicule en parfait état, première main au Cameroun. Entretien complet effectué chez le concessionnaire. Peinture d'origine, aucune rayure. Intérieur cuir noir comme neuf. Toutes options : Caméra 360°, toit ouvrant, climatisation bi-zone, GPS Afrique.\n\nIdéal pour les longs trajets et une utilisation urbaine prestigieuse. Disponible pour essai immédiat sur Douala.",
         style: context.textStyles.bodyLarge?.copyWith(
           color: AppColors.trust.withValues(alpha: 0.7),
           height: 1.6,
@@ -335,7 +401,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
   Widget _buildSpecsGrid(BuildContext context) {
     final specs = [
       {'label': 'Marque', 'value': 'Toyota'},
-      {'label': 'ModÃ¨le', 'value': data.title.split(' ').first},
+      {'label': 'Modèle', 'value': data.title.split(' ').first},
       {'label': 'Version', 'value': 'Luxury Edition'},
       {'label': 'Portes', 'value': '5'},
       {'label': 'Places', 'value': '7'},
@@ -424,7 +490,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
                     style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.trust),
                   ),
                   Text(
-                    'Membre depuis 2022 â€¢ 48 annonces',
+                    'Membre depuis 2022 • 48 annonces',
                     style: TextStyle(color: AppColors.neutral, fontSize: 11),
                   ),
                 ],

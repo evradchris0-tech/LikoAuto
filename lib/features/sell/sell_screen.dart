@@ -12,6 +12,7 @@ import 'package:liko_auto/features/sell/widgets/sell_step_3_details.dart';
 import 'package:liko_auto/features/sell/widgets/sell_step_4_price.dart';
 import 'package:liko_auto/features/sell/widgets/sell_step_5_summary.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class SellScreen extends ConsumerWidget {
   const SellScreen({super.key});
@@ -213,12 +214,7 @@ class SellScreen extends ConsumerWidget {
 
   void _publish(BuildContext context, WidgetRef ref) {
     // TODO(api): brancher sur l'endpoint NestJS quand livré.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Annonce publiée avec succès (mock).'),
-        backgroundColor: AppColors.success,
-      ),
-    );
+    AppSnack.success(context, 'Annonce publiée avec succès (mock).');
     _exit(context, ref);
   }
 }

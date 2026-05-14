@@ -10,6 +10,7 @@ import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/my_listings/domain/my_listing.dart';
 import 'package:liko_auto/features/my_listings/providers/my_listings_provider.dart';
 import 'package:liko_auto/features/my_listings/widgets/my_listing_card.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
   const MyListingsScreen({super.key});
@@ -168,25 +169,25 @@ class _ListingsList extends ConsumerWidget {
         unawaited(context.push<void>(AppRoutes.sell));
         return;
       case MyListingAction.boost:
-        _snack(context, 'Bientôt : booster « ${l.card.title} ».');
+        AppSnack.info(context, 'Bientôt : booster « ${l.card.title} ».');
         return;
       case MyListingAction.pause:
         notifier.changeStatus(l.id, ListingStatus.paused);
-        _snack(context, 'Annonce mise en pause.');
+        AppSnack.info(context, 'Annonce mise en pause.');
         return;
       case MyListingAction.resume:
         notifier.changeStatus(l.id, ListingStatus.active);
-        _snack(context, 'Annonce réactivée.');
+        AppSnack.success(context, 'Annonce réactivée.');
         return;
       case MyListingAction.markSold:
         notifier.changeStatus(l.id, ListingStatus.sold);
-        _snack(context, 'Félicitations, annonce marquée vendue !');
+        AppSnack.success(context, 'Félicitations, annonce marquée vendue !');
         return;
       case MyListingAction.delete:
         final ok = await _confirmDelete(context, l);
         if (ok && context.mounted) {
           notifier.delete(l.id);
-          _snack(context, 'Annonce supprimée.', destructive: true);
+          AppSnack.error(context, 'Annonce supprimée.');
         }
         return;
     }
@@ -224,17 +225,6 @@ class _ListingsList extends ConsumerWidget {
     return res ?? false;
   }
 
-  void _snack(BuildContext context, String msg, {bool destructive = false}) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: destructive ? AppColors.error : AppColors.trust,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
 }
 
 class _EmptyState extends StatelessWidget {

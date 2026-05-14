@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/features/shell/widgets/app_drawer.dart';
 
-/// Shell de navigation principal â€” persiste le BottomNav entre les 5 onglets
+/// Shell de navigation principal — persiste le BottomNav entre les 5 onglets
 /// (Accueil, Recherche, Vendre, Chat, Profil) via StatefulShellRoute.
 class AppShell extends StatelessWidget {
   const AppShell({required this.shell, super.key});
@@ -30,8 +30,8 @@ class AppShell extends StatelessWidget {
               unselectedLabelTextStyle: const TextStyle(color: AppColors.neutral),
               destinations: const [
                 NavigationRailDestination(
-                  icon: Icon(Icons.space_dashboard_outlined),
-                  selectedIcon: Icon(Icons.space_dashboard_rounded),
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_rounded),
                   label: Text('Accueil'),
                 ),
                 NavigationRailDestination(
@@ -66,6 +66,7 @@ class AppShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBody: true,
       drawer: const AppDrawer(),
       body: shell,
       floatingActionButton: FloatingActionButton(
@@ -80,13 +81,17 @@ class AppShell extends StatelessWidget {
         shape: const CircularNotchedRectangle(),
         notchMargin: 10,
         elevation: 20,
-        height: 80, // Increased height to prevent overflow
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
+        padding: EdgeInsets.zero,
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
             _NavBarItem(
-              icon: Icons.space_dashboard_outlined,
-              selectedIcon: Icons.space_dashboard_rounded,
+              icon: Icons.home_outlined,
+              selectedIcon: Icons.home_rounded,
               label: 'Accueil',
               isSelected: shell.currentIndex == 0,
               onTap: () => shell.goBranch(0, initialLocation: 0 == shell.currentIndex),
@@ -113,7 +118,9 @@ class AppShell extends StatelessWidget {
               isSelected: shell.currentIndex == 4,
               onTap: () => shell.goBranch(4, initialLocation: 4 == shell.currentIndex),
             ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

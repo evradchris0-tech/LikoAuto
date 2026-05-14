@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/providers/city_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class CityPickerBottomSheet extends ConsumerWidget {
   const CityPickerBottomSheet({super.key});
@@ -82,19 +83,16 @@ class CityPickerBottomSheet extends ConsumerWidget {
               Navigator.pop(context);
               try {
                 await ref.read(detectCityProvider.future);
-              } catch (e) {
+              } on Exception catch (_) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Erreur géolocalisation. Veuillez réessayer.'),
-                      behavior: SnackBarBehavior.floating,
-                      action: SnackBarAction(
-                        label: 'Réessayer',
-                        textColor: Colors.white,
-                        onPressed: () {
-                          // TODO: Retry logic
-                        },
-                      ),
+                  AppSnack.error(
+                    context,
+                    'Erreur géolocalisation. Veuillez réessayer.',
+                    action: SnackBarAction(
+                      label: 'Réessayer',
+                      textColor: Colors.white,
+                      onPressed: () =>
+                          ref.invalidate(detectCityProvider),
                     ),
                   );
                 }

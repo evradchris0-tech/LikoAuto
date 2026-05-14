@@ -7,9 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class AccountSettingsScreen extends ConsumerStatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -232,10 +234,10 @@ class _Content extends ConsumerWidget {
     try {
       await user?.updateDisplayName(newName);
       await user?.reload();
-      if (context.mounted) _snack(context, 'Nom mis à jour.');
+      if (context.mounted) AppSnack.success(context, 'Nom mis à jour.');
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {
-        _snack(context, 'Erreur : ${e.message}', destructive: true);
+        AppSnack.error(context, 'Erreur : ${e.message}');
       }
     }
   }
@@ -247,21 +249,17 @@ class _Content extends ConsumerWidget {
   ) async {
     final email = user?.email;
     if (email == null) {
-      _snack(
-        context,
-        'Aucun email lié à ce compte.',
-        destructive: true,
-      );
+      AppSnack.error(context, 'Aucun email lié à ce compte.');
       return;
     }
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       if (context.mounted) {
-        _snack(context, 'Email envoyé à $email.');
+        AppSnack.success(context, 'Email envoyé à $email.');
       }
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {
-        _snack(context, 'Erreur : ${e.message}', destructive: true);
+        AppSnack.error(context, 'Erreur : ${e.message}');
       }
     }
   }
@@ -295,6 +293,7 @@ class _Content extends ConsumerWidget {
     );
     if (ok != true) return;
     await ref.read(authRepositoryProvider).signOut();
+    await ref.read(mockSignedInProvider.notifier).signOut();
     if (context.mounted) context.go(AppRoutes.login);
   }
 
@@ -333,27 +332,14 @@ class _Content extends ConsumerWidget {
     );
     if (ok != true) return;
     if (context.mounted) {
-      _snack(
+      AppSnack.warning(
         context,
         'Suppression côté serveur à venir (API NestJS).',
-        destructive: true,
       );
     }
   }
 
-  void _info(BuildContext context, String msg) => _snack(context, msg);
-
-  void _snack(BuildContext context, String msg, {bool destructive = false}) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: destructive ? AppColors.error : AppColors.trust,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
+  void _info(BuildContext context, String msg) => AppSnack.info(context, msg);
 }
 
 class _AvatarPicker extends StatelessWidget {

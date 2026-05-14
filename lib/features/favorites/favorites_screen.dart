@@ -8,6 +8,7 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -94,24 +95,17 @@ class FavoritesScreen extends ConsumerWidget {
                             ref
                                 .read(favoritesProvider.notifier)
                                 .remove(item);
-                            ScaffoldMessenger.of(context)
-                              ..clearSnackBars()
-                              ..showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Annonce retirée des favoris',
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: AppColors.trust,
-                                  action: SnackBarAction(
-                                    label: 'Annuler',
-                                    textColor: Colors.white,
-                                    onPressed: () => ref
-                                        .read(favoritesProvider.notifier)
-                                        .toggle(item),
-                                  ),
-                                ),
-                              );
+                            AppSnack.info(
+                              context,
+                              'Annonce retirée des favoris',
+                              action: SnackBarAction(
+                                label: 'Annuler',
+                                textColor: Colors.white,
+                                onPressed: () => ref
+                                    .read(favoritesProvider.notifier)
+                                    .toggle(item),
+                              ),
+                            );
                           },
                           child: ListingCard(
                             data: item,

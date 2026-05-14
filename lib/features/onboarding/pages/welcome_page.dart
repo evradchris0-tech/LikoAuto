@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:liko_auto/core/constants/app_assets.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/onboarding/widgets/onboarding_page_layout.dart';
 
-/// Onboarding 1/4 â€” Bienvenue sur Liko Auto.
+/// Onboarding 1/4 "” Bienvenue sur Liko Auto.
 class WelcomePage extends StatelessWidget {
   const WelcomePage({
     required this.onContinue,
@@ -19,7 +19,7 @@ class WelcomePage extends StatelessWidget {
       step: 1,
       totalSteps: 4,
       title: 'La marketplace auto\nla plus fiable du Cameroun.',
-      body: 'Achetez et vendez en toute confiance,\nde Douala Ã  YaoundÃ©.',
+      body: 'Achetez et vendez en toute confiance,\nde Douala à Yaoundé.',
       primaryLabel: 'Commencer',
       onPrimary: onContinue,
       visual: const _WelcomeVisual(),
@@ -28,8 +28,8 @@ class WelcomePage extends StatelessWidget {
         runSpacing: AppSpacing.sm,
         alignment: WrapAlignment.center,
         children: [
-          _Bubble(icon: Icons.directions_car_rounded, label: '+ de 1000 VÃ©hicules'),
-          _Bubble(icon: Icons.verified_user_rounded, label: 'Vendeurs VÃ©rifiÃ©s'),
+          _Bubble(icon: Icons.directions_car_rounded, label: '+ de 1000 Véhicules'),
+          _Bubble(icon: Icons.verified_user_rounded, label: 'Vendeurs Vérifiés'),
           _Bubble(icon: Icons.support_agent_rounded, label: 'Support 24/7'),
         ],
       ),
@@ -79,7 +79,7 @@ class _WelcomeVisual extends StatelessWidget {
               ),
             ),
           ),
-          // Chips en bas Ã  gauche
+          // Chips en bas à gauche
           const Positioned(
             left: AppSpacing.lg,
             bottom: AppSpacing.lg,
@@ -88,14 +88,14 @@ class _WelcomeVisual extends StatelessWidget {
               children: [
                 _Chip(
                   icon: Icons.verified_rounded,
-                  label: 'VÃ‰HICULE VÃ‰RIFIÃ‰',
+                  label: 'VÉHICULE VÉRIFIÉ',
                   background: AppColors.success,
                   foreground: Colors.white,
                 ),
                 SizedBox(height: 8),
                 _Chip(
                   icon: Icons.workspace_premium_rounded,
-                  label: 'SÃ‰LECTION PREMIUM',
+                  label: 'SÉLECTION PREMIUM',
                   background: Colors.white,
                   foreground: AppColors.primary,
                 ),
