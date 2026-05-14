@@ -66,6 +66,11 @@ class AppDrawer extends ConsumerWidget {
                   onTap: () => _navTo(context, AppRoutes.favorites),
                 ),
                 _DrawerItem(
+                  icon: Icons.event_available_rounded,
+                  label: 'Mes rendez-vous',
+                  onTap: () => _navTo(context, AppRoutes.myBookings),
+                ),
+                _DrawerItem(
                   icon: Icons.storefront_rounded,
                   label: 'Garages Partenaires',
                   onTap: () => _navTo(context, AppRoutes.search),
@@ -73,9 +78,9 @@ class AppDrawer extends ConsumerWidget {
                 const Divider(indent: 20, endIndent: 20, height: 40),
                 _DrawerItem(
                   icon: Icons.notifications_active_rounded,
-                  label: 'Alertes Prix',
+                  label: 'Notifications',
                   onTap: () =>
-                      _navTo(context, AppRoutes.notificationSettings),
+                      _navTo(context, AppRoutes.notificationsInbox),
                 ),
                 _DrawerItem(
                   icon: Icons.shield_rounded,

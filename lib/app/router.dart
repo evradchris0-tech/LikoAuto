@@ -8,6 +8,8 @@ import 'package:liko_auto/features/auth/login_screen.dart';
 import 'package:liko_auto/features/auth/otp_verification_screen.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/features/auth/register_screen.dart';
+import 'package:liko_auto/features/bookings/booking_flow_screen.dart';
+import 'package:liko_auto/features/bookings/my_bookings_screen.dart';
 import 'package:liko_auto/features/chat/chat_detail_screen.dart';
 import 'package:liko_auto/features/chat/chat_list_screen.dart';
 import 'package:liko_auto/features/favorites/favorites_screen.dart';
@@ -16,6 +18,7 @@ import 'package:liko_auto/features/history/history_screen.dart';
 import 'package:liko_auto/features/home/home_screen.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/features/my_listings/my_listings_screen.dart';
+import 'package:liko_auto/features/notifications_inbox/notifications_inbox_screen.dart';
 import 'package:liko_auto/features/notifications_settings/notification_settings_screen.dart';
 import 'package:liko_auto/features/onboarding/onboarding_screen.dart';
 import 'package:liko_auto/features/photo_gallery/photo_gallery_screen.dart';
@@ -53,6 +56,9 @@ abstract final class AppRoutes {
   static const String support = '/support';
   static const String garageDetail = '/garage_detail';
   static const String photoGallery = '/photo_gallery';
+  static const String notificationsInbox = '/notifications';
+  static const String bookingFlow = '/booking_flow';
+  static const String myBookings = '/my_bookings';
 
   /// Routes nécessitant une session utilisateur.
   static const Set<String> guarded = {
@@ -65,6 +71,9 @@ abstract final class AppRoutes {
     history,
     accountSettings,
     notificationSettings,
+    notificationsInbox,
+    bookingFlow,
+    myBookings,
   };
 }
 
@@ -184,6 +193,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.notificationSettings,
         name: 'notificationSettings',
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationsInbox,
+        name: 'notificationsInbox',
+        builder: (context, state) => const NotificationsInboxScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bookingFlow,
+        name: 'bookingFlow',
+        builder: (context, state) {
+          final args = state.extra as BookingFlowArgs?;
+          if (args == null) {
+            return const Scaffold(
+              body: Center(child: Text('Erreur : garage manquant')),
+            );
+          }
+          return BookingFlowScreen(args: args);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.myBookings,
+        name: 'myBookings',
+        builder: (context, state) => const MyBookingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.support,

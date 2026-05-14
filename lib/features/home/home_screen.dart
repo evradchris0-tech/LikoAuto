@@ -14,6 +14,7 @@ import 'package:liko_auto/features/home/widgets/home_app_bar.dart';
 import 'package:liko_auto/features/home/widgets/home_skeleton.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/features/home/widgets/promo_banner.dart';
+import 'package:liko_auto/features/notifications_inbox/providers/notifications_inbox_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +26,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _scrollController = ScrollController();
   bool _isScrolled = false;
-  int _unreadNotifs = 2;
 
   @override
   void initState() {
@@ -58,6 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final city = ref.watch(selectedCityProvider);
     final listingsAsync = ref.watch(homeListingsProvider);
+    final unreadNotifs = ref.watch(unreadNotificationsCountProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -68,9 +69,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           HomeAppBar(
             isScrolled: _isScrolled,
             city: city,
-            unreadNotifs: _unreadNotifs,
+            unreadNotifs: unreadNotifs,
             onCityTap: _showCityPicker,
-            onNotifTap: () => setState(() => _unreadNotifs = 0),
+            onNotifTap: () => context.push(AppRoutes.notificationsInbox),
           ),
           Expanded(
             child: listingsAsync.when(

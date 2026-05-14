@@ -28,7 +28,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(viewHistoryProvider.notifier).record(widget.data);
+        ref.read(viewHistoryActionsProvider).record(widget.data);
       }
     });
   }

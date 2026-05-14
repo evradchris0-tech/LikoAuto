@@ -14,7 +14,7 @@ class HistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entries = ref.watch(viewHistoryProvider);
+    final entries = ref.watch(viewHistoryProvider).valueOrNull ?? const [];
     final groups = _groupByDay(entries);
 
     return Scaffold(
@@ -92,7 +92,7 @@ class HistoryScreen extends ConsumerWidget {
                                     extra: v.data,
                                   ),
                                   onRemove: () => ref
-                                      .read(viewHistoryProvider.notifier)
+                                      .read(viewHistoryActionsProvider)
                                       .remove(v.data),
                                 ),
                               ),
@@ -168,7 +168,7 @@ class HistoryScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (ok ?? false) ref.read(viewHistoryProvider.notifier).clearAll();
+    if (ok ?? false) await ref.read(viewHistoryActionsProvider).clearAll();
   }
 }
 

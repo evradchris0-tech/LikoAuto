@@ -44,7 +44,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final listings = ref.watch(myListingsProvider);
+    final listings = ref.watch(myListingsProvider).valueOrNull ?? const [];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -163,7 +163,7 @@ class _ListingsList extends ConsumerWidget {
     MyListing l,
     MyListingAction a,
   ) async {
-    final notifier = ref.read(myListingsProvider.notifier);
+    final actions = ref.read(myListingsActionsProvider);
     switch (a) {
       case MyListingAction.edit:
         unawaited(context.push<void>(AppRoutes.sell));
@@ -172,22 +172,33 @@ class _ListingsList extends ConsumerWidget {
         AppSnack.info(context, 'Bientôt : booster « ${l.card.title} ».');
         return;
       case MyListingAction.pause:
-        notifier.changeStatus(l.id, ListingStatus.paused);
-        AppSnack.info(context, 'Annonce mise en pause.');
+        await actions.changeStatus(l.id, ListingStatus.paused);
+        if (context.mounted) {
+          AppSnack.info(context, 'Annonce mise en pause.');
+        }
         return;
       case MyListingAction.resume:
-        notifier.changeStatus(l.id, ListingStatus.active);
-        AppSnack.success(context, 'Annonce réactivée.');
+        await actions.changeStatus(l.id, ListingStatus.active);
+        if (context.mounted) {
+          AppSnack.success(context, 'Annonce réactivée.');
+        }
         return;
       case MyListingAction.markSold:
-        notifier.changeStatus(l.id, ListingStatus.sold);
-        AppSnack.success(context, 'Félicitations, annonce marquée vendue !');
+        await actions.changeStatus(l.id, ListingStatus.sold);
+        if (context.mounted) {
+          AppSnack.success(
+            context,
+            'Félicitations, annonce marquée vendue !',
+          );
+        }
         return;
       case MyListingAction.delete:
         final ok = await _confirmDelete(context, l);
         if (ok && context.mounted) {
-          notifier.delete(l.id);
-          AppSnack.error(context, 'Annonce supprimée.');
+          await actions.delete(l.id);
+          if (context.mounted) {
+            AppSnack.error(context, 'Annonce supprimée.');
+          }
         }
         return;
     }

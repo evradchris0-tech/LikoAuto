@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liko_auto/app/app.dart';
+import 'package:liko_auto/core/db/app_database.dart';
+import 'package:liko_auto/core/db/database_provider.dart';
 import 'package:liko_auto/core/providers/package_info_provider.dart';
 import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/firebase_options.dart';
@@ -45,12 +47,15 @@ Future<void> main() async {
 
   final packageInfo = await PackageInfo.fromPlatform();
   final prefs = await SharedPreferences.getInstance();
+  // Base locale drift (favoris, historique, annonces, notifs, RDV, avis…).
+  final database = AppDatabase();
 
   runApp(
     ProviderScope(
       overrides: [
         packageInfoProvider.overrideWithValue(packageInfo),
         sharedPreferencesProvider.overrideWithValue(prefs),
+        appDatabaseProvider.overrideWithValue(database),
       ],
       child: const LikoAutoApp(),
     ),

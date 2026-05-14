@@ -5,7 +5,9 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/chat/providers/chat_detail_provider.dart';
+import 'package:liko_auto/features/chat/providers/moderation_provider.dart';
 import 'package:liko_auto/features/chat/widgets/chat_bubble.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class ChatDetailScreen extends ConsumerWidget {
   const ChatDetailScreen({required this.chatId, super.key});
@@ -77,8 +79,11 @@ class ChatDetailScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.phone_outlined, color: AppColors.trust), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.more_vert, color: AppColors.trust), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.phone_outlined, color: AppColors.trust),
+            onPressed: () {},
+          ),
+          _ChatMenu(chatId: chatId, ref: ref),
         ],
       ),
       body: Column(
@@ -197,5 +202,148 @@ class ChatDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+enum _ChatAction { mute, unmute, block, report }
+
+class _ChatMenu extends ConsumerWidget {
+  const _ChatMenu({required this.chatId, required this.ref});
+  final String chatId;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context, WidgetRef _) {
+    final muted = ref.watch(mutedThreadsProvider).valueOrNull ?? const {};
+    final isMuted = muted.contains(chatId);
+    return PopupMenuButton<_ChatAction>(
+      icon: const Icon(Icons.more_vert, color: AppColors.trust),
+      onSelected: (a) => _handle(context, a),
+      itemBuilder: (_) => [
+        if (isMuted)
+          const PopupMenuItem(
+            value: _ChatAction.unmute,
+            child: Row(
+              children: [
+                Icon(Icons.notifications_active_outlined,
+                    color: AppColors.trust),
+                SizedBox(width: 12),
+                Text('Réactiver les notifications'),
+              ],
+            ),
+          )
+        else
+          const PopupMenuItem(
+            value: _ChatAction.mute,
+            child: Row(
+              children: [
+                Icon(Icons.notifications_off_outlined,
+                    color: AppColors.trust),
+                SizedBox(width: 12),
+                Text('Couper les notifications'),
+              ],
+            ),
+          ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: _ChatAction.block,
+          child: Row(
+            children: [
+              Icon(Icons.block, color: AppColors.error),
+              SizedBox(width: 12),
+              Text(
+                "Bloquer l'utilisateur",
+                style: TextStyle(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: _ChatAction.report,
+          child: Row(
+            children: [
+              Icon(Icons.flag_outlined, color: AppColors.error),
+              SizedBox(width: 12),
+              Text(
+                'Signaler la conversation',
+                style: TextStyle(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handle(BuildContext context, _ChatAction action) async {
+    final mod = ref.read(moderationActionsProvider);
+    switch (action) {
+      case _ChatAction.mute:
+        await mod.muteThread(chatId);
+        if (context.mounted) {
+          AppSnack.info(context, 'Notifications coupées pour ce chat.');
+        }
+        return;
+      case _ChatAction.unmute:
+        await mod.unmuteThread(chatId);
+        if (context.mounted) {
+          AppSnack.success(context, 'Notifications réactivées.');
+        }
+        return;
+      case _ChatAction.block:
+        final ok = await _confirm(
+          context,
+          title: 'Bloquer cet utilisateur ?',
+          body: 'Vous ne recevrez plus ses messages. Vous pouvez le '
+              'débloquer à tout moment depuis les paramètres.',
+          confirmLabel: 'Bloquer',
+        );
+        if (ok && context.mounted) {
+          await mod.blockUser(chatId);
+          if (context.mounted) {
+            AppSnack.error(context, 'Utilisateur bloqué.');
+            context.pop();
+          }
+        }
+        return;
+      case _ChatAction.report:
+        AppSnack.success(context, 'Conversation signalée. Merci.');
+        return;
+    }
+  }
+
+  Future<bool> _confirm(
+    BuildContext context, {
+    required String title,
+    required String body,
+    required String confirmLabel,
+  }) async {
+    final r = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Annuler',
+              style: TextStyle(color: AppColors.neutral),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              confirmLabel,
+              style: const TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return r ?? false;
   }
 }

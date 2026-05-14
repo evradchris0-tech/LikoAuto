@@ -9,8 +9,10 @@ import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/features/bookings/providers/bookings_provider.dart';
 import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
 import 'package:liko_auto/features/my_listings/providers/my_listings_provider.dart';
+import 'package:liko_auto/features/notifications_inbox/providers/notifications_inbox_provider.dart';
 import 'package:liko_auto/features/profile/widgets/profile_menu_item.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -22,6 +24,8 @@ class ProfileScreen extends ConsumerWidget {
     final authState = ref.watch(authStateChangesProvider);
     final activeListings = ref.watch(activeListingsCountProvider);
     final favoritesCount = ref.watch(favoritesCountProvider);
+    final unreadNotifs = ref.watch(unreadNotificationsCountProvider);
+    final upcomingBookings = ref.watch(upcomingBookingsCountProvider);
 
     return Column(
       children: [
@@ -66,9 +70,22 @@ class ProfileScreen extends ConsumerWidget {
                         onTap: () => context.push(AppRoutes.favorites),
                       ),
                       ProfileMenuItem(
+                        icon: Icons.event_available_rounded,
+                        label: 'Mes rendez-vous',
+                        badgeCount: upcomingBookings,
+                        onTap: () => context.push(AppRoutes.myBookings),
+                      ),
+                      ProfileMenuItem(
                         icon: Icons.history_rounded,
                         label: 'Historique des vues',
                         onTap: () => context.push(AppRoutes.history),
+                      ),
+                      ProfileMenuItem(
+                        icon: Icons.inbox_rounded,
+                        label: 'Notifications',
+                        badgeCount: unreadNotifs,
+                        onTap: () =>
+                            context.push(AppRoutes.notificationsInbox),
                       ),
                     ],
                   ),

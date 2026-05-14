@@ -46,8 +46,10 @@ class ListingCard extends ConsumerWidget {
   final VoidCallback? onTap;
   final VoidCallback? onFavorite;
 
-  void _toggleFavorite(BuildContext context, WidgetRef ref) {
-    final added = ref.read(favoritesProvider.notifier).toggle(data);
+  Future<void> _toggleFavorite(BuildContext context, WidgetRef ref) async {
+    final added =
+        await ref.read(favoritesActionsProvider).toggle(data);
+    if (!context.mounted) return;
     if (added) {
       AppSnack.success(context, 'Ajouté aux favoris');
     } else {
@@ -59,7 +61,10 @@ class ListingCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final d = data;
-    final isFavorited = ref.watch(isFavoriteProvider(d));
+    final isFavorited = ref.watch(isFavoriteProvider(d)).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
     return GestureDetector(
       onTap: onTap,
       child: Container(

@@ -15,7 +15,7 @@ class FavoritesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final favorites = ref.watch(favoritesProvider);
+    final favorites = ref.watch(favoritesProvider).valueOrNull ?? const [];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -93,7 +93,7 @@ class FavoritesScreen extends ConsumerWidget {
                           background: const _SwipeBackground(),
                           onDismissed: (_) {
                             ref
-                                .read(favoritesProvider.notifier)
+                                .read(favoritesActionsProvider)
                                 .remove(item);
                             AppSnack.info(
                               context,
@@ -102,7 +102,7 @@ class FavoritesScreen extends ConsumerWidget {
                                 label: 'Annuler',
                                 textColor: Colors.white,
                                 onPressed: () => ref
-                                    .read(favoritesProvider.notifier)
+                                    .read(favoritesActionsProvider)
                                     .toggle(item),
                               ),
                             );
@@ -153,7 +153,7 @@ class FavoritesScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (ok ?? false) ref.read(favoritesProvider.notifier).clearAll();
+    if (ok ?? false) await ref.read(favoritesActionsProvider).clearAll();
   }
 }
 

@@ -6,8 +6,12 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/bookings/booking_flow_screen.dart';
 import 'package:liko_auto/features/garage_detail/domain/garage_detail.dart';
 import 'package:liko_auto/features/garage_detail/providers/garage_detail_provider.dart';
+import 'package:liko_auto/features/reviews/domain/review.dart';
+import 'package:liko_auto/features/reviews/providers/reviews_provider.dart';
+import 'package:liko_auto/features/reviews/widgets/leave_review_sheet.dart';
 import 'package:liko_auto/features/search/widgets/garage_result_card.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
@@ -20,6 +24,12 @@ class GarageDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(garageDetailProvider(card));
+    final publishedReviews = ref
+            .watch(reviewsForTargetProvider(
+              (type: ReviewTargetType.garage, id: card.name),
+            ))
+            .valueOrNull ??
+        const <Review>[];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -36,9 +46,54 @@ class GarageDetailScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: _HoursBlock(hours: detail.hours)),
           SliverToBoxAdapter(
             child: _SectionTitle(
-              label: 'Avis (${detail.reviewCount})',
+              label:
+                  'Avis (${detail.reviewCount + publishedReviews.length})',
               trailing: _RatingPill(rating: detail.card.rating),
             ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
+              child: OutlinedButton.icon(
+                onPressed: () => showLeaveReviewSheet(
+                  context,
+                  targetType: ReviewTargetType.garage,
+                  targetId: card.name,
+                  targetName: card.name,
+                  verified: false,
+                ),
+                icon: const Icon(
+                  Icons.star_outline_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                label: const Text(
+                  'Laisser un avis',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverList.builder(
+            itemCount: publishedReviews.length,
+            itemBuilder: (_, i) =>
+                _PublishedReviewTile(review: publishedReviews[i]),
           ),
           SliverList.builder(
             itemCount: detail.reviews.length,
@@ -708,6 +763,146 @@ class _ReviewTile extends StatelessWidget {
   }
 }
 
+// ── Published review tile (drift) ─────────────────────────────────────────
+
+class _PublishedReviewTile extends StatelessWidget {
+  const _PublishedReviewTile({required this.review});
+  final Review review;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.primarySoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppColors.primary,
+                child: Text(
+                  review.authorName.characters.first.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              AppSpacing.gapSm,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          review.authorName,
+                          style: const TextStyle(
+                            color: AppColors.trust,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (review.verified) ...[
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 14,
+                            color: AppColors.success,
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      _relativeTime(review.createdAt),
+                      style: const TextStyle(
+                        color: AppColors.neutral,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  for (var i = 0; i < 5; i++)
+                    Icon(
+                      i < review.rating
+                          ? Icons.star_rounded
+                          : Icons.star_border_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                ],
+              ),
+            ],
+          ),
+          if (review.body != null && review.body!.trim().isNotEmpty) ...[
+            AppSpacing.gapSm,
+            Text(
+              review.body!,
+              style: context.textStyles.bodySmall?.copyWith(
+                color: AppColors.trust,
+                height: 1.5,
+              ),
+            ),
+          ],
+          if (review.tags.isNotEmpty) ...[
+            AppSpacing.gapSm,
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final t in review.tags)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      t,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _relativeTime(DateTime t) {
+    final diff = DateTime.now().difference(t);
+    if (diff.inMinutes < 1) return "à l'instant";
+    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'il y a ${diff.inHours} h';
+    if (diff.inDays < 7) return 'il y a ${diff.inDays} j';
+    return '${t.day.toString().padLeft(2, '0')}/'
+        '${t.month.toString().padLeft(2, '0')}';
+  }
+}
+
 // ── Bottom bar (Contacter + Prendre RDV) ──────────────────────────────────
 
 class _BottomBar extends StatelessWidget {
@@ -758,9 +953,9 @@ class _BottomBar extends StatelessWidget {
                 child: PrimaryButton(
                   label: 'Prendre RDV',
                   icon: Icons.event_available_rounded,
-                  onPressed: () => AppSnack.info(
-                    context,
-                    'Prise de RDV : disponible au Sprint 5.',
+                  onPressed: () => context.push(
+                    AppRoutes.bookingFlow,
+                    extra: BookingFlowArgs(garage: detail.card),
                   ),
                 ),
               ),
