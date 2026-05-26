@@ -29,19 +29,19 @@ abstract final class AppTypography {
       // Body
       bodyLarge: base.bodyLarge?.copyWith(
         fontSize: 16,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         height: 1.45,
         color: onSurface,
       ),
       bodyMedium: base.bodyMedium?.copyWith(
         fontSize: 14,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         height: 1.45,
         color: onSurfaceVariant,
       ),
       bodySmall: base.bodySmall?.copyWith(
         fontSize: 12,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         height: 1.4,
         color: onSurfaceVariant,
       ),

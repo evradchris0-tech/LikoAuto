@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/chat/providers/chat_detail_provider.dart';
 import 'package:liko_auto/features/chat/providers/moderation_provider.dart';
@@ -174,15 +175,19 @@ class ChatDetailScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
                           color: AppColors.background,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
                         ),
                         child: const TextField(
+                          style: TextStyle(color: AppColors.trust),
                           decoration: InputDecoration(
                             hintText: 'Écrire un message...',
+                            hintStyle: TextStyle(color: AppColors.neutral),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 12),
                           ),
-                          maxLines: null,
+                          minLines: 1,
+                          maxLines: 4,
+                          textInputAction: TextInputAction.send,
                         ),
                       ),
                     ),

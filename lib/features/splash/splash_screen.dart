@@ -8,6 +8,8 @@ import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/constants/app_assets.dart';
 import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/features/biometric/data/biometric_repository.dart';
 
 /// Splash screen Flutter — fond Spicy Paprika + logo animé + tagline.
 /// Dure 2,5s puis redirige vers l'onboarding (1ère fois) ou /home (sinon).
@@ -48,10 +50,29 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _controller.forward();
 
-    Timer(const Duration(milliseconds: 2800), () {
+    Timer(const Duration(milliseconds: 2800), () async {
       if (!mounted) return;
       final seen = ref.read(onboardingSeenProvider);
-      context.go(seen ? AppRoutes.home : AppRoutes.onboarding);
+      if (!seen) {
+        context.go(AppRoutes.onboarding);
+        return;
+      }
+
+      final bioRepo = ref.read(biometricRepositoryProvider);
+      final firebaseUser = ref.read(authRepositoryProvider).currentUser;
+
+      if (firebaseUser != null && bioRepo.isEnabled) {
+        final available = await bioRepo.isAvailable();
+        if (!mounted) return;
+        if (available) {
+          final ok = await bioRepo.authenticate();
+          if (!mounted) return;
+          context.go(ok ? AppRoutes.home : AppRoutes.login);
+          return;
+        }
+      }
+
+      context.go(AppRoutes.home);
     });
   }
 

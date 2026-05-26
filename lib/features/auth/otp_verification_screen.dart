@@ -6,8 +6,10 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/features/biometric/data/biometric_repository.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:liko_auto/shared/widgets/modals/biometric_setup_sheet.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   const OtpVerificationScreen({
@@ -57,15 +59,15 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     if (code.length != 6) return;
 
     setState(() => _isLoading = true);
-    
+
     try {
       await ref.read(authRepositoryProvider).verifyOTP(
         verificationId: widget.verificationId,
         smsCode: code,
       );
-      if (mounted) {
-        context.go(AppRoutes.home); // Success! Redirection.
-      }
+      if (!mounted) return;
+      await _maybePromptBiometric();
+      if (mounted) context.go(AppRoutes.home);
     } on Exception catch (_) {
       if (mounted) {
         AppSnack.error(context, 'Code invalide. Veuillez réessayer.');
@@ -73,6 +75,14 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _maybePromptBiometric() async {
+    final bioRepo = ref.read(biometricRepositoryProvider);
+    if (bioRepo.isEnabled) return;
+    final available = await bioRepo.isAvailable();
+    if (!mounted || !available) return;
+    await showBiometricSetupSheet(context, ref);
   }
 
   @override
@@ -143,7 +153,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
               AppSpacing.gapXl,
               Center(
                 child: TextButton(
-                  onPressed: () {}, // TODO: Resend Logic
+                  onPressed: () {}, // TODO(api): implémenter renvoi SMS
                   child: const Text('Renvoyer le code', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                 ),
               ),

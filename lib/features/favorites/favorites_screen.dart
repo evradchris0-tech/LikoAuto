@@ -98,13 +98,10 @@ class FavoritesScreen extends ConsumerWidget {
                             AppSnack.info(
                               context,
                               'Annonce retirée des favoris',
-                              action: SnackBarAction(
-                                label: 'Annuler',
-                                textColor: Colors.white,
-                                onPressed: () => ref
-                                    .read(favoritesActionsProvider)
-                                    .toggle(item),
-                              ),
+                              actionLabel: 'Annuler',
+                              onAction: () => ref
+                                  .read(favoritesActionsProvider)
+                                  .toggle(item),
                             );
                           },
                           child: ListingCard(

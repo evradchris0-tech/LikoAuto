@@ -33,6 +33,13 @@ class MyListingCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             borderRadius: AppRadius.rCard,
+            // Bordure dorée si boosté (wireframe 5.1)
+            border: listing.isBoosted
+                ? Border.all(
+                    color: const Color(0xFFD4820A),
+                    width: 1.5,
+                  )
+                : null,
             boxShadow: [
               BoxShadow(
                 color: AppColors.trust.withValues(alpha: 0.05),
@@ -63,6 +70,39 @@ class MyListingCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Badge BOOSTÉ (wireframe 5.1)
+                        if (listing.isBoosted)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF3CD),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.rocket_launch_rounded,
+                                  size: 11,
+                                  color: Color(0xFFD4820A),
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'BOOSTÉ',
+                                  style: TextStyle(
+                                    color: Color(0xFFD4820A),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         Row(
                           children: [
                             Expanded(

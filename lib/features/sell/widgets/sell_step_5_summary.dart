@@ -6,6 +6,9 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/sell/providers/sell_form_provider.dart';
 
+// Provider local pour l'option boost (wireframe 3.5)
+final _boostSelectedProvider = StateProvider.autoDispose<bool>((ref) => false);
+
 class SellStep5Summary extends ConsumerWidget {
   const SellStep5Summary({super.key});
 
@@ -75,12 +78,109 @@ class SellStep5Summary extends ConsumerWidget {
           ),
         ),
         AppSpacing.gapXl,
+        // Boost (wireframe 3.5)
+        _BoostCard(),
+        AppSpacing.gapLg,
         Text(
           'En publiant cette annonce, vous acceptez nos conditions générales.',
           textAlign: TextAlign.center,
           style: context.textStyles.bodySmall?.copyWith(color: AppColors.neutral),
         ),
       ],
+    );
+  }
+}
+
+// ── Boost card (wireframe 3.5) ──────────────────────────────────────────────────
+class _BoostCard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final boosted = ref.watch(_boostSelectedProvider);
+    return GestureDetector(
+      onTap: () =>
+          ref.read(_boostSelectedProvider.notifier).state = !boosted,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          gradient: boosted
+              ? LinearGradient(
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withValues(alpha: 0.8),
+                  ],
+                )
+              : null,
+          color: boosted ? null : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: boosted ? AppColors.primary : AppColors.outline,
+            width: boosted ? 2 : 1,
+          ),
+          boxShadow: boosted
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: boosted
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : AppColors.primarySoft,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.rocket_launch_rounded,
+                size: 22,
+                color: boosted ? Colors.white : AppColors.primary,
+              ),
+            ),
+            AppSpacing.gapMd,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Booster cette annonce',
+                    style: TextStyle(
+                      color: boosted ? Colors.white : AppColors.trust,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '3× plus de visibilité • 5 000 FCFA / semaine',
+                    style: TextStyle(
+                      color: boosted
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : AppColors.neutral,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: boosted,
+              onChanged: (v) =>
+                  ref.read(_boostSelectedProvider.notifier).state = v,
+              activeThumbColor: Colors.white,
+              activeTrackColor: Colors.white.withValues(alpha: 0.3),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

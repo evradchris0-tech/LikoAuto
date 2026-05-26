@@ -51,11 +51,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyASSyuqtD83PBHK-JIoPs3H3XRFSq56ChU',
-    appId: '1:1045309120591:android:82b451ac24948bcf620a3a',
-    messagingSenderId: '1045309120591',
-    projectId: 'liko-auto',
-    storageBucket: 'liko-auto.firebasestorage.app',
+    apiKey: 'AIzaSyAW8rsMIJ9lf9ddR3h0M8O1FQVXaFD4r0M',
+    appId: '1:281104470269:android:a7672ec42b3cb95a756e94',
+    messagingSenderId: '281104470269',
+    projectId: 'liko-auto-dev',
+    storageBucket: 'liko-auto-dev.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

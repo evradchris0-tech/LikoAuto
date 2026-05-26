@@ -33,16 +33,6 @@ class Booking {
     this.note,
   });
 
-  final String id;
-  final String garageName;
-  final String garageLocation;
-  final String garageImageAsset;
-  final GarageService service;
-  final DateTime scheduledAt;
-  final BookingStatus status;
-  final String? note;
-  final DateTime createdAt;
-
   /// Helper pour construire à partir d'une `GarageCardData` + service choisi.
   factory Booking.fromGarage({
     required String id,
@@ -63,6 +53,16 @@ class Booking {
       createdAt: DateTime.now(),
     );
   }
+
+  final String id;
+  final String garageName;
+  final String garageLocation;
+  final String garageImageAsset;
+  final GarageService service;
+  final DateTime scheduledAt;
+  final BookingStatus status;
+  final String? note;
+  final DateTime createdAt;
 
   Booking copyWith({BookingStatus? status}) {
     return Booking(

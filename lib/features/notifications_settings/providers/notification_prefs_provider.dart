@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:liko_auto/core/providers/preferences_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:liko_auto/features/notifications_settings/data/notification_prefs_repository.dart';
 
 @immutable
 class NotificationPrefs {
@@ -56,53 +55,40 @@ class NotificationPrefs {
   }
 }
 
-class _Keys {
-  static const push = 'notif_push';
-  static const messages = 'notif_messages';
-  static const priceDrops = 'notif_price_drops';
-  static const appointments = 'notif_appointments';
-  static const system = 'notif_system';
-  static const promos = 'notif_promos';
-  static const emailDigest = 'notif_email_digest';
-  static const quietOn = 'notif_quiet_on';
-  static const quietStart = 'notif_quiet_start';
-  static const quietEnd = 'notif_quiet_end';
-}
-
 class NotificationPrefsNotifier extends StateNotifier<NotificationPrefs> {
-  NotificationPrefsNotifier(this._prefs) : super(_load(_prefs));
+  NotificationPrefsNotifier(this._repo) : super(_loadFromRepo(_repo));
 
-  final SharedPreferences _prefs;
+  final NotificationPrefsRepository _repo;
 
-  static NotificationPrefs _load(SharedPreferences p) {
+  static NotificationPrefs _loadFromRepo(NotificationPrefsRepository r) {
     return NotificationPrefs(
-      pushEnabled: p.getBool(_Keys.push) ?? true,
-      newMessages: p.getBool(_Keys.messages) ?? true,
-      priceDrops: p.getBool(_Keys.priceDrops) ?? true,
-      appointments: p.getBool(_Keys.appointments) ?? true,
-      systemAlerts: p.getBool(_Keys.system) ?? true,
-      promotions: p.getBool(_Keys.promos) ?? false,
-      emailDigest: p.getBool(_Keys.emailDigest) ?? false,
-      quietHoursEnabled: p.getBool(_Keys.quietOn) ?? false,
-      quietStartHour: p.getInt(_Keys.quietStart) ?? 22,
-      quietEndHour: p.getInt(_Keys.quietEnd) ?? 7,
+      pushEnabled: r.pushEnabled,
+      newMessages: r.newMessages,
+      priceDrops: r.priceDrops,
+      appointments: r.appointments,
+      systemAlerts: r.systemAlerts,
+      promotions: r.promotions,
+      emailDigest: r.emailDigest,
+      quietHoursEnabled: r.quietHoursEnabled,
+      quietStartHour: r.quietStartHour,
+      quietEndHour: r.quietEndHour,
     );
   }
 
   Future<void> _persist(NotificationPrefs next) async {
     state = next;
-    await Future.wait<void>([
-      _prefs.setBool(_Keys.push, next.pushEnabled),
-      _prefs.setBool(_Keys.messages, next.newMessages),
-      _prefs.setBool(_Keys.priceDrops, next.priceDrops),
-      _prefs.setBool(_Keys.appointments, next.appointments),
-      _prefs.setBool(_Keys.system, next.systemAlerts),
-      _prefs.setBool(_Keys.promos, next.promotions),
-      _prefs.setBool(_Keys.emailDigest, next.emailDigest),
-      _prefs.setBool(_Keys.quietOn, next.quietHoursEnabled),
-      _prefs.setInt(_Keys.quietStart, next.quietStartHour),
-      _prefs.setInt(_Keys.quietEnd, next.quietEndHour),
-    ]);
+    await _repo.persistAll(
+      pushEnabled: next.pushEnabled,
+      newMessages: next.newMessages,
+      priceDrops: next.priceDrops,
+      appointments: next.appointments,
+      systemAlerts: next.systemAlerts,
+      promotions: next.promotions,
+      emailDigest: next.emailDigest,
+      quietHoursEnabled: next.quietHoursEnabled,
+      quietStartHour: next.quietStartHour,
+      quietEndHour: next.quietEndHour,
+    );
   }
 
   Future<void> setPushEnabled({required bool value}) async =>
@@ -129,5 +115,7 @@ class NotificationPrefsNotifier extends StateNotifier<NotificationPrefs> {
 
 final notificationPrefsProvider =
     StateNotifierProvider<NotificationPrefsNotifier, NotificationPrefs>((ref) {
-  return NotificationPrefsNotifier(ref.watch(sharedPreferencesProvider));
+  return NotificationPrefsNotifier(
+    ref.watch(notificationPrefsRepositoryProvider),
+  );
 });

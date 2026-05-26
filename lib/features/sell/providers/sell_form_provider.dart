@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:liko_auto/features/listings/domain/api_listing.dart';
 
 enum FuelType { essence, diesel, hybride, electrique }
 
@@ -12,7 +13,9 @@ class SellFormData {
   const SellFormData({
     this.vin,
     this.brand,
+    this.brandId,
     this.model,
+    this.modelId,
     this.photos = const [],
     this.mileageKm,
     this.year,
@@ -21,11 +24,18 @@ class SellFormData {
     this.priceFcfa,
     this.description,
     this.isNegotiable = false,
+    this.isTradeInAccepted = false,
+    this.isFinancingAvailable = false,
+    this.cityId,
+    this.condition,
+    this.color,
   });
 
   final String? vin;
   final String? brand;
+  final int? brandId;
   final String? model;
+  final int? modelId;
   final List<File> photos;
   final int? mileageKm;
   final int? year;
@@ -34,6 +44,11 @@ class SellFormData {
   final int? priceFcfa;
   final String? description;
   final bool isNegotiable;
+  final bool isTradeInAccepted;
+  final bool isFinancingAvailable;
+  final int? cityId;
+  final VehicleCondition? condition;
+  final String? color;
 
   /// VIN valide = exactement 17 caractères alphanumériques (sans I, O, Q).
   bool get isVinValid {
@@ -44,8 +59,8 @@ class SellFormData {
 
   bool get hasPhotosMinimum => photos.length >= 5;
 
-  /// Le step 1 (identifier) accepte le VIN OU une saisie manuelle marque+modèle.
-  bool get isStep1Valid => isVinValid || (brand != null && model != null);
+  /// Step 1 accepte le VIN OU une sélection marque+modèle via l'API.
+  bool get isStep1Valid => isVinValid || (brandId != null && modelId != null);
 
   bool get isStep2Valid => hasPhotosMinimum;
 
@@ -53,12 +68,38 @@ class SellFormData {
       mileageKm != null && year != null && fuel != null && gearbox != null;
 
   bool get isStep4Valid =>
-      priceFcfa != null && priceFcfa! > 0 && description != null && description!.trim().length >= 10;
+      priceFcfa != null &&
+      priceFcfa! > 0 &&
+      description != null &&
+      description!.trim().length >= 10;
+
+  /// Retourne une copie avec la marque définie et le modèle effacé.
+  SellFormData withBrand({required int id, required String name}) => SellFormData(
+        vin: vin,
+        brand: name,
+        brandId: id,
+        // model intentionally cleared
+        photos: photos,
+        mileageKm: mileageKm,
+        year: year,
+        fuel: fuel,
+        gearbox: gearbox,
+        priceFcfa: priceFcfa,
+        description: description,
+        isNegotiable: isNegotiable,
+        isTradeInAccepted: isTradeInAccepted,
+        isFinancingAvailable: isFinancingAvailable,
+        cityId: cityId,
+        condition: condition,
+        color: color,
+      );
 
   SellFormData copyWith({
     String? vin,
     String? brand,
+    int? brandId,
     String? model,
+    int? modelId,
     List<File>? photos,
     int? mileageKm,
     int? year,
@@ -67,11 +108,18 @@ class SellFormData {
     int? priceFcfa,
     String? description,
     bool? isNegotiable,
+    bool? isTradeInAccepted,
+    bool? isFinancingAvailable,
+    int? cityId,
+    VehicleCondition? condition,
+    String? color,
   }) {
     return SellFormData(
       vin: vin ?? this.vin,
       brand: brand ?? this.brand,
+      brandId: brandId ?? this.brandId,
       model: model ?? this.model,
+      modelId: modelId ?? this.modelId,
       photos: photos ?? this.photos,
       mileageKm: mileageKm ?? this.mileageKm,
       year: year ?? this.year,
@@ -80,6 +128,11 @@ class SellFormData {
       priceFcfa: priceFcfa ?? this.priceFcfa,
       description: description ?? this.description,
       isNegotiable: isNegotiable ?? this.isNegotiable,
+      isTradeInAccepted: isTradeInAccepted ?? this.isTradeInAccepted,
+      isFinancingAvailable: isFinancingAvailable ?? this.isFinancingAvailable,
+      cityId: cityId ?? this.cityId,
+      condition: condition ?? this.condition,
+      color: color ?? this.color,
     );
   }
 }
@@ -88,8 +141,12 @@ class SellFormNotifier extends StateNotifier<SellFormData> {
   SellFormNotifier() : super(const SellFormData());
 
   void setVin(String value) => state = state.copyWith(vin: value);
-  void setBrandModel({required String brand, required String model}) =>
-      state = state.copyWith(brand: brand, model: model);
+
+  void setBrand({required int id, required String name}) =>
+      state = state.withBrand(id: id, name: name);
+
+  void setModel({required int id, required String name}) =>
+      state = state.copyWith(model: name, modelId: id);
 
   void setPhotos(List<File> files) => state = state.copyWith(photos: files);
   void addPhotos(List<File> files) =>
@@ -108,6 +165,14 @@ class SellFormNotifier extends StateNotifier<SellFormData> {
   void setDescription(String d) => state = state.copyWith(description: d);
   void setNegotiable({required bool value}) =>
       state = state.copyWith(isNegotiable: value);
+  void setTradeIn({required bool value}) =>
+      state = state.copyWith(isTradeInAccepted: value);
+  void setFinancing({required bool value}) =>
+      state = state.copyWith(isFinancingAvailable: value);
+
+  void setCityId(int id) => state = state.copyWith(cityId: id);
+  void setCondition(VehicleCondition c) => state = state.copyWith(condition: c);
+  void setColor(String c) => state = state.copyWith(color: c);
 
   void reset() => state = const SellFormData();
 }

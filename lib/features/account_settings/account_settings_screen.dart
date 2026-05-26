@@ -114,10 +114,7 @@ class _Content extends ConsumerWidget {
               trailing: user?.emailVerified ?? false
                   ? const _VerifiedChip()
                   : null,
-              onTap: () => _info(
-                context,
-                "Modifier l'email nécessite une re-authentification. À venir.",
-              ),
+              onTap: () => context.push(AppRoutes.changeEmail),
             ),
             _Tile(
               icon: Icons.phone_outlined,
@@ -126,10 +123,7 @@ class _Content extends ConsumerWidget {
               trailing: user?.phoneNumber != null
                   ? const _VerifiedChip()
                   : null,
-              onTap: () => _info(
-                context,
-                'Lier ou changer le numéro nécessite une vérification SMS. À venir.',
-              ),
+              onTap: () => context.push(AppRoutes.changePhone),
             ),
           ],
         ),
@@ -338,8 +332,6 @@ class _Content extends ConsumerWidget {
       );
     }
   }
-
-  void _info(BuildContext context, String msg) => AppSnack.info(context, msg);
 }
 
 class _AvatarPicker extends StatelessWidget {

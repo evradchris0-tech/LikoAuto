@@ -14,6 +14,7 @@ import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
 import 'package:liko_auto/features/my_listings/providers/my_listings_provider.dart';
 import 'package:liko_auto/features/notifications_inbox/providers/notifications_inbox_provider.dart';
 import 'package:liko_auto/features/profile/widgets/profile_menu_item.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -53,8 +54,13 @@ class ProfileScreen extends ConsumerWidget {
             data: (user) => SingleChildScrollView(
               child: Column(
                 children: [
-                  _ProfileHeader(user: user),
-                  AppSpacing.gapMd,
+                  _ProfileHeader(
+                    user: user,
+                    activeListings: activeListings,
+                    favoritesCount: favoritesCount,
+                    upcomingBookings: upcomingBookings,
+                  ),
+                  const _SectionLabel(label: 'ACTIVITÉ'),
                   ProfileSectionList(
                     items: [
                       ProfileMenuItem(
@@ -87,9 +93,18 @@ class ProfileScreen extends ConsumerWidget {
                         onTap: () =>
                             context.push(AppRoutes.notificationsInbox),
                       ),
+                      ProfileMenuItem(
+                        icon: Icons.calculate_outlined,
+                        label: 'Estimer ma voiture',
+                        isNew: true,
+                        onTap: () => AppSnack.info(
+                          context,
+                          'Estimateur disponible au Sprint 6.',
+                        ),
+                      ),
                     ],
                   ),
-                  AppSpacing.gapMd,
+                  const _SectionLabel(label: 'COMPTE'),
                   ProfileSectionList(
                     items: [
                       ProfileMenuItem(
@@ -185,9 +200,17 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.user});
+  const _ProfileHeader({
+    required this.user,
+    required this.activeListings,
+    required this.favoritesCount,
+    required this.upcomingBookings,
+  });
 
   final User? user;
+  final int activeListings;
+  final int favoritesCount;
+  final int upcomingBookings;
 
   @override
   Widget build(BuildContext context) {
@@ -200,78 +223,174 @@ class _ProfileHeader extends StatelessWidget {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.outline,
-              shape: BoxShape.circle,
-              image: avatarUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(avatarUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            alignment: Alignment.center,
-            child: avatarUrl == null
-                ? Text(
-                    displayName.isNotEmpty
-                        ? displayName[0].toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+          // Avatar + nom + badge
+          Row(
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.outline,
+                  shape: BoxShape.circle,
+                  image: avatarUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(avatarUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: avatarUrl == null
+                    ? Text(
+                        displayName.isNotEmpty
+                            ? displayName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+              ),
+              AppSpacing.gapLg,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: context.textStyles.displaySmall?.copyWith(
+                        color: AppColors.trust,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                      ),
                     ),
-                  )
-                : null,
-          ),
-          AppSpacing.gapLg,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: context.textStyles.displaySmall?.copyWith(
-                    color: AppColors.trust,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: context.textStyles.bodyMedium?.copyWith(
-                    color: AppColors.neutral,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    user == null ? 'Invité' : 'Vendeur Particulier',
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: context.textStyles.bodyMedium?.copyWith(
+                        color: AppColors.neutral,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySoft,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        user == null ? 'Invité' : 'Vendeur Particulier',
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          // Stats row (wireframe 2.5)
+          const SizedBox(height: AppSpacing.lg),
+          const Divider(height: 1, color: AppColors.outline),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatItem(
+                value: activeListings.toString(),
+                label: 'Annonces',
+              ),
+              _StatDivider(),
+              _StatItem(
+                value: favoritesCount.toString(),
+                label: 'Favoris',
+              ),
+              _StatDivider(),
+              _StatItem(
+                value: upcomingBookings.toString(),
+                label: 'RDV',
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
         ],
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: context.textStyles.titleLarge?.copyWith(
+            color: AppColors.trust,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: context.textStyles.labelSmall?.copyWith(
+            color: AppColors.neutral,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 32,
+      color: AppColors.outline,
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.xs,
+      ),
+      child: Text(
+        label,
+        style: context.textStyles.labelSmall?.copyWith(
+          color: AppColors.neutral,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }

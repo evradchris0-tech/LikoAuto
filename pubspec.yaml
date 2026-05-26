@@ -25,11 +25,18 @@ dependencies:
   package_info_plus: ^9.0.1
   riverpod_annotation: ^2.6.1
   shared_preferences: ^2.3.2
+  # HTTP client
+  dio: ^5.7.0
   # Local persistence
   drift: ^2.20.0
   sqlite3_flutter_libs: ^0.5.24
   path: ^1.9.0
   path_provider: ^2.1.5
+  # Biométrie
+  local_auth: ^2.3.0
+  # Cartographie OSM
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3

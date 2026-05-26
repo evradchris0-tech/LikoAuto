@@ -47,6 +47,7 @@ class MyListing {
     required this.publishedAt,
     this.expiresAt,
     this.rejectionReason,
+    this.isBoosted = false, // Badge BOOSTÉ (wireframe 5.1)
   });
 
   final String id;
@@ -57,4 +58,5 @@ class MyListing {
   final DateTime publishedAt;
   final DateTime? expiresAt;
   final String? rejectionReason;
+  final bool isBoosted;
 }

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/catalog/domain/brand.dart';
+import 'package:liko_auto/features/catalog/domain/car_model.dart';
+import 'package:liko_auto/features/catalog/providers/catalog_provider.dart';
 import 'package:liko_auto/features/sell/providers/sell_form_provider.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
 
@@ -17,25 +20,16 @@ class SellStep1Identifier extends ConsumerStatefulWidget {
 
 class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
   late final TextEditingController _vinCtrl;
-  late final TextEditingController _brandCtrl;
-  late final TextEditingController _modelCtrl;
-  bool _manualMode = false;
 
   @override
   void initState() {
     super.initState();
-    final form = ref.read(sellFormProvider);
-    _vinCtrl = TextEditingController(text: form.vin ?? '');
-    _brandCtrl = TextEditingController(text: form.brand ?? '');
-    _modelCtrl = TextEditingController(text: form.model ?? '');
-    _manualMode = form.brand != null;
+    _vinCtrl = TextEditingController(text: ref.read(sellFormProvider).vin ?? '');
   }
 
   @override
   void dispose() {
     _vinCtrl.dispose();
-    _brandCtrl.dispose();
-    _modelCtrl.dispose();
     super.dispose();
   }
 
@@ -62,9 +56,39 @@ class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
           ),
         ),
         AppSpacing.gapXl,
+        // Badge RECOMMANDÉ (wireframe 3.1)
+        Row(
+          children: [
+            Text(
+              'Numéro de châssis (VIN)',
+              style: context.textStyles.labelMedium?.copyWith(
+                color: AppColors.trust,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.successSoft,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'RECOMMANDÉ',
+                style: TextStyle(
+                  color: AppColors.success,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
         LikoTextField(
           controller: _vinCtrl,
-          hintText: 'Numéro de châssis (VIN)',
+          hintText: 'Ex : JT3HP10V1P0123456',
           prefixIcon: const Icon(
             Icons.qr_code_2_rounded,
             color: AppColors.neutral,
@@ -77,7 +101,6 @@ class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
           ],
           onChanged: (value) {
             ref.read(sellFormProvider.notifier).setVin(value);
-            setState(() {});
           },
         ),
         AppSpacing.gapSm,
@@ -99,60 +122,36 @@ class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
           ],
         ),
         AppSpacing.gapLg,
-        if (!_manualMode)
-          OutlinedButton.icon(
-            onPressed: () => setState(() => _manualMode = true),
-            icon: const Icon(Icons.edit_note_rounded),
-            label: const Text('Saisir manuellement la marque et le modèle'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.trust,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              side: const BorderSide(color: AppColors.outline),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          )
-        else
-          Column(
-            children: [
-              LikoTextField(
-                controller: _brandCtrl,
-                hintText: 'Marque (ex : Toyota)',
-                prefixIcon: const Icon(
-                  Icons.directions_car_filled_outlined,
-                  color: AppColors.neutral,
-                ),
-                onChanged: (v) {
-                  ref.read(sellFormProvider.notifier).setBrandModel(
-                        brand: v.trim(),
-                        model: _modelCtrl.text.trim(),
-                      );
-                  setState(() {});
-                },
-              ),
-              AppSpacing.gapMd,
-              LikoTextField(
-                controller: _modelCtrl,
-                hintText: 'Modèle (ex : RAV4)',
-                prefixIcon: const Icon(
-                  Icons.label_outline_rounded,
-                  color: AppColors.neutral,
-                ),
-                onChanged: (v) {
-                  ref.read(sellFormProvider.notifier).setBrandModel(
-                        brand: _brandCtrl.text.trim(),
-                        model: v.trim(),
-                      );
-                  setState(() {});
-                },
-              ),
-            ],
+        Text(
+          'Marque',
+          style: context.textStyles.labelMedium?.copyWith(
+            color: AppColors.trust,
+            fontWeight: FontWeight.w700,
           ),
+        ),
+        const SizedBox(height: 8),
+        _ApiBrandChips(
+          selectedBrandId: form.brandId,
+          onSelect: (brand) => ref
+              .read(sellFormProvider.notifier)
+              .setBrand(id: brand.id, name: brand.name),
+        ),
+        if (form.brandId != null) ...[
+          AppSpacing.gapLg,
+          _ApiModelChips(
+            brandId: form.brandId!,
+            selectedModelId: form.modelId,
+            onSelect: (model) => ref
+                .read(sellFormProvider.notifier)
+                .setModel(id: model.id, name: model.name),
+          ),
+        ],
       ],
     );
   }
 }
+
+// ── VIN feedback ──────────────────────────────────────────────────────────────
 
 class _VinFeedback extends StatelessWidget {
   const _VinFeedback({required this.form});
@@ -206,6 +205,164 @@ class _VinFeedback extends StatelessWidget {
     );
   }
 }
+
+// ── API brand chips ────────────────────────────────────────────────────────────
+
+class _ApiBrandChips extends ConsumerWidget {
+  const _ApiBrandChips({
+    required this.selectedBrandId,
+    required this.onSelect,
+  });
+
+  final int? selectedBrandId;
+  final void Function(Brand) onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brandsAsync = ref.watch(brandsProvider);
+    return brandsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      error: (_, __) => Text(
+        'Impossible de charger les marques.',
+        style: context.textStyles.labelSmall?.copyWith(color: AppColors.error),
+      ),
+      data: (brands) => Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: brands.where((b) => b.isActive).map((brand) {
+          final isActive = selectedBrandId == brand.id;
+          return GestureDetector(
+            onTap: () => onSelect(brand),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: isActive ? AppColors.trust : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isActive ? AppColors.trust : AppColors.outline,
+                ),
+              ),
+              child: Text(
+                brand.name,
+                style: TextStyle(
+                  color: isActive ? Colors.white : AppColors.trust,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ── API model chips ────────────────────────────────────────────────────────────
+
+class _ApiModelChips extends ConsumerWidget {
+  const _ApiModelChips({
+    required this.brandId,
+    required this.selectedModelId,
+    required this.onSelect,
+  });
+
+  final int brandId;
+  final int? selectedModelId;
+  final void Function(CarModel) onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modelsAsync = ref.watch(modelsProvider(brandId));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Modèle',
+          style: context.textStyles.labelMedium?.copyWith(
+            color: AppColors.trust,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        modelsAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+          error: (_, __) => Text(
+            'Impossible de charger les modèles.',
+            style:
+                context.textStyles.labelSmall?.copyWith(color: AppColors.error),
+          ),
+          data: (models) {
+            final active = models.where((m) => m.isActive).toList();
+            if (active.isEmpty) {
+              return Text(
+                'Aucun modèle disponible pour cette marque.',
+                style: context.textStyles.labelSmall
+                    ?.copyWith(color: AppColors.neutral),
+              );
+            }
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: active.map((model) {
+                final isActive = selectedModelId == model.id;
+                return GestureDetector(
+                  onTap: () => onSelect(model),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isActive ? AppColors.trust : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isActive ? AppColors.trust : AppColors.outline,
+                      ),
+                    ),
+                    child: Text(
+                      model.name,
+                      style: TextStyle(
+                        color: isActive ? Colors.white : AppColors.trust,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// ── VIN formatter ──────────────────────────────────────────────────────────────
 
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override

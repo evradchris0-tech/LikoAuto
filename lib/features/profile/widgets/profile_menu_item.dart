@@ -9,6 +9,7 @@ class ProfileMenuItem extends StatelessWidget {
     required this.onTap,
     this.badgeCount,
     this.isDestructive = false,
+    this.isNew = false,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class ProfileMenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final int? badgeCount;
   final bool isDestructive;
+  final bool isNew;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,24 @@ class ProfileMenuItem extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (badgeCount != null && badgeCount! > 0)
+          if (isNew)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'NEW',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 9,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            )
+          else if (badgeCount != null && badgeCount! > 0)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(

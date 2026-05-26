@@ -8,27 +8,79 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 /// - `error`   : erreur ou action destructive confirmée
 /// - `info`    : info neutre, retrait passif, message contextuel
 /// - `warning` : avertissement non bloquant (connexion lente, mode dégradé)
+///
+/// Paramètre optionnel `actionLabel` + `onAction` pour un bouton "Voir" /
+/// "Réessayer" / "Annuler" affiché à droite (wireframe 6.1).
 abstract final class AppSnack {
   static const _floating = SnackBarBehavior.floating;
   static const _duration = Duration(seconds: 3);
   static const _shape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(12)),
   );
+  static const _margin = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
-  static void success(BuildContext context, String message, {SnackBarAction? action}) {
-    _show(context, message, AppColors.success, Icons.check_circle_rounded, action);
+  static void success(
+    BuildContext context,
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    _show(
+      context,
+      message,
+      AppColors.success,
+      Icons.check_circle_rounded,
+      actionLabel,
+      onAction,
+    );
   }
 
-  static void error(BuildContext context, String message, {SnackBarAction? action}) {
-    _show(context, message, AppColors.error, Icons.error_outline_rounded, action);
+  static void error(
+    BuildContext context,
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    _show(
+      context,
+      message,
+      AppColors.error,
+      Icons.error_outline_rounded,
+      actionLabel,
+      onAction,
+    );
   }
 
-  static void info(BuildContext context, String message, {SnackBarAction? action}) {
-    _show(context, message, AppColors.trust, Icons.info_outline_rounded, action);
+  static void info(
+    BuildContext context,
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    _show(
+      context,
+      message,
+      AppColors.trust,
+      Icons.info_outline_rounded,
+      actionLabel,
+      onAction,
+    );
   }
 
-  static void warning(BuildContext context, String message, {SnackBarAction? action}) {
-    _show(context, message, AppColors.warning, Icons.warning_amber_rounded, action);
+  static void warning(
+    BuildContext context,
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    _show(
+      context,
+      message,
+      AppColors.warning,
+      Icons.warning_amber_rounded,
+      actionLabel,
+      onAction,
+    );
   }
 
   static void _show(
@@ -36,7 +88,8 @@ abstract final class AppSnack {
     String message,
     Color bg,
     IconData icon,
-    SnackBarAction? action,
+    String? actionLabel,
+    VoidCallback? onAction,
   ) {
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -46,7 +99,7 @@ abstract final class AppSnack {
           behavior: _floating,
           duration: _duration,
           shape: _shape,
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: _margin,
           content: Row(
             children: [
               Icon(icon, color: Colors.white, size: 20),
@@ -62,7 +115,13 @@ abstract final class AppSnack {
               ),
             ],
           ),
-          action: action,
+          action: actionLabel != null && onAction != null
+              ? SnackBarAction(
+                  label: actionLabel,
+                  textColor: Colors.white,
+                  onPressed: onAction,
+                )
+              : null,
         ),
       );
   }

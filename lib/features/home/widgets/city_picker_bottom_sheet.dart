@@ -88,12 +88,8 @@ class CityPickerBottomSheet extends ConsumerWidget {
                   AppSnack.error(
                     context,
                     'Erreur géolocalisation. Veuillez réessayer.',
-                    action: SnackBarAction(
-                      label: 'Réessayer',
-                      textColor: Colors.white,
-                      onPressed: () =>
-                          ref.invalidate(detectCityProvider),
-                    ),
+                    actionLabel: 'Réessayer',
+                    onAction: () => ref.invalidate(detectCityProvider),
                   );
                 }
               }

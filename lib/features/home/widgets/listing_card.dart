@@ -20,6 +20,7 @@ class ListingCardData {
     this.year = '2021',
     this.isVinVerified = false,
     this.isPro = false,
+    this.priceDrop, // Badge baisse de prix (wireframe 5.2), ex: -500000
   });
 
   final String title;
@@ -31,6 +32,7 @@ class ListingCardData {
   final String year;
   final bool isVinVerified;
   final bool isPro;
+  final int? priceDrop; // Valeur négative (baisse) ou nulle (pas de baisse)
 }
 
 /// Carte d'annonce — image gauche + info droite + badges VIN/Pro.
@@ -102,20 +104,7 @@ class ListingCard extends ConsumerWidget {
                     // Image
                     Hero(
                       tag: 'car_image_${d.title}_${d.priceFcfa}',
-                      child: Image.asset(
-                        d.imageAsset,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const ColoredBox(
-                          color: AppColors.primarySoft,
-                          child: Center(
-                            child: Icon(
-                              Icons.directions_car_rounded,
-                              color: AppColors.primary,
-                              size: 36,
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: _CarImage(url: d.imageAsset),
                     ),
                     // Dégradé bas pour le badge photo
                     Positioned(
@@ -210,15 +199,51 @@ class ListingCard extends ConsumerWidget {
                       ],
                     ),
                     AppSpacing.gapXs,
-                    // Prix
-                    Text(
-                      d.priceFcfa.toFcfa(),
-                      style: context.textStyles.headlineMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17,
-                        height: 1.1,
-                      ),
+                    // Prix + badge baisse de prix (wireframe 5.2)
+                    Row(
+                      children: [
+                        Text(
+                          d.priceFcfa.toFcfa(),
+                          style: context.textStyles.headlineMedium?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17,
+                            height: 1.1,
+                          ),
+                        ),
+                        if (d.priceDrop != null && d.priceDrop! < 0) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFEBEB),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.trending_down_rounded,
+                                  size: 12,
+                                  color: AppColors.error,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '-${d.priceDrop!.abs() ~/ 1000}k',
+                                  style: const TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     AppSpacing.gapSm,
                     // Badges VIN + Pro
@@ -312,6 +337,42 @@ class _Badge extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Affiche une image locale (assets/) ou réseau (http/https).
+class _CarImage extends StatelessWidget {
+  const _CarImage({required this.url});
+  final String url;
+
+  static const _placeholder = ColoredBox(
+    color: AppColors.primarySoft,
+    child: Center(
+      child: Icon(
+        Icons.directions_car_rounded,
+        color: AppColors.primary,
+        size: 36,
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    if (url.startsWith('http')) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder,
+        loadingBuilder: (_, child, progress) =>
+            progress == null ? child : _placeholder,
+      );
+    }
+    if (url.isEmpty) return _placeholder;
+    return Image.asset(
+      url,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _placeholder,
     );
   }
 }

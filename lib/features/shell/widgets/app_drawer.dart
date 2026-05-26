@@ -243,18 +243,21 @@ class _RoleSwitcher extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.person_search_rounded, size: 20),
-            onPressed: () => ref.read(userRoleProvider.notifier).setRole(UserRole.buyer),
             tooltip: 'Acheteur',
+            onPressed: () =>
+                ref.read(userRoleProvider.notifier).role = UserRole.buyer,
           ),
           IconButton(
             icon: const Icon(Icons.sell_rounded, size: 20),
-            onPressed: () => ref.read(userRoleProvider.notifier).setRole(UserRole.seller),
             tooltip: 'Vendeur',
+            onPressed: () =>
+                ref.read(userRoleProvider.notifier).role = UserRole.seller,
           ),
           IconButton(
             icon: const Icon(Icons.business_rounded, size: 20),
-            onPressed: () => ref.read(userRoleProvider.notifier).setRole(UserRole.garage),
             tooltip: 'Garage',
+            onPressed: () =>
+                ref.read(userRoleProvider.notifier).role = UserRole.garage,
           ),
         ],
       ),

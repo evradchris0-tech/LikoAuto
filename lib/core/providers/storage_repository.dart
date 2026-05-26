@@ -11,9 +11,9 @@ final storageRepositoryProvider = Provider<StorageRepository>((ref) {
 });
 
 class StorageRepository {
-
-  StorageRepository(this._storage);
-  final FirebaseStorage _storage;
+  // Upload simulé en attendant l'activation de Firebase Storage (OPTION A).
+  // ignore: avoid_unused_constructor_parameters
+  StorageRepository(FirebaseStorage storage);
 
   /// Upload une image vers Firebase Storage et retourne l'URL de téléchargement.
   /// [path] est le chemin de destination (ex: 'vehicles/uid123/photo1.jpg')
@@ -21,15 +21,12 @@ class StorageRepository {
     // OPTION B : Mode Simulation
     // Pour éviter de bloquer le développement sans carte bancaire sur Firebase.
     // Simule un temps d'upload réseau.
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Retourne une URL factice d'une voiture.
+    await Future<void>.delayed(const Duration(seconds: 2));
+
     return 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800';
   }
 
-  /// Supprime un fichier de Firebase Storage
   Future<void> deleteFile(String path) async {
-    // OPTION B : Mode Simulation
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
   }
 }

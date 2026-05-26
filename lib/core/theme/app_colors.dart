@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 /// Palette validée — Proposition N°2, Mars 2026.
 abstract final class AppColors {
   // Brand
-  static const Color primary = Color(0xFFD55D31); // Spicy Paprika
+  static const Color primary = Color(0xFFC54E26); // Deep Paprika
   static const Color trust = Color(0xFF0D2F50); // Deep Space Blue
 
   // Neutrals
   static const Color background = Color(0xFFF5F5F5); // White Smoke
-  static const Color neutral = Color(0xFFA29C9F); // Rosy Granite
+  static const Color neutral = Color(0xFF64748B); // Slate 500
   static const Color surface = Colors.white;
-  static const Color outline = Color(0xFFE0E0E0);
+  static const Color outline = Color(0xFFE2E8F0); // Slate 200
 
   // Semantic
   static const Color success = Color(0xFF00A676);

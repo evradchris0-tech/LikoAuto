@@ -5,7 +5,8 @@ enum UserRole { buyer, seller, garage }
 class UserRoleNotifier extends StateNotifier<UserRole> {
   UserRoleNotifier() : super(UserRole.buyer);
 
-  void setRole(UserRole role) => state = role;
+  UserRole get role => state;
+  set role(UserRole role) => state = role;
 }
 
 final userRoleProvider = StateNotifierProvider<UserRoleNotifier, UserRole>((ref) {

@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/features/account_settings/account_settings_screen.dart';
+import 'package:liko_auto/features/account_settings/change_email_screen.dart';
+import 'package:liko_auto/features/account_settings/change_phone_screen.dart';
 import 'package:liko_auto/features/auth/forgot_password_screen.dart';
 import 'package:liko_auto/features/auth/login_screen.dart';
-import 'package:liko_auto/features/auth/otp_verification_screen.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/features/auth/register_screen.dart';
 import 'package:liko_auto/features/bookings/booking_flow_screen.dart';
@@ -45,7 +46,6 @@ abstract final class AppRoutes {
   static const String vehicleDetail = '/vehicle_detail';
   static const String register = '/register';
   static const String login = '/login';
-  static const String otpVerification = '/otp_verification';
   static const String forgotPassword = '/forgot_password';
   static const String chatDetail = '/chat_detail';
   static const String myListings = '/my_listings';
@@ -59,6 +59,8 @@ abstract final class AppRoutes {
   static const String notificationsInbox = '/notifications';
   static const String bookingFlow = '/booking_flow';
   static const String myBookings = '/my_bookings';
+  static const String changeEmail = '/change_email';
+  static const String changePhone = '/change_phone';
 
   /// Routes nécessitant une session utilisateur.
   static const Set<String> guarded = {
@@ -74,6 +76,8 @@ abstract final class AppRoutes {
     notificationsInbox,
     bookingFlow,
     myBookings,
+    changeEmail,
+    changePhone,
   };
 }
 
@@ -139,19 +143,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: AppRoutes.otpVerification,
-        name: 'otpVerification',
-        builder: (context, state) {
-          final phone = state.uri.queryParameters['phone'] ?? '';
-          final verificationId =
-              state.uri.queryParameters['verificationId'] ?? '';
-          return OtpVerificationScreen(
-            phoneNumber: phone,
-            verificationId: verificationId,
-          );
-        },
-      ),
-      GoRoute(
         path: AppRoutes.forgotPassword,
         name: 'forgotPassword',
         builder: (context, state) => const ForgotPasswordScreen(),
@@ -163,6 +154,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final id = state.uri.queryParameters['id'] ?? '1';
           return ChatDetailScreen(chatId: id);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.changeEmail,
+        name: 'changeEmail',
+        builder: (context, state) => const ChangeEmailScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.changePhone,
+        name: 'changePhone',
+        builder: (context, state) => const ChangePhoneScreen(),
       ),
       GoRoute(
         path: AppRoutes.sell,

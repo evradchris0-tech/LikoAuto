@@ -23,6 +23,7 @@ abstract final class MockVehicles {
       imageAsset: AppAssets.carTucson,
       photoCount: 5,
       isVinVerified: true,
+      priceDrop: -500000, // Baisse de 500k (wireframe 5.2)
     ),
     ListingCardData(
       title: 'Mercedes GLC 300 2021',
@@ -70,6 +71,7 @@ abstract final class MockVehicles {
       photoCount: 11,
       isVinVerified: true,
       isPro: true,
+      priceDrop: -1500000, // Baisse de 1,5M (wireframe 5.2)
     ),
     ListingCardData(
       title: 'Nissan Qashqai 2018',

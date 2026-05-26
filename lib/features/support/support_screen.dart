@@ -117,7 +117,7 @@ class SupportScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Décrivez le problème rencontré (étapes, écran, message d\'erreur).',
+              "Décrivez le problème rencontré (étapes, écran, message d'erreur).",
               style: context.textStyles.bodySmall?.copyWith(
                 color: AppColors.neutral,
               ),
@@ -549,7 +549,7 @@ const _faqCategories = <_FaqCategory>[
       _FaqEntry(
         'Puis-je négocier le prix ?',
         "Oui. Si l'annonce affiche le badge orange « Négociable », le vendeur "
-            "est ouvert à la discussion. Faites votre offre dans le chat. Sinon, "
+            'est ouvert à la discussion. Faites votre offre dans le chat. Sinon, '
             'le prix est ferme.',
       ),
     ],
@@ -560,27 +560,27 @@ const _faqCategories = <_FaqCategory>[
     entries: [
       _FaqEntry(
         'Combien de photos dois-je ajouter ?',
-        "Minimum 5 photos claires (extérieur, intérieur, moteur, tableau de bord, "
+        'Minimum 5 photos claires (extérieur, intérieur, moteur, tableau de bord, '
             'compteur kilométrique). Les annonces avec 8 photos ou plus se vendent '
-            "3× plus vite. Maximum 21 photos.",
+            '3× plus vite. Maximum 21 photos.',
       ),
       _FaqEntry(
         'Pourquoi un VIN est-il demandé ?',
-        "Le VIN active le badge « VIN vérifié » et augmente la confiance des "
+        'Le VIN active le badge « VIN vérifié » et augmente la confiance des '
             'acheteurs. Sans VIN, votre annonce reste publiable mais ne bénéficiera '
-            "pas de ce gage de qualité. Le VIN se trouve sur la carte grise et "
+            'pas de ce gage de qualité. Le VIN se trouve sur la carte grise et '
             'sur le pare-brise côté conducteur.',
       ),
       _FaqEntry(
         'Mon annonce a été refusée, que faire ?',
-        "Une raison précise vous est communiquée dans « Mes annonces ». Les "
+        'Une raison précise vous est communiquée dans « Mes annonces ». Les '
             'causes les plus fréquentes : VIN illisible sur les photos, photos '
-            "floues, prix incohérent. Modifiez puis re-soumettez.",
+            'floues, prix incohérent. Modifiez puis re-soumettez.',
       ),
       _FaqEntry(
         'Comment booster mon annonce ?',
         'Le boost (à venir) place votre annonce en haut des résultats pendant '
-            "7 jours et triple sa visibilité. Tarif : à partir de 5 000 FCFA.",
+            '7 jours et triple sa visibilité. Tarif : à partir de 5 000 FCFA.',
       ),
     ],
   ),
@@ -592,18 +592,18 @@ const _faqCategories = <_FaqCategory>[
         'Liko Auto gère-t-il les paiements ?',
         'Non. Les transactions se font en direct entre acheteur et vendeur, '
             "généralement en présence d'un garage partenaire pour la vérification. "
-            "Nous ne stockons aucune information bancaire.",
+            'Nous ne stockons aucune information bancaire.',
       ),
       _FaqEntry(
         'Comment éviter les arnaques ?',
-        "Vérifiez toujours le badge VIN, demandez la carte grise originale, "
+        'Vérifiez toujours le badge VIN, demandez la carte grise originale, '
             'inspectez le véhicule dans un garage certifié Liko Auto avant de '
             "payer, et ne versez jamais d'avance avant d'avoir vu la voiture.",
       ),
       _FaqEntry(
         'Que faire si je suspecte une fraude ?',
         'Contactez immédiatement notre support via WhatsApp ou téléphone. '
-            "Nous bloquons le compte concerné sous 24h après vérification.",
+            'Nous bloquons le compte concerné sous 24h après vérification.',
       ),
     ],
   ),
@@ -702,13 +702,13 @@ class _FaqCategoryCard extends StatelessWidget {
 // ── Légal ──────────────────────────────────────────────────────────────────
 
 const _termsText =
-    'Conditions d\'utilisation — Liko Auto\n\n'
+    "Conditions d'utilisation — Liko Auto\n\n"
     '1. Acceptation\n'
     "En utilisant l'application Liko Auto, vous acceptez les présentes "
     "conditions d'utilisation.\n\n"
     '2. Usage de la plateforme\n'
     'Liko Auto est une marketplace mettant en relation acheteurs et vendeurs '
-    'de véhicules. Liko Auto n\'est pas partie aux transactions.\n\n'
+    "de véhicules. Liko Auto n'est pas partie aux transactions.\n\n"
     '3. Compte utilisateur\n'
     'Vous êtes responsable de la confidentialité de vos identifiants et de '
     'toute activité réalisée sous votre compte.\n\n'
@@ -716,7 +716,7 @@ const _termsText =
     'Les annonces doivent être conformes à la loi camerounaise. Toute annonce '
     'frauduleuse, incomplète ou trompeuse sera retirée.\n\n'
     '5. Responsabilités\n'
-    'Liko Auto ne garantit pas l\'exactitude des informations publiées par '
+    "Liko Auto ne garantit pas l'exactitude des informations publiées par "
     'les utilisateurs. Les transactions sont effectuées sous la seule '
     'responsabilité des parties concernées.\n\n'
     '6. Modification\n'
@@ -737,7 +737,7 @@ const _privacyText =
     'agrégées et anonymisées.\n\n'
     '3. Stockage\n'
     'Vos données sont stockées sur des serveurs sécurisés en Europe '
-    "(Firebase, Google Cloud) avec chiffrement au repos et en transit.\n\n"
+    '(Firebase, Google Cloud) avec chiffrement au repos et en transit.\n\n'
     '4. Partage\n'
     'Nous ne vendons jamais vos données à des tiers. Le partage avec un '
     'autre utilisateur (via le chat) reste sous votre contrôle.\n\n'

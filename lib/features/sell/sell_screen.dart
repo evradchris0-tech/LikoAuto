@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liko_auto/core/api/api_exception.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
+import 'package:liko_auto/core/providers/user_session_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/auth/domain/user_session.dart';
+import 'package:liko_auto/features/listings/data/listings_repository.dart';
+import 'package:liko_auto/features/listings/domain/api_listing.dart';
 import 'package:liko_auto/features/sell/providers/sell_form_provider.dart';
 import 'package:liko_auto/features/sell/providers/sell_step_provider.dart';
 import 'package:liko_auto/features/sell/widgets/sell_step_1_identifier.dart';
@@ -116,29 +121,85 @@ class SellScreen extends ConsumerWidget {
       _exit(context, ref);
       return;
     }
-    final shouldExit = await showDialog<bool>(
+    // Wireframe 6.9 — 3 options
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Abandonner ?'),
-        content: const Text(
-          'Vos informations saisies seront perdues. Voulez-vous vraiment quitter ?',
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Continuer la saisie'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Quitter'),
-          ),
-        ],
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: AppColors.outline,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Text(
+              'Que souhaitez-vous faire ?',
+              style: TextStyle(
+                color: AppColors.trust,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Votre progression sera perdue si vous quittez sans sauvegarder.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.neutral, fontSize: 13),
+            ),
+            const SizedBox(height: 24),
+            // Option 1 — Enregistrer un brouillon
+            _ExitOption(
+              icon: Icons.save_outlined,
+              label: 'Enregistrer un brouillon',
+              subtitle: 'Reprendre plus tard',
+              color: AppColors.trust,
+              onTap: () {
+                Navigator.pop(ctx);
+                AppSnack.info(
+                  context,
+                  'Brouillon sauvegardé.',
+                  actionLabel: 'Voir',
+                  onAction: () {},
+                );
+                _exit(context, ref);
+              },
+            ),
+            const SizedBox(height: 10),
+            // Option 2 — Quitter sans sauvegarder
+            _ExitOption(
+              icon: Icons.delete_outline_rounded,
+              label: 'Quitter sans sauvegarder',
+              subtitle: 'Les informations saisies seront perdues',
+              color: AppColors.error,
+              onTap: () {
+                Navigator.pop(ctx);
+                _exit(context, ref);
+              },
+            ),
+            const SizedBox(height: 10),
+            // Option 3 — Annuler
+            _ExitOption(
+              icon: Icons.edit_outlined,
+              label: 'Continuer la saisie',
+              subtitle: 'Rester sur le formulaire',
+              color: AppColors.neutral,
+              onTap: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
       ),
     );
-    if (shouldExit ?? false) {
-      if (context.mounted) _exit(context, ref);
-    }
   }
 
   void _exit(BuildContext context, WidgetRef ref) {
@@ -212,9 +273,140 @@ class SellScreen extends ConsumerWidget {
     );
   }
 
-  void _publish(BuildContext context, WidgetRef ref) {
-    // TODO(api): brancher sur l'endpoint NestJS quand livré.
-    AppSnack.success(context, 'Annonce publiée avec succès (mock).');
-    _exit(context, ref);
+  Future<void> _publish(BuildContext context, WidgetRef ref) async {
+    final form = ref.read(sellFormProvider);
+    final session = ref.read(userSessionProvider).valueOrNull;
+
+    if (session is! AuthenticatedSession) {
+      AppSnack.error(context, 'Vous devez être connecté pour publier.');
+      return;
+    }
+
+    // cityId / countryId : à remplacer quand la sélection ville est ajoutée au form.
+    final cityId = form.cityId ?? 1; // Douala par défaut
+    const countryId = 1; // Cameroun par défaut
+
+    final title = [form.brand, form.model, form.year?.toString()]
+        .whereType<String>()
+        .join(' ');
+
+    final vehicle = CreateVehicleRequest(
+      modelId: form.modelId ?? 0,
+      year: form.year ?? DateTime.now().year,
+      condition: form.condition ?? VehicleCondition.locallyUsed,
+      mileage: form.mileageKm,
+      color: form.color,
+      fuelType: form.fuel?.name,
+      transmissionType: form.gearbox?.name,
+      vin: form.isVinValid ? form.vin?.trim() : null,
+      isVinVerified: form.isVinValid,
+    );
+
+    final request = CreateListingRequest(
+      sellerId: session.profile.backendId ?? 0,
+      title: title.isEmpty ? 'Véhicule' : title,
+      price: form.priceFcfa!,
+      cityId: cityId,
+      countryId: countryId,
+      vehicle: vehicle,
+      description: form.description,
+    );
+
+    try {
+      await ref.read(listingsRepositoryProvider).postListingWithMedia(
+            listing: request,
+            photos: form.photos,
+          );
+      if (!context.mounted) return;
+      AppSnack.success(context, 'Annonce publiée avec succès !');
+      _exit(context, ref);
+    } on ValidationException catch (e) {
+      if (!context.mounted) return;
+      AppSnack.error(
+        context,
+        e.errors.isNotEmpty ? e.errors.first : 'Données invalides.',
+      );
+    } on NetworkException {
+      if (!context.mounted) return;
+      AppSnack.error(context, 'Pas de connexion. Réessayez.');
+    } on ApiException {
+      if (!context.mounted) return;
+      AppSnack.error(context, 'Erreur lors de la publication. Réessayez.');
+    }
+  }
+}
+
+// ── Option ligne dans le bottom sheet de sortie (wireframe 6.9) ──────────────
+
+class _ExitOption extends StatelessWidget {
+  const _ExitOption({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.15)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 20, color: color),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: color.withValues(alpha: 0.65),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: color),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

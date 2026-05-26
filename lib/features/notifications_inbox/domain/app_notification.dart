@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 
 /// Types de notifications reçues par l'utilisateur.

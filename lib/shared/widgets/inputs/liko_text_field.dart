@@ -37,6 +37,7 @@ class LikoTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      style: const TextStyle(color: AppColors.trust),
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,

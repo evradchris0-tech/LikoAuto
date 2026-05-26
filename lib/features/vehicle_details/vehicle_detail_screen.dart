@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -111,6 +113,15 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
                     _buildSectionHeader(context, 'VÉHICULE EN DÉTAILS'),
                     _buildSpecsGrid(context),
                     AppSpacing.gapXl,
+                    // Rapport Confiance (wireframe 4.1)
+                    _buildRapportConfiance(context),
+                    AppSpacing.gapXl,
+                    // Tabs Détails / Historique (wireframe 4.1)
+                    _buildDetailsTabs(context),
+                    AppSpacing.gapXl,
+                    // Financement mensualités (wireframe 4.1)
+                    _buildFinancementCard(context),
+                    AppSpacing.gapXl,
                     _buildSellerInfo(context),
                     AppSpacing.gapLg,
                     _buildReportLink(context),
@@ -188,9 +199,9 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
                 child: Image.asset(
                   data.imageAsset,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => ColoredBox(
+                  errorBuilder: (context, error, stackTrace) => const ColoredBox(
                     color: AppColors.primarySoft,
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         Icons.directions_car_rounded,
                         size: 64,
@@ -514,6 +525,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
       ),
       child: Row(
         children: [
+          // Chat icon
           Container(
             decoration: BoxDecoration(
               color: AppColors.background,
@@ -521,6 +533,18 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
             ),
             child: IconButton(
               icon: const Icon(Icons.chat_bubble_rounded, color: AppColors.primary),
+              onPressed: () {},
+            ),
+          ),
+          AppSpacing.gapSm,
+          // Appeler (wireframe 4.1)
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.successSoft,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.call_rounded, color: AppColors.success),
               onPressed: () {},
             ),
           ),
@@ -535,10 +559,237 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
-              child: const Text('APPELER LE VENDEUR', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+              child: const Text('Contacter le vendeur', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Rapport Confiance (wireframe 4.1) ──────────────────────────────────────
+  Widget _buildRapportConfiance(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0D2F50), Color(0xFF1A4A7A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.shield_outlined, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'RAPPORT DE CONFIANCE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                _ConfidenceItem(
+                  icon: Icons.verified_rounded,
+                  label: 'VIN vérifié',
+                  ok: data.isVinVerified,
+                ),
+                _ConfidenceItem(
+                  icon: Icons.photo_library_outlined,
+                  label: '${data.photoCount} photos',
+                  ok: data.photoCount >= 5,
+                ),
+                const _ConfidenceItem(
+                  icon: Icons.history_rounded,
+                  label: '1 propriétaire',
+                  ok: true,
+                ),
+                const _ConfidenceItem(
+                  icon: Icons.build_outlined,
+                  label: 'Entretien suivi',
+                  ok: true,
+                ),
+              ]
+                  .map(
+                    (e) => Expanded(child: e),
+                  )
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Tabs Détails / Historique (wireframe 4.1) ──────────────────────────────
+  Widget _buildDetailsTabs(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TabBar(
+                labelColor: AppColors.trust,
+                unselectedLabelColor: AppColors.neutral,
+                indicator: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.trust.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+                tabs: const [
+                  Tab(text: 'Détails'),
+                  Tab(text: 'Historique'),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              height: 160,
+              child: TabBarView(
+                children: [
+                  // Onglet Détails
+                  _buildDetailsContent(context),
+                  // Onglet Historique
+                  _buildHistoryContent(context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailsContent(BuildContext context) {
+    return const Column(
+      children: [
+        _DetailRow(label: 'Couleur extérieure', value: 'Blanc nacré'),
+        Divider(height: 1, color: AppColors.outline),
+        _DetailRow(label: 'Intérieur', value: 'Cuir noir'),
+        Divider(height: 1, color: AppColors.outline),
+        _DetailRow(label: 'Garantie', value: '6 mois'),
+        Divider(height: 1, color: AppColors.outline),
+        _DetailRow(label: 'Disponibilité', value: 'Immédiate'),
+      ],
+    );
+  }
+
+  Widget _buildHistoryContent(BuildContext context) {
+    return const Column(
+      children: [
+        _DetailRow(label: 'Propriétaires', value: '1 seul'),
+        Divider(height: 1, color: AppColors.outline),
+        _DetailRow(label: 'Dernière vidange', value: 'Jan. 2025'),
+        Divider(height: 1, color: AppColors.outline),
+        _DetailRow(label: 'Dernier contrôle', value: 'Mar. 2025'),
+        Divider(height: 1, color: AppColors.outline),
+        _DetailRow(label: 'Accidents déclarés', value: 'Aucun'),
+      ],
+    );
+  }
+
+  // ── Financement mensualités (wireframe 4.1) ────────────────────────────────
+  Widget _buildFinancementCard(BuildContext context) {
+    // Estimation : 20% apport, 36 mois, taux 8%/an
+    final principal = data.priceFcfa * 0.8;
+    const monthlyRate = 0.08 / 12;
+    const nMonths = 36;
+    final monthly = (principal * monthlyRate) /
+        (1 - (1 / math.pow(1 + monthlyRate, nMonths)));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.primarySoft,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.account_balance_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            AppSpacing.gapMd,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Financement disponible',
+                    style: TextStyle(
+                      color: AppColors.trust,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '~${monthly.round().toGroupedString()} FCFA / mois',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 17,
+                    ),
+                  ),
+                  const Text(
+                    "sur 36 mois • 20% d'apport • 8% annuel",
+                    style: TextStyle(
+                      color: AppColors.neutral,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.primary,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -624,3 +875,86 @@ class _StatBox extends StatelessWidget {
   }
 }
 
+// ── Confidence item (wireframe 4.1 — Rapport de confiance) ──────────────────
+
+class _ConfidenceItem extends StatelessWidget {
+  const _ConfidenceItem({
+    required this.icon,
+    required this.label,
+    required this.ok,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool ok;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: ok
+                ? AppColors.success.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: ok ? AppColors.success : Colors.white38,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: ok ? Colors.white : Colors.white54,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Detail row (wireframe 4.1 — Tabs Détails/Historique) ────────────────────
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.neutral,
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.trust,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
