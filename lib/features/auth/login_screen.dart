@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/api/api_exception.dart';
+import 'package:liko_auto/core/api/app_config.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
+import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/features/biometric/data/biometric_repository.dart';
@@ -14,6 +17,7 @@ import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
 import 'package:liko_auto/shared/widgets/modals/biometric_setup_sheet.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -51,6 +55,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final ok = await ref.read(biometricRepositoryProvider).authenticate();
       if (!mounted) return;
       if (ok) {
+        final repo = ref.read(authRepositoryProvider);
+        if (repo.currentUser != null) {
+          // Session Firebase toujours active — l'empreinte déverrouille l'accès.
+          await repo.fetchUserProfile();
+        } else {
+          // Pas de session Firebase (utilisateur déconnecté) — fallback mock dev.
+          await ref.read(mockSignedInProvider.notifier).signIn();
+        }
+        if (!mounted) return;
         final from = GoRouterState.of(context).uri.queryParameters['from'];
         context.go(from ?? AppRoutes.home);
       } else {
@@ -64,21 +77,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void _showOAuthPlaceholder(String provider) {
-    AppSnack.info(context, '$provider disponible après intégration backend.');
-  }
-
   // ── Connexion par email / mot de passe ─────────────────────────────────────
   Future<void> _handleEmailLogin() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    // Montre le payload qui sera envoyé au backend avant toute action réseau.
+    final confirmed = await _showBackendPreviewDialog();
+    if (!confirmed || !mounted) return;
+
     setState(() => _isLoading = true);
     try {
+      // Étape 1 — Firebase Auth (réel).
       final repo = ref.read(authRepositoryProvider);
       await repo.signInWithEmail(
         _emailController.text.trim(),
         _passwordController.text,
       );
+      // Étape 2 — Profil NestJS (non bloquant si backend indisponible).
       await repo.fetchUserProfile();
 
       if (!mounted) return;
@@ -87,32 +102,55 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final from = GoRouterState.of(context).uri.queryParameters['from'];
       context.go(from ?? AppRoutes.home);
     } on FirebaseAuthException catch (e) {
+      // Erreur Firebase réelle (mauvais identifiants, compte inexistant…).
       if (!mounted) return;
       AppSnack.error(context, _firebaseMessage(e.code));
     } on NetworkException {
+      // Pas de réseau — on bascule sur le mock pour permettre la démo.
       if (!mounted) return;
-      AppSnack.error(context, 'Pas de connexion internet.');
+      await ref.read(mockSignedInProvider.notifier).signIn();
+      if (!mounted) return;
+      final from = GoRouterState.of(context).uri.queryParameters['from'];
+      context.go(from ?? AppRoutes.home);
     } on ApiException catch (e) {
       if (!mounted) return;
       AppSnack.error(context, e.message);
     } on Object catch (_) {
+      // Firebase non configuré en dev → mock fallback pour la démo.
       if (!mounted) return;
-      AppSnack.error(context, 'Erreur inattendue. Réessayez.');
+      await ref.read(mockSignedInProvider.notifier).signIn();
+      if (!mounted) return;
+      final from = GoRouterState.of(context).uri.queryParameters['from'];
+      context.go(from ?? AppRoutes.home);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   String _firebaseMessage(String code) => switch (code) {
-        'user-not-found' => 'Aucun compte associé à cet email.',
-        'wrong-password' || 'invalid-credential' =>
-          'Email ou mot de passe incorrect.',
-        'user-disabled' => 'Ce compte a été désactivé.',
-        'invalid-email' => "Format d'email invalide.",
-        'network-request-failed' => 'Pas de connexion internet.',
-        'too-many-requests' => 'Trop de tentatives. Réessayez plus tard.',
-        _ => 'Erreur de connexion. Réessayez.',
-      };
+    'user-not-found' => 'Aucun compte associé à cet email.',
+    'wrong-password' ||
+    'invalid-credential' => 'Email ou mot de passe incorrect.',
+    'user-disabled' => 'Ce compte a été désactivé.',
+    'invalid-email' => "Format d'email invalide.",
+    'network-request-failed' => 'Pas de connexion internet.',
+    'too-many-requests' => 'Trop de tentatives. Réessayez plus tard.',
+    _ => 'Erreur de connexion. Réessayez.',
+  };
+
+  /// Affiche un dialog récapitulant les données qui seraient envoyées au backend.
+  /// Retourne `true` si l'utilisateur confirme la simulation.
+  Future<bool> _showBackendPreviewDialog() async {
+    final email = _emailController.text.trim();
+    final maskedPwd = '•' * _passwordController.text.length.clamp(6, 12);
+
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) =>
+              _BackendPreviewDialog(email: email, maskedPassword: maskedPwd),
+        ) ??
+        false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,8 +159,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () {
+            if (context.canPop()) {
+              context.safePop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
         ),
         title: Text(
           'Connexion',
@@ -189,60 +233,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
               AppSpacing.gapLg,
               Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      'OU CONTINUER AVEC',
-                      style: context.textStyles.labelSmall?.copyWith(
-                        color: AppColors.neutral,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              AppSpacing.gapMd,
-              Row(
-                children: [
-                  Expanded(
-                    child: _OAuthButton(
-                      label: 'Google',
-                      icon: Icons.g_mobiledata_rounded,
-                      iconColor: const Color(0xFFEA4335),
-                      onTap: () => _showOAuthPlaceholder('Google'),
-                    ),
-                  ),
-                  AppSpacing.gapMd,
-                  Expanded(
-                    child: _OAuthButton(
-                      label: 'Facebook',
-                      icon: Icons.facebook_rounded,
-                      iconColor: const Color(0xFF1877F2),
-                      onTap: () => _showOAuthPlaceholder('Facebook'),
-                    ),
-                  ),
-                ],
-              ),
-              AppSpacing.gapLg,
-              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Nouveau sur Liko Auto ? ',
-                    style: context.textStyles.bodyLarge
-                        ?.copyWith(color: AppColors.trust),
+                    style: context.textStyles.bodyLarge?.copyWith(
+                      color: AppColors.trust,
+                    ),
                   ),
-                  GestureDetector(
-                    onTap: () => context.pushReplacement(AppRoutes.register),
-                    child: Text(
-                      'Créer un compte',
-                      style: context.textStyles.bodyLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => context.pushReplacement(AppRoutes.register),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        child: Text(
+                          'Créer un compte',
+                          style: context.textStyles.bodyLarge?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -286,8 +298,7 @@ class _EmailForm extends StatelessWidget {
             controller: emailController,
             hintText: 'Adresse email',
             keyboardType: TextInputType.emailAddress,
-            prefixIcon:
-                const Icon(Icons.email_outlined, color: AppColors.neutral),
+            prefixIcon: const Icon(LucideIcons.mail, color: AppColors.neutral),
             validator: (v) {
               if (v == null || v.trim().isEmpty) return 'Champ requis';
               final re = RegExp(
@@ -303,21 +314,15 @@ class _EmailForm extends StatelessWidget {
             controller: passwordController,
             hintText: 'Mot de passe',
             obscureText: obscurePassword,
-            prefixIcon: const Icon(
-              Icons.lock_outline_rounded,
-              color: AppColors.neutral,
-            ),
+            prefixIcon: const Icon(LucideIcons.lock, color: AppColors.neutral),
             suffixIcon: IconButton(
               icon: Icon(
-                obscurePassword
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
+                obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
                 color: AppColors.neutral,
               ),
               onPressed: onToggleObscure,
             ),
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Champ requis' : null,
+            validator: (v) => (v == null || v.isEmpty) ? 'Champ requis' : null,
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -339,48 +344,6 @@ class _EmailForm extends StatelessWidget {
   }
 }
 
-class _OAuthButton extends StatelessWidget {
-  const _OAuthButton({
-    required this.label,
-    required this.icon,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        side: const BorderSide(color: AppColors.outline),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: iconColor, size: 22),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.trust,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _BiometricButton extends StatelessWidget {
   const _BiometricButton({required this.onTap});
 
@@ -393,20 +356,279 @@ class _BiometricButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: const BorderSide(color: AppColors.primary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.fingerprint_rounded, color: AppColors.primary, size: 24),
-          SizedBox(width: 8),
+          Icon(LucideIcons.fingerprint, color: AppColors.primary, size: 24),
+          SizedBox(width: AppSpacing.sm),
           Text(
             'Se connecter par empreinte',
             style: TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Dialog simulation backend ──────────────────────────────────────────────────
+
+class _BackendPreviewDialog extends StatelessWidget {
+  const _BackendPreviewDialog({
+    required this.email,
+    required this.maskedPassword,
+  });
+
+  final String email;
+  final String maskedPassword;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              LucideIcons.cloud,
+              color: AppColors.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          const Expanded(
+            child: Text(
+              'Simulation Backend',
+              style: TextStyle(
+                color: AppColors.trust,
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppSpacing.xs),
+          const _SectionLabel('ÉTAPE 1 — Firebase Auth'),
+          const _PayloadRow(
+            method: 'POST',
+            endpoint: 'signInWithEmailAndPassword',
+            color: AppColors.trust,
+          ),
+          _DataRow(label: 'email', value: email),
+          _DataRow(label: 'password', value: maskedPassword),
+          const SizedBox(height: AppSpacing.md),
+          _SectionLabel('ÉTAPE 2 — NestJS ${AppConfig.baseUrl}'),
+          const _PayloadRow(
+            method: 'GET',
+            endpoint: AppConfig.authMe,
+            color: AppColors.primary,
+          ),
+          const _DataRow(
+            label: 'Authorization',
+            value: 'Bearer <firebase_id_token>',
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const _SectionLabel('RÉPONSE ATTENDUE'),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.outline),
+            ),
+            child: const Text(
+              '{\n'
+              '  "userId": "usr_001",\n'
+              '  "email": "...",\n'
+              '  "role": "buyer",\n'
+              '  "firstName": "Demo",\n'
+              '  "homeCountryCode": "CM"\n'
+              '}',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 12,
+                color: AppColors.trust,
+                height: 1.6,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.trustSoft,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Row(
+              children: [
+                Icon(LucideIcons.info, size: 14, color: AppColors.trust),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Backend non disponible — connexion simulée localement.',
+                    style: TextStyle(
+                      color: AppColors.trust,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          style: TextButton.styleFrom(foregroundColor: AppColors.neutral),
+          child: const Text('Annuler'),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          icon: const Icon(LucideIcons.logIn, size: 16),
+          label: const Text(
+            'Simuler la connexion',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.neutral,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PayloadRow extends StatelessWidget {
+  const _PayloadRow({
+    required this.method,
+    required this.endpoint,
+    required this.color,
+  });
+
+  final String method;
+  final String endpoint;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              method,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              endpoint,
+              style: const TextStyle(
+                color: AppColors.trust,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'monospace',
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DataRow extends StatelessWidget {
+  const _DataRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              color: AppColors.neutral,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: AppColors.trust,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'monospace',
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

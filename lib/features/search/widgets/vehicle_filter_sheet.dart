@@ -23,6 +23,7 @@ class VehicleFilterSheet extends StatefulWidget {
     return showModalBottomSheet<VehicleFilters>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.rBottomSheet),
       builder: (_) => VehicleFilterSheet(initial: initial),
@@ -173,6 +174,9 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     child: SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: AppColors.primary,
+                      activeTrackColor: AppColors.primarySoft,
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: AppColors.outline,
                       title: Text(
                         'VIN vérifié uniquement',
                         style: context.textStyles.bodyLarge?.copyWith(

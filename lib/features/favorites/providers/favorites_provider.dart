@@ -11,17 +11,18 @@ final favoritesProvider = StreamProvider<List<ListingCardData>>((ref) {
 });
 
 /// Vrai si l'annonce donnée est dans les favoris.
-final isFavoriteProvider =
-    StreamProvider.family<bool, ListingCardData>((ref, data) {
+final isFavoriteProvider = StreamProvider.family<bool, ListingCardData>((
+  ref,
+  data,
+) {
   return ref.watch(favoritesRepositoryProvider).watchIsFavorite(data);
 });
 
 /// Compteur live de favoris — utilisé par le badge profile.
 final favoritesCountProvider = Provider<int>((ref) {
-  return ref.watch(favoritesProvider).maybeWhen(
-        data: (list) => list.length,
-        orElse: () => 0,
-      );
+  return ref
+      .watch(favoritesProvider)
+      .maybeWhen(data: (list) => list.length, orElse: () => 0);
 });
 
 /// Actions sur les favoris (toggle / remove / clear).

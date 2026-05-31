@@ -12,14 +12,14 @@ class UserRole {
   });
 
   factory UserRole.fromJson(Map<String, dynamic> json) => UserRole(
-        name: json['name'] as String,
-        displayName: json['displayName'] as String,
-        scope: json['scope'] == 'backoffice'
-            ? RoleScope.backoffice
-            : RoleScope.marketplace,
-      );
+    name: json['name'] as String,
+    displayName: json['displayName'] as String,
+    scope: json['scope'] == 'backoffice'
+        ? RoleScope.backoffice
+        : RoleScope.marketplace,
+  );
 
-  final String name;        // ex: 'moderator_junior', 'seller'
+  final String name; // ex: 'moderator_junior', 'seller'
   final String displayName; // ex: 'Modérateur Junior', 'Vendeur Particulier'
   final RoleScope scope;
 }
@@ -54,7 +54,8 @@ class UserProfile {
     final rawId = json['id'];
     return UserProfile(
       backendId: rawId is int ? rawId : null,
-      uid: json['uid'] as String? ??
+      uid:
+          json['uid'] as String? ??
           json['firebase_uid'] as String? ??
           (rawId is String ? rawId : ''),
       email: json['email'] as String,
@@ -63,9 +64,7 @@ class UserProfile {
       phone: profileJson['phone'] as String?,
       profilePictureUrl: profileJson['profilePictureUrl'] as String?,
       homeCountry: profileJson['homeCountry'] != null
-          ? Country.fromJson(
-              profileJson['homeCountry'] as Map<String, dynamic>,
-            )
+          ? Country.fromJson(profileJson['homeCountry'] as Map<String, dynamic>)
           : const Country(code: 'CM', name: 'Cameroun'),
       roles: rolesJson
           .cast<Map<String, dynamic>>()

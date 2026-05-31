@@ -30,28 +30,28 @@ class RegisterPayload {
     required this.firstName,
     required this.lastName,
     required this.phone,
+    required this.address,
     required this.role,
     this.homeCountryCode = 'CM',
-    this.companyName,
   });
 
   final String firstName;
   final String lastName;
   final String phone;
+  final String address;
 
-  /// 'buyer' | 'seller' | 'garage_owner'
+  /// 'buyer' | 'seller'
   final String role;
   final String homeCountryCode;
-  final String? companyName;
 
   Map<String, dynamic> toJson() => {
-        'firstName': firstName,
-        'lastName': lastName,
-        'phone': phone,
-        'role': role,
-        'homeCountryCode': homeCountryCode,
-        if (companyName != null) 'companyName': companyName,
-      };
+    'firstName': firstName,
+    'lastName': lastName,
+    'phone': phone,
+    'address': address,
+    'role': role,
+    'homeCountryCode': homeCountryCode,
+  };
 }
 
 // ─── Repository ───────────────────────────────────────────────────────────────
@@ -73,7 +73,10 @@ class AuthRepository {
   }
 
   Future<void> registerWithEmail(String email, String password) async {
-    await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   Future<void> signOut() async {

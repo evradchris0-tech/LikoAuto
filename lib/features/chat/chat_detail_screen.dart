@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
@@ -9,6 +8,7 @@ import 'package:liko_auto/features/chat/providers/chat_detail_provider.dart';
 import 'package:liko_auto/features/chat/providers/moderation_provider.dart';
 import 'package:liko_auto/features/chat/widgets/chat_bubble.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ChatDetailScreen extends ConsumerWidget {
   const ChatDetailScreen({required this.chatId, super.key});
@@ -21,12 +21,12 @@ class ChatDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 1,
         shadowColor: Colors.black.withValues(alpha: 0.05),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Row(
           children: [
@@ -35,8 +35,14 @@ class ChatDetailScreen extends ConsumerWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                  child: const Icon(Icons.directions_car, color: Colors.white38),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primarySoft,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.directions_car_outlined,
+                    color: AppColors.primary,
+                  ),
                 ),
                 Positioned(
                   bottom: 0,
@@ -53,7 +59,7 @@ class ChatDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,78 +73,98 @@ class ChatDetailScreen extends ConsumerWidget {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.verified_outlined, size: 14, color: AppColors.trust),
+                    const SizedBox(width: AppSpacing.xs),
+                    const Icon(
+                      LucideIcons.badgeCheck,
+                      size: 14,
+                      color: AppColors.trust,
+                    ),
                   ],
                 ),
                 Text(
                   'En ligne',
-                  style: context.textStyles.labelSmall?.copyWith(color: AppColors.success),
+                  style: context.textStyles.labelSmall?.copyWith(
+                    color: AppColors.success,
+                  ),
                 ),
               ],
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.phone_outlined, color: AppColors.trust),
-            onPressed: () {},
-          ),
-          _ChatMenu(chatId: chatId, ref: ref),
-        ],
+        actions: [_ChatMenu(chatId: chatId, ref: ref)],
       ),
       body: Column(
         children: [
           // Vehicle reference banner
           Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            color: AppColors.surface,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             child: Row(
               children: [
                 Container(
                   width: 48,
                   height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.outline,
-                    borderRadius: BorderRadius.circular(6),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: AppRadius.rXs,
                   ),
-                  child: const Icon(Icons.directions_car, size: 20, color: Colors.white),
+                  child: const Icon(
+                    Icons.directions_car_outlined,
+                    size: 20,
+                    color: AppColors.primary,
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Toyota RAV4 2021',
-                        style: context.textStyles.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                        style: context.textStyles.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       Text(
                         '14 500 000 FCFA',
-                        style: context.textStyles.labelMedium?.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        style: context.textStyles.labelMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.neutral),
+                const Icon(LucideIcons.chevronRight, color: AppColors.neutral),
               ],
             ),
           ),
-          
+
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               reverse: true, // Start from bottom
               itemCount: messages.length + 1, // +1 for the date header
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, index) {
                 if (index == messages.length) {
                   return const Padding(
-                    padding: EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
+                    padding: EdgeInsets.only(
+                      top: AppSpacing.xl,
+                      bottom: AppSpacing.sm,
+                    ),
                     child: Center(
                       child: Text(
                         "Aujourd'hui",
-                        style: TextStyle(color: AppColors.neutral, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: AppColors.neutral,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   );
@@ -148,11 +174,11 @@ class ChatDetailScreen extends ConsumerWidget {
               },
             ),
           ),
-          
+
           // Input Area
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -162,41 +188,81 @@ class ChatDetailScreen extends ConsumerWidget {
               ],
             ),
             child: SafeArea(
+              top: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.add_a_photo_outlined, color: AppColors.neutral),
-                      onPressed: () {},
+                      icon: const Icon(
+                        LucideIcons.camera,
+                        color: AppColors.neutral,
+                      ),
+                      onPressed: () =>
+                          AppSnack.info(context, 'Ajout de photo (Sprint 5)'),
                     ),
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
-                        ),
-                        child: const TextField(
-                          style: TextStyle(color: AppColors.trust),
-                          decoration: InputDecoration(
-                            hintText: 'Écrire un message...',
-                            hintStyle: TextStyle(color: AppColors.neutral),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      child: TextField(
+                        style: const TextStyle(color: AppColors.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'Écrire un message...',
+                          hintStyle: const TextStyle(color: AppColors.neutral),
+                          filled: true,
+                          fillColor: AppColors.background,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
                           ),
-                          minLines: 1,
-                          maxLines: 4,
-                          textInputAction: TextInputAction.send,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.bottomSheet,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.outline,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.bottomSheet,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.outline,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.bottomSheet,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                            ),
+                          ),
                         ),
+                        minLines: 1,
+                        maxLines: 4,
+                        textInputAction: TextInputAction.send,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Container(
-                      decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
                       child: IconButton(
-                        icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                        onPressed: () {},
+                        icon: const Icon(
+                          LucideIcons.send,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () => AppSnack.info(
+                          context,
+                          'Envoi de message (Sprint 5)',
+                        ),
                       ),
                     ),
                   ],
@@ -222,7 +288,9 @@ class _ChatMenu extends ConsumerWidget {
     final muted = ref.watch(mutedThreadsProvider).valueOrNull ?? const {};
     final isMuted = muted.contains(chatId);
     return PopupMenuButton<_ChatAction>(
-      icon: const Icon(Icons.more_vert, color: AppColors.trust),
+      icon: const Icon(LucideIcons.moreVertical, color: AppColors.primary),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (a) => _handle(context, a),
       itemBuilder: (_) => [
         if (isMuted)
@@ -230,10 +298,15 @@ class _ChatMenu extends ConsumerWidget {
             value: _ChatAction.unmute,
             child: Row(
               children: [
-                Icon(Icons.notifications_active_outlined,
-                    color: AppColors.trust),
-                SizedBox(width: 12),
-                Text('Réactiver les notifications'),
+                Icon(LucideIcons.bellRing, color: AppColors.primary),
+                SizedBox(width: AppSpacing.md),
+                Text(
+                  'Réactiver les notifications',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           )
@@ -242,23 +315,31 @@ class _ChatMenu extends ConsumerWidget {
             value: _ChatAction.mute,
             child: Row(
               children: [
-                Icon(Icons.notifications_off_outlined,
-                    color: AppColors.trust),
-                SizedBox(width: 12),
-                Text('Couper les notifications'),
+                Icon(LucideIcons.bellOff, color: AppColors.primary),
+                SizedBox(width: AppSpacing.md),
+                Text(
+                  'Couper les notifications',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
-        const PopupMenuDivider(),
+        const PopupMenuDivider(color: AppColors.outline),
         const PopupMenuItem(
           value: _ChatAction.block,
           child: Row(
             children: [
               Icon(Icons.block, color: AppColors.error),
-              SizedBox(width: 12),
+              SizedBox(width: AppSpacing.md),
               Text(
                 "Bloquer l'utilisateur",
-                style: TextStyle(color: AppColors.error),
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -267,11 +348,14 @@ class _ChatMenu extends ConsumerWidget {
           value: _ChatAction.report,
           child: Row(
             children: [
-              Icon(Icons.flag_outlined, color: AppColors.error),
-              SizedBox(width: 12),
+              Icon(LucideIcons.flag, color: AppColors.error),
+              SizedBox(width: AppSpacing.md),
               Text(
                 'Signaler la conversation',
-                style: TextStyle(color: AppColors.error),
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -299,7 +383,8 @@ class _ChatMenu extends ConsumerWidget {
         final ok = await _confirm(
           context,
           title: 'Bloquer cet utilisateur ?',
-          body: 'Vous ne recevrez plus ses messages. Vous pouvez le '
+          body:
+              'Vous ne recevrez plus ses messages. Vous pouvez le '
               'débloquer à tout moment depuis les paramètres.',
           confirmLabel: 'Bloquer',
         );
@@ -307,7 +392,7 @@ class _ChatMenu extends ConsumerWidget {
           await mod.blockUser(chatId);
           if (context.mounted) {
             AppSnack.error(context, 'Utilisateur bloqué.');
-            context.pop();
+            context.safePop();
           }
         }
         return;

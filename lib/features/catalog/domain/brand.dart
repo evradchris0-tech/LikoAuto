@@ -10,11 +10,11 @@ class Brand {
   });
 
   factory Brand.fromJson(Map<String, dynamic> json) => Brand(
-        id: json['id'] as int,
-        name: json['name'] as String,
-        logoUrl: json['logo_url'] as String?,
-        isActive: json['is_active'] as bool? ?? true,
-      );
+    id: json['id'] as int,
+    name: json['name'] as String,
+    logoUrl: json['logo_url'] as String?,
+    isActive: json['is_active'] as bool? ?? true,
+  );
 
   final int id;
   final String name;

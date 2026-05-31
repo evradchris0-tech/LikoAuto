@@ -9,7 +9,10 @@ final brandsProvider = FutureProvider<List<Brand>>((ref) {
 });
 
 /// Liste des modèles, filtrables par marque.
-final modelsProvider = FutureProvider.family<List<CarModel>, int?>((ref, brandId) {
+final modelsProvider = FutureProvider.family<List<CarModel>, int?>((
+  ref,
+  brandId,
+) {
   return ref.watch(catalogRepositoryProvider).getModels(brandId: brandId);
 });
 

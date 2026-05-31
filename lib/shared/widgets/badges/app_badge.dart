@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Badge générique stylé selon le type. Wrap automatique en Semantics.
 enum AppBadgeStyle { vinVerified, pro, negotiable, neutral, warning }
@@ -16,19 +19,19 @@ class AppBadge extends StatelessWidget {
   /// Badge "VIN vérifié" — vert, avec icône check.
   const AppBadge.vinVerified({super.key})
     : label = 'VIN vérifié',
-      icon = Icons.verified_rounded,
+      icon = LucideIcons.badgeCheck,
       style = AppBadgeStyle.vinVerified;
 
   /// Badge "Pro" — fond primary, texte blanc.
   const AppBadge.pro({super.key})
     : label = 'Pro',
-      icon = Icons.workspace_premium_rounded,
+      icon = LucideIcons.award,
       style = AppBadgeStyle.pro;
 
   /// Badge "Certifié" — fond primary, texte blanc.
   const AppBadge.certified({super.key})
     : label = 'Garage certifié',
-      icon = Icons.verified_user_rounded,
+      icon = LucideIcons.shieldCheck,
       style = AppBadgeStyle.pro;
 
   /// Badge "Négociable" — fond orange clair, texte primary.
@@ -52,14 +55,14 @@ class AppBadge extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: colors.background,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: AppRadius.rPill,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
               Icon(icon, size: 14, color: colors.foreground),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
             ],
             Text(
               label,
@@ -90,8 +93,8 @@ class AppBadge extends StatelessWidget {
         );
       case AppBadgeStyle.warning:
         return (
-          background: const Color(0xFFFFF3DC),
-          foreground: const Color(0xFFB97810),
+          background: AppColors.warningSoft,
+          foreground: AppColors.warning,
         );
       case AppBadgeStyle.neutral:
         return (

@@ -11,12 +11,12 @@ class ApiCity {
   });
 
   factory ApiCity.fromJson(Map<String, dynamic> json) => ApiCity(
-        id: json['id'] as int,
-        regionId: json['region_id'] as int? ?? 0,
-        countryId: json['country_id'] as int? ?? 0,
-        name: json['name'] as String,
-        isActive: json['is_active'] as bool? ?? true,
-      );
+    id: json['id'] as int,
+    regionId: json['region_id'] as int? ?? 0,
+    countryId: json['country_id'] as int? ?? 0,
+    name: json['name'] as String,
+    isActive: json['is_active'] as bool? ?? true,
+  );
 
   final int id;
   final int regionId;
@@ -46,13 +46,13 @@ class ApiCountry {
   });
 
   factory ApiCountry.fromJson(Map<String, dynamic> json) => ApiCountry(
-        id: json['id'] as int,
-        code: json['code'] as String,
-        name: json['name'] as String,
-        currency: json['currency'] as String?,
-        phonePrefix: json['phone_prefix'] as String?,
-        isActive: json['is_active'] as bool? ?? true,
-      );
+    id: json['id'] as int,
+    code: json['code'] as String,
+    name: json['name'] as String,
+    currency: json['currency'] as String?,
+    phonePrefix: json['phone_prefix'] as String?,
+    isActive: json['is_active'] as bool? ?? true,
+  );
 
   final int id;
   final String code;

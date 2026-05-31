@@ -54,7 +54,7 @@ class ChatBubble extends StatelessWidget {
                 ),
               ),
               if (timeLabel != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(timeLabel!, style: context.textStyles.bodySmall),
               ],
             ],

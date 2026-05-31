@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/constants/app_assets.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Logo Liko Auto — bouclier + check + wordmark.
 /// Source : assets/images/liko_logo.jpeg (fond Spicy Paprika).
@@ -28,7 +29,7 @@ class LikoLogo extends StatelessWidget {
         width: size,
         height: size,
         color: AppColors.primary,
-        child: const Icon(Icons.shield, color: Colors.white),
+        child: const Icon(LucideIcons.shield, color: Colors.white),
       ),
     );
 

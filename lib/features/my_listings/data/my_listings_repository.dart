@@ -7,44 +7,45 @@ import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/features/my_listings/domain/my_listing.dart';
 
 MyListing _fromRow(MyListingRow r) => MyListing(
-      id: r.id,
-      card: ListingCardData(
-        title: r.title,
-        priceFcfa: r.priceFcfa,
-        location: r.location,
-        mileageKm: r.mileageKm,
-        imageAsset: r.imageAsset,
-        photoCount: r.photoCount,
-        year: r.year,
-        isVinVerified: r.isVinVerified,
-        isPro: r.isPro,
-      ),
-      status: ListingStatus.values[r.status],
-      views: r.views,
-      contacts: r.contacts,
-      publishedAt: r.publishedAt,
-      expiresAt: r.expiresAt,
-      rejectionReason: r.rejectionReason,
-    );
+  id: r.id,
+  card: ListingCardData(
+    id: 0,
+    title: r.title,
+    priceFcfa: r.priceFcfa,
+    location: r.location,
+    mileageKm: r.mileageKm,
+    imageAsset: r.imageAsset,
+    photoCount: r.photoCount,
+    year: r.year,
+    isVinVerified: r.isVinVerified,
+    isPro: r.isPro,
+  ),
+  status: ListingStatus.values[r.status],
+  views: r.views,
+  contacts: r.contacts,
+  publishedAt: r.publishedAt,
+  expiresAt: r.expiresAt,
+  rejectionReason: r.rejectionReason,
+);
 
 MyListingsCompanion _toCompanion(MyListing l) => MyListingsCompanion.insert(
-      id: l.id,
-      title: l.card.title,
-      priceFcfa: l.card.priceFcfa,
-      location: l.card.location,
-      mileageKm: l.card.mileageKm,
-      imageAsset: l.card.imageAsset,
-      photoCount: l.card.photoCount,
-      year: Value(l.card.year),
-      isVinVerified: Value(l.card.isVinVerified),
-      isPro: Value(l.card.isPro),
-      status: l.status.index,
-      views: Value(l.views),
-      contacts: Value(l.contacts),
-      publishedAt: l.publishedAt,
-      expiresAt: Value(l.expiresAt),
-      rejectionReason: Value(l.rejectionReason),
-    );
+  id: l.id,
+  title: l.card.title,
+  priceFcfa: l.card.priceFcfa,
+  location: l.card.location,
+  mileageKm: l.card.mileageKm,
+  imageAsset: l.card.imageAsset,
+  photoCount: l.card.photoCount,
+  year: Value(l.card.year),
+  isVinVerified: Value(l.card.isVinVerified),
+  isPro: Value(l.card.isPro),
+  status: l.status.index,
+  views: Value(l.views),
+  contacts: Value(l.contacts),
+  publishedAt: l.publishedAt,
+  expiresAt: Value(l.expiresAt),
+  rejectionReason: Value(l.rejectionReason),
+);
 
 class MyListingsRepository {
   const MyListingsRepository(this._db);
@@ -60,13 +61,16 @@ class MyListingsRepository {
       await _seed(_db);
     }
     final q = _db.select(_db.myListings)
-      ..orderBy([(t) => OrderingTerm(expression: t.publishedAt, mode: OrderingMode.desc)]);
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.publishedAt, mode: OrderingMode.desc),
+      ]);
     yield* q.watch().map((rows) => rows.map(_fromRow).toList());
   }
 
   Future<void> changeStatus(String id, ListingStatus next) async {
-    await (_db.update(_db.myListings)..where((t) => t.id.equals(id)))
-        .write(MyListingsCompanion(status: Value(next.index)));
+    await (_db.update(_db.myListings)..where((t) => t.id.equals(id))).write(
+      MyListingsCompanion(status: Value(next.index)),
+    );
   }
 
   Future<void> delete(String id) async {
@@ -74,7 +78,9 @@ class MyListingsRepository {
   }
 
   Future<void> insert(MyListing listing) async {
-    await _db.into(_db.myListings).insertOnConflictUpdate(_toCompanion(listing));
+    await _db
+        .into(_db.myListings)
+        .insertOnConflictUpdate(_toCompanion(listing));
   }
 }
 

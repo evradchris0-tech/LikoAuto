@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
-import 'package:liko_auto/core/theme/app_radius.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
 
-/// Bouton d'action principal — radius 12, hauteur 56, fond primary.
-/// Utilisé pour : Publier, Contacter, Vendre, Confirmer.
+/// Bouton d'action principal — hérite du `elevatedButtonTheme`.
+/// Gère uniquement ce que le thème ne peut pas exprimer :
+/// - l'état de chargement (spinner + fond primary maintenu)
+/// - l'option full-width
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     required this.label,
@@ -23,25 +25,21 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = context.colors;
-    final isDisabled = onPressed == null || isLoading;
 
     final button = ElevatedButton(
-      onPressed: isDisabled ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: cs.primary,
-        foregroundColor: Colors.white,
-        disabledBackgroundColor: cs.primary.withValues(alpha: 0.4),
-        disabledForegroundColor: Colors.white,
-        minimumSize: const Size(64, 56),
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        shape: const RoundedRectangleBorder(borderRadius: AppRadius.rButton),
-        textStyle: context.textStyles.labelLarge,
-        elevation: 0,
-      ),
+      onPressed: isLoading ? null : onPressed,
+      // Override uniquement pour le loading : garder la couleur primaire
+      // même quand onPressed est null (état visuellement "actif mais occupé").
+      style: isLoading
+          ? ElevatedButton.styleFrom(
+              disabledBackgroundColor: cs.primary,
+              disabledForegroundColor: cs.onPrimary,
+            )
+          : null, // hérite entièrement du elevatedButtonTheme
       child: isLoading
           ? const SizedBox(
-              height: 22,
-              width: 22,
+              height: 20,
+              width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
                 color: Colors.white,
@@ -53,7 +51,7 @@ class PrimaryButton extends StatelessWidget {
               children: [
                 if (icon != null) ...[
                   Icon(icon, size: 20),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                 ],
                 Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
               ],

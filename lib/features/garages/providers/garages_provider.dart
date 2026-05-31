@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:liko_auto/features/garages/data/garages_repository.dart';
+import 'package:liko_auto/core/services/mock_data_service.dart';
 import 'package:liko_auto/features/garages/domain/garage_entity.dart';
 
-/// Liste de tous les garages disponibles.
-final garagesProvider = Provider<List<GarageEntity>>((ref) {
-  return ref.watch(garagesRepositoryProvider).getAll();
+/// Liste complète des garages, chargée depuis mock_data.json.
+final garagesProvider = FutureProvider<List<GarageEntity>>((ref) async {
+  final service = await ref.watch(mockDataServiceProvider.future);
+  return service.garages;
 });

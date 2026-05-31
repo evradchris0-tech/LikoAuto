@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/api/api_exception.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/providers/user_session_provider.dart';
@@ -18,9 +19,17 @@ import 'package:liko_auto/features/sell/widgets/sell_step_4_price.dart';
 import 'package:liko_auto/features/sell/widgets/sell_step_5_summary.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-class SellScreen extends ConsumerWidget {
+class SellScreen extends ConsumerStatefulWidget {
   const SellScreen({super.key});
+
+  @override
+  ConsumerState<SellScreen> createState() => _SellScreenState();
+}
+
+class _SellScreenState extends ConsumerState<SellScreen> {
+  bool _canPop = false;
 
   bool _isStepValid(int step, SellFormData form) {
     switch (step) {
@@ -43,24 +52,24 @@ class SellScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final currentStep = ref.watch(sellStepProvider);
     final totalSteps = ref.watch(sellTotalStepsProvider);
     final form = ref.watch(sellFormProvider);
 
     return PopScope(
+      canPop: _canPop,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) {
-          ref.read(sellStepProvider.notifier).state = 1;
-        }
+        if (didPop) return;
+        _confirmExit(context, ref);
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close, color: AppColors.trust),
+            icon: const Icon(LucideIcons.x, color: AppColors.trust),
             onPressed: () => _confirmExit(context, ref),
           ),
           title: Text(
@@ -113,7 +122,8 @@ class SellScreen extends ConsumerWidget {
 
   Future<void> _confirmExit(BuildContext context, WidgetRef ref) async {
     final form = ref.read(sellFormProvider);
-    final hasData = form.vin != null ||
+    final hasData =
+        form.vin != null ||
         form.brand != null ||
         form.photos.isNotEmpty ||
         form.priceFcfa != null;
@@ -151,16 +161,16 @@ class SellScreen extends ConsumerWidget {
                 fontSize: 18,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.sm),
             const Text(
               'Votre progression sera perdue si vous quittez sans sauvegarder.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.neutral, fontSize: 13),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
             // Option 1 — Enregistrer un brouillon
             _ExitOption(
-              icon: Icons.save_outlined,
+              icon: LucideIcons.save,
               label: 'Enregistrer un brouillon',
               subtitle: 'Reprendre plus tard',
               color: AppColors.trust,
@@ -170,7 +180,9 @@ class SellScreen extends ConsumerWidget {
                   context,
                   'Brouillon sauvegardé.',
                   actionLabel: 'Voir',
-                  onAction: () {},
+                  onAction: () {
+                    ref.read(goRouterProvider).push(AppRoutes.myListings);
+                  },
                 );
                 _exit(context, ref);
               },
@@ -178,7 +190,7 @@ class SellScreen extends ConsumerWidget {
             const SizedBox(height: 10),
             // Option 2 — Quitter sans sauvegarder
             _ExitOption(
-              icon: Icons.delete_outline_rounded,
+              icon: LucideIcons.trash2,
               label: 'Quitter sans sauvegarder',
               subtitle: 'Les informations saisies seront perdues',
               color: AppColors.error,
@@ -190,7 +202,7 @@ class SellScreen extends ConsumerWidget {
             const SizedBox(height: 10),
             // Option 3 — Annuler
             _ExitOption(
-              icon: Icons.edit_outlined,
+              icon: LucideIcons.edit2,
               label: 'Continuer la saisie',
               subtitle: 'Rester sur le formulaire',
               color: AppColors.neutral,
@@ -205,7 +217,10 @@ class SellScreen extends ConsumerWidget {
   void _exit(BuildContext context, WidgetRef ref) {
     ref.read(sellStepProvider.notifier).state = 1;
     ref.read(sellFormProvider.notifier).reset();
-    context.pop();
+    setState(() => _canPop = true);
+    Future.microtask(() {
+      if (context.mounted) context.safePop();
+    });
   }
 
   Widget _buildCurrentStep(int step) {
@@ -240,8 +255,7 @@ class SellScreen extends ConsumerWidget {
           children: [
             if (currentStep > 1) ...[
               OutlinedButton(
-                onPressed: () =>
-                    ref.read(sellStepProvider.notifier).state--,
+                onPressed: () => ref.read(sellStepProvider.notifier).state--,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                   side: const BorderSide(color: AppColors.outline),
@@ -249,7 +263,10 @@ class SellScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Icon(Icons.arrow_back, color: AppColors.trust),
+                child: const Icon(
+                  LucideIcons.arrowLeft,
+                  color: AppColors.trust,
+                ),
               ),
               AppSpacing.gapMd,
             ],
@@ -278,7 +295,12 @@ class SellScreen extends ConsumerWidget {
     final session = ref.read(userSessionProvider).valueOrNull;
 
     if (session is! AuthenticatedSession) {
-      AppSnack.error(context, 'Vous devez être connecté pour publier.');
+      AppSnack.error(
+        context,
+        'Vous devez être connecté pour publier.',
+        actionLabel: 'Se connecter',
+        onAction: () => context.push(AppRoutes.login),
+      );
       return;
     }
 
@@ -286,9 +308,11 @@ class SellScreen extends ConsumerWidget {
     final cityId = form.cityId ?? 1; // Douala par défaut
     const countryId = 1; // Cameroun par défaut
 
-    final title = [form.brand, form.model, form.year?.toString()]
-        .whereType<String>()
-        .join(' ');
+    final title = [
+      form.brand,
+      form.model,
+      form.year?.toString(),
+    ].whereType<String>().join(' ');
 
     final vehicle = CreateVehicleRequest(
       modelId: form.modelId ?? 0,
@@ -313,10 +337,9 @@ class SellScreen extends ConsumerWidget {
     );
 
     try {
-      await ref.read(listingsRepositoryProvider).postListingWithMedia(
-            listing: request,
-            photos: form.photos,
-          );
+      await ref
+          .read(listingsRepositoryProvider)
+          .postListingWithMedia(listing: request, photos: form.photos);
       if (!context.mounted) return;
       AppSnack.success(context, 'Annonce publiée avec succès !');
       _exit(context, ref);
@@ -402,7 +425,7 @@ class _ExitOption extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: color),
+              Icon(LucideIcons.chevronRight, size: 14, color: color),
             ],
           ),
         ),

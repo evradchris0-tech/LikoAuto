@@ -3,14 +3,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Override dans `main.dart` après chargement asynchrone.
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('sharedPreferencesProvider must be overridden in main()');
+  throw UnimplementedError(
+    'sharedPreferencesProvider must be overridden in main()',
+  );
 });
 
 const _kOnboardingSeenKey = 'onboarding_seen_v1';
 
 class OnboardingSeenNotifier extends StateNotifier<bool> {
   OnboardingSeenNotifier(this._prefs)
-      : super(_prefs.getBool(_kOnboardingSeenKey) ?? false);
+    : super(_prefs.getBool(_kOnboardingSeenKey) ?? false);
 
   final SharedPreferences _prefs;
 
@@ -27,8 +29,8 @@ class OnboardingSeenNotifier extends StateNotifier<bool> {
 
 final onboardingSeenProvider =
     StateNotifierProvider<OnboardingSeenNotifier, bool>((ref) {
-  return OnboardingSeenNotifier(ref.watch(sharedPreferencesProvider));
-});
+      return OnboardingSeenNotifier(ref.watch(sharedPreferencesProvider));
+    });
 
 // ── Mock auth ──────────────────────────────────────────────────────────────
 // Bypass temporaire de l'auth Firebase en attendant le backend NestJS.
@@ -38,7 +40,7 @@ const _kMockSignedInKey = 'mock_signed_in';
 
 class MockSignedInNotifier extends StateNotifier<bool> {
   MockSignedInNotifier(this._prefs)
-      : super(_prefs.getBool(_kMockSignedInKey) ?? false);
+    : super(_prefs.getBool(_kMockSignedInKey) ?? false);
 
   final SharedPreferences _prefs;
 
@@ -53,7 +55,8 @@ class MockSignedInNotifier extends StateNotifier<bool> {
   }
 }
 
-final mockSignedInProvider =
-    StateNotifierProvider<MockSignedInNotifier, bool>((ref) {
+final mockSignedInProvider = StateNotifierProvider<MockSignedInNotifier, bool>((
+  ref,
+) {
   return MockSignedInNotifier(ref.watch(sharedPreferencesProvider));
 });

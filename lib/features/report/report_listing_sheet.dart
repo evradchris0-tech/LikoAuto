@@ -6,6 +6,7 @@ import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 enum ReportReason {
   vinSuspect,
@@ -40,19 +41,19 @@ extension on ReportReason {
   IconData get icon {
     switch (this) {
       case ReportReason.vinSuspect:
-        return Icons.qr_code_2_rounded;
+        return LucideIcons.qrCode;
       case ReportReason.misleadingPrice:
-        return Icons.payments_outlined;
+        return LucideIcons.banknote;
       case ReportReason.badPhotos:
         return Icons.image_not_supported_outlined;
       case ReportReason.duplicate:
-        return Icons.content_copy_rounded;
+        return LucideIcons.copy;
       case ReportReason.illegal:
-        return Icons.gavel_outlined;
+        return LucideIcons.gavel;
       case ReportReason.scam:
-        return Icons.warning_amber_rounded;
+        return LucideIcons.alertTriangle;
       case ReportReason.other:
-        return Icons.more_horiz_rounded;
+        return LucideIcons.moreHorizontal;
     }
   }
 }
@@ -95,8 +96,7 @@ class _ReportListingSheetState extends State<_ReportListingSheet> {
 
   bool get _canSubmit {
     if (_selected == null) return false;
-    if (_selected == ReportReason.other &&
-        _otherCtrl.text.trim().length < 10) {
+    if (_selected == ReportReason.other && _otherCtrl.text.trim().length < 10) {
       return false;
     }
     return true;
@@ -128,7 +128,7 @@ class _ReportListingSheetState extends State<_ReportListingSheet> {
           ),
           child: Column(
             children: [
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Container(
                 width: 40,
                 height: 4,
@@ -155,7 +155,7 @@ class _ReportListingSheetState extends State<_ReportListingSheet> {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       widget.listing.title,
                       style: context.textStyles.bodyMedium?.copyWith(
@@ -199,7 +199,7 @@ class _ReportListingSheetState extends State<_ReportListingSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Icon(
-                            Icons.shield_outlined,
+                            LucideIcons.shield,
                             color: AppColors.primary,
                             size: 18,
                           ),
@@ -226,7 +226,7 @@ class _ReportListingSheetState extends State<_ReportListingSheet> {
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: PrimaryButton(
                     label: 'Envoyer le signalement',
-                    icon: Icons.flag_outlined,
+                    icon: LucideIcons.flag,
                     isLoading: _submitting,
                     onPressed: _canSubmit ? _submit : null,
                   ),
@@ -283,18 +283,14 @@ class _ReasonTile extends StatelessWidget {
                     reason.label,
                     style: TextStyle(
                       color: AppColors.trust,
-                      fontWeight: selected
-                          ? FontWeight.w800
-                          : FontWeight.w600,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
                 ),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 180),
                   child: Icon(
-                    selected
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_unchecked_rounded,
+                    selected ? LucideIcons.checkCircle2 : LucideIcons.circle,
                     key: ValueKey(selected),
                     color: selected ? AppColors.primary : AppColors.outline,
                     size: 22,

@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
+import 'package:liko_auto/core/providers/user_session_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/features/shell/widgets/app_drawer.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Shell de navigation principal — persiste le BottomNav entre les 5 onglets
 /// (Accueil, Recherche, Vendre, Chat, Profil) via StatefulShellRoute.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({required this.shell, super.key});
   final StatefulNavigationShell shell;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Force l'initialisation de la session utilisateur dès l'ouverture de l'app.
+    ref.watch(userSessionProvider);
+
     final width = MediaQuery.of(context).size.width;
     final isWide = width > 800;
 
@@ -24,34 +30,43 @@ class AppShell extends StatelessWidget {
               onDestinationSelected: shell.goBranch,
               labelType: NavigationRailLabelType.all,
               backgroundColor: Colors.white,
+              useIndicator: true,
+              indicatorColor: AppColors.primary.withValues(alpha: 0.12),
               selectedIconTheme: const IconThemeData(color: AppColors.primary),
-              unselectedIconTheme: const IconThemeData(color: AppColors.neutral),
-              selectedLabelTextStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-              unselectedLabelTextStyle: const TextStyle(color: AppColors.neutral),
+              unselectedIconTheme: const IconThemeData(
+                color: AppColors.neutral,
+              ),
+              selectedLabelTextStyle: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedLabelTextStyle: const TextStyle(
+                color: AppColors.neutral,
+              ),
               destinations: const [
                 NavigationRailDestination(
                   icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded),
+                  selectedIcon: Icon(Icons.home),
                   label: Text('Accueil'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.search_rounded),
-                  selectedIcon: Icon(Icons.search_rounded),
+                  icon: Icon(Icons.search_outlined),
+                  selectedIcon: Icon(Icons.search),
                   label: Text('Annonces'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.add_circle_outline_rounded),
-                  selectedIcon: Icon(Icons.add_circle_rounded),
+                  icon: Icon(Icons.add_circle_outline),
+                  selectedIcon: Icon(Icons.add_circle),
                   label: Text('Vendre'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.forum_outlined),
-                  selectedIcon: Icon(Icons.forum_rounded),
+                  icon: Icon(Icons.chat_bubble_outline),
+                  selectedIcon: Icon(Icons.chat_bubble),
                   label: Text('Messages'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.account_circle_outlined),
-                  selectedIcon: Icon(Icons.account_circle_rounded),
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
                   label: Text('Profil'),
                 ),
               ],
@@ -73,7 +88,7 @@ class AppShell extends StatelessWidget {
         onPressed: () => context.push(AppRoutes.sell),
         backgroundColor: AppColors.primary,
         elevation: 6,
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
+        child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
@@ -89,35 +104,47 @@ class AppShell extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-            _NavBarItem(
-              icon: Icons.home_outlined,
-              selectedIcon: Icons.home_rounded,
-              label: 'Accueil',
-              isSelected: shell.currentIndex == 0,
-              onTap: () => shell.goBranch(0, initialLocation: 0 == shell.currentIndex),
-            ),
-            _NavBarItem(
-              icon: Icons.search_rounded,
-              selectedIcon: Icons.search_rounded,
-              label: 'Annonces',
-              isSelected: shell.currentIndex == 1,
-              onTap: () => shell.goBranch(1, initialLocation: 1 == shell.currentIndex),
-            ),
-            const SizedBox(width: 40), // Spacer for FAB
-            _NavBarItem(
-              icon: Icons.forum_outlined,
-              selectedIcon: Icons.forum_rounded,
-              label: 'Messages',
-              isSelected: shell.currentIndex == 3,
-              onTap: () => shell.goBranch(3, initialLocation: 3 == shell.currentIndex),
-            ),
-            _NavBarItem(
-              icon: Icons.account_circle_outlined,
-              selectedIcon: Icons.account_circle_rounded,
-              label: 'Profil',
-              isSelected: shell.currentIndex == 4,
-              onTap: () => shell.goBranch(4, initialLocation: 4 == shell.currentIndex),
-            ),
+                _NavBarItem(
+                  icon: LucideIcons.home,
+                  selectedIcon: LucideIcons.home,
+                  label: 'Accueil',
+                  isSelected: shell.currentIndex == 0,
+                  onTap: () => shell.goBranch(
+                    0,
+                    initialLocation: 0 == shell.currentIndex,
+                  ),
+                ),
+                _NavBarItem(
+                  icon: LucideIcons.search,
+                  selectedIcon: LucideIcons.search,
+                  label: 'Annonces',
+                  isSelected: shell.currentIndex == 1,
+                  onTap: () => shell.goBranch(
+                    1,
+                    initialLocation: 1 == shell.currentIndex,
+                  ),
+                ),
+                const SizedBox(width: 40), // Spacer for FAB
+                _NavBarItem(
+                  icon: LucideIcons.messageCircle,
+                  selectedIcon: LucideIcons.messageCircle,
+                  label: 'Messages',
+                  isSelected: shell.currentIndex == 3,
+                  onTap: () => shell.goBranch(
+                    3,
+                    initialLocation: 3 == shell.currentIndex,
+                  ),
+                ),
+                _NavBarItem(
+                  icon: LucideIcons.user,
+                  selectedIcon: LucideIcons.user,
+                  label: 'Profil',
+                  isSelected: shell.currentIndex == 4,
+                  onTap: () => shell.goBranch(
+                    4,
+                    initialLocation: 4 == shell.currentIndex,
+                  ),
+                ),
               ],
             ),
           ),
@@ -151,21 +178,30 @@ class _NavBarItem extends StatelessWidget {
       highlightColor: Colors.transparent,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center, // Centering helps with overflow
+        mainAxisAlignment:
+            MainAxisAlignment.center, // Centering helps with overflow
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary.withValues(alpha: 0.12) : Colors.transparent,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              isSelected ? selectedIcon : icon,
-              color: color,
-              size: 24,
+          AnimatedScale(
+            scale: isSelected ? 1.1 : 1.0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutBack,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                isSelected ? selectedIcon : icon,
+                color: isSelected ? AppColors.primary : color,
+                size: 24,
+              ),
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
@@ -180,6 +216,3 @@ class _NavBarItem extends StatelessWidget {
     );
   }
 }
-
-
-

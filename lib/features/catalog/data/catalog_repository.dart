@@ -28,9 +28,7 @@ class CatalogRepository {
   }
 
   Future<List<ModelVariant>> getVariants(int modelId) async {
-    final res = await _api.get<List<dynamic>>(
-      AppConfig.modelVariants(modelId),
-    );
+    final res = await _api.get<List<dynamic>>(AppConfig.modelVariants(modelId));
     return (res.data ?? [])
         .cast<Map<String, dynamic>>()
         .map(ModelVariant.fromJson)

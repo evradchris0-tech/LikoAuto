@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/constants/app_assets.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/onboarding/widgets/onboarding_page_layout.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Onboarding 1/4 "” Bienvenue sur Liko Auto.
 class WelcomePage extends StatelessWidget {
-  const WelcomePage({
-    required this.onContinue,
-    super.key,
-  });
+  const WelcomePage({required this.onContinue, super.key});
 
   final VoidCallback onContinue;
 
@@ -17,7 +16,7 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return OnboardingPageLayout(
       step: 1,
-      totalSteps: 4,
+      totalSteps: 5,
       title: 'La marketplace auto\nla plus fiable du Cameroun.',
       body: 'Achetez et vendez en toute confiance,\nde Douala à Yaoundé.',
       primaryLabel: 'Commencer',
@@ -28,9 +27,12 @@ class WelcomePage extends StatelessWidget {
         runSpacing: AppSpacing.sm,
         alignment: WrapAlignment.center,
         children: [
-          _Bubble(icon: Icons.directions_car_rounded, label: '+ de 1000 Véhicules'),
-          _Bubble(icon: Icons.verified_user_rounded, label: 'Vendeurs Vérifiés'),
-          _Bubble(icon: Icons.support_agent_rounded, label: 'Support 24/7'),
+          _Bubble(
+            icon: Icons.directions_car_outlined,
+            label: '+ de 1000 Véhicules',
+          ),
+          _Bubble(icon: LucideIcons.shieldCheck, label: 'Vendeurs Vérifiés'),
+          _Bubble(icon: LucideIcons.headphones, label: 'Support 24/7'),
         ],
       ),
     );
@@ -87,14 +89,14 @@ class _WelcomeVisual extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Chip(
-                  icon: Icons.verified_rounded,
+                  icon: LucideIcons.badgeCheck,
                   label: 'VÉHICULE VÉRIFIÉ',
                   background: AppColors.success,
                   foreground: Colors.white,
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: AppSpacing.sm),
                 _Chip(
-                  icon: Icons.workspace_premium_rounded,
+                  icon: LucideIcons.award,
                   label: 'SÉLECTION PREMIUM',
                   background: Colors.white,
                   foreground: AppColors.primary,
@@ -140,14 +142,14 @@ class _Chip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: foreground),
-          const SizedBox(width: 6),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             label,
             style: TextStyle(
               color: foreground,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.3,
-              fontSize: 11,
+              fontSize: 12,
             ),
           ),
         ],
@@ -157,10 +159,7 @@ class _Chip extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({
-    required this.icon,
-    required this.label,
-  });
+  const _Bubble({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -171,14 +170,14 @@ class _Bubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: AppColors.primary),
-          const SizedBox(width: 6),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             label,
             style: const TextStyle(

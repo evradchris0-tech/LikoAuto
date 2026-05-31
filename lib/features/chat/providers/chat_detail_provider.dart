@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liko_auto/features/chat/domain/message_entity.dart';
 
-final chatMessagesProvider = Provider.family<List<MessageEntity>, String>((ref, chatId) {
+final chatMessagesProvider = Provider.family<List<MessageEntity>, String>((
+  ref,
+  chatId,
+) {
   // In a real app, you'd fetch messages for this specific chatId.
   return const [
     MessageEntity(
@@ -20,7 +23,8 @@ final chatMessagesProvider = Provider.family<List<MessageEntity>, String>((ref, 
     ),
     MessageEntity(
       id: 'm3',
-      text: 'Bonjour, la Toyota RAV4 est toujours disponible. Vous pouvez passer la voir ce soir au garage.',
+      text:
+          'Bonjour, la Toyota RAV4 est toujours disponible. Vous pouvez passer la voir ce soir au garage.',
       isMe: false,
       time: '09:42',
     ),

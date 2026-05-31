@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -27,13 +28,13 @@ class ListingFilters {
   final String? query;
 
   Map<String, dynamic> toQueryParams() => {
-        if (status != null) 'status': status!.name,
-        if (brandId != null) 'brandId': brandId,
-        if (modelId != null) 'modelId': modelId,
-        if (cityId != null) 'cityId': cityId,
-        if (minPrice != null) 'minPrice': minPrice,
-        if (maxPrice != null) 'maxPrice': maxPrice,
-      };
+    if (status != null) 'status': status!.name,
+    if (brandId != null) 'brandId': brandId,
+    if (modelId != null) 'modelId': modelId,
+    if (cityId != null) 'cityId': cityId,
+    if (minPrice != null) 'minPrice': minPrice,
+    if (maxPrice != null) 'maxPrice': maxPrice,
+  };
 
   bool get isEmpty =>
       status == null &&
@@ -61,8 +62,7 @@ class ListingsRepository {
   }
 
   Future<ApiListing> getListing(int id) async {
-    final res =
-        await _api.get<Map<String, dynamic>>(AppConfig.listing(id));
+    final res = await _api.get<Map<String, dynamic>>(AppConfig.listing(id));
     return ApiListing.fromJson(res.data!);
   }
 
@@ -83,7 +83,7 @@ class ListingsRepository {
       }
 
       final formData = FormData.fromMap({
-        'listing': listing.toJson().toString(),
+        'listing': jsonEncode(listing.toJson()),
         if (multipartPhotos.isNotEmpty) 'photos': multipartPhotos,
       });
 

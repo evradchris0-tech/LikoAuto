@@ -16,19 +16,20 @@ class ViewedListing {
 }
 
 ViewedListing _fromRow(ViewHistoryRow r) => ViewedListing(
-      data: ListingCardData(
-        title: r.title,
-        priceFcfa: r.priceFcfa,
-        location: r.location,
-        mileageKm: r.mileageKm,
-        imageAsset: r.imageAsset,
-        photoCount: r.photoCount,
-        year: r.year,
-        isVinVerified: r.isVinVerified,
-        isPro: r.isPro,
-      ),
-      viewedAt: r.viewedAt,
-    );
+  data: ListingCardData(
+    id: 0,
+    title: r.title,
+    priceFcfa: r.priceFcfa,
+    location: r.location,
+    mileageKm: r.mileageKm,
+    imageAsset: r.imageAsset,
+    photoCount: r.photoCount,
+    year: r.year,
+    isVinVerified: r.isVinVerified,
+    isPro: r.isPro,
+  ),
+  viewedAt: r.viewedAt,
+);
 
 class ViewHistoryRepository {
   const ViewHistoryRepository(this._db);
@@ -36,13 +37,17 @@ class ViewHistoryRepository {
 
   Stream<List<ViewedListing>> watchAll() {
     final q = _db.select(_db.viewHistory)
-      ..orderBy([(t) => OrderingTerm(expression: t.viewedAt, mode: OrderingMode.desc)]);
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.viewedAt, mode: OrderingMode.desc),
+      ]);
     return q.watch().map((rows) => rows.map(_fromRow).toList());
   }
 
   /// Enregistre (ou met à jour) une consultation. Plafond à 50 entrées.
   Future<void> record(ListingCardData data) async {
-    await _db.into(_db.viewHistory).insertOnConflictUpdate(
+    await _db
+        .into(_db.viewHistory)
+        .insertOnConflictUpdate(
           ViewHistoryCompanion.insert(
             listingKey: favoriteKey(data),
             title: data.title,
@@ -72,9 +77,9 @@ class ViewHistoryRepository {
   }
 
   Future<void> remove(ListingCardData data) async {
-    await (_db.delete(_db.viewHistory)
-          ..where((t) => t.listingKey.equals(favoriteKey(data))))
-        .go();
+    await (_db.delete(
+      _db.viewHistory,
+    )..where((t) => t.listingKey.equals(favoriteKey(data)))).go();
   }
 
   Future<void> clearAll() => _db.delete(_db.viewHistory).go();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Types de notifications reçues par l'utilisateur.
 enum NotifType {
@@ -17,21 +18,21 @@ extension NotifTypeStyle on NotifType {
   IconData get icon {
     switch (this) {
       case NotifType.newMessage:
-        return Icons.forum_rounded;
+        return LucideIcons.messageSquare;
       case NotifType.priceDrop:
-        return Icons.trending_down_rounded;
+        return LucideIcons.trendingDown;
       case NotifType.appointment:
-        return Icons.event_available_rounded;
+        return LucideIcons.calendarCheck;
       case NotifType.listingApproved:
-        return Icons.check_circle_rounded;
+        return LucideIcons.checkCircle;
       case NotifType.listingRejected:
-        return Icons.cancel_rounded;
+        return LucideIcons.xCircle;
       case NotifType.review:
-        return Icons.star_rounded;
+        return LucideIcons.star;
       case NotifType.system:
-        return Icons.shield_rounded;
+        return LucideIcons.shield;
       case NotifType.promo:
-        return Icons.local_offer_rounded;
+        return LucideIcons.tag;
     }
   }
 
@@ -77,9 +78,7 @@ class AppNotification {
   final bool isRead;
   final Map<String, dynamic> payload;
 
-  AppNotification copyWith({
-    bool? isRead,
-  }) {
+  AppNotification copyWith({bool? isRead}) {
     return AppNotification(
       id: id,
       type: type,

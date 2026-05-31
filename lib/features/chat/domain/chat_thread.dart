@@ -1,5 +1,4 @@
 class ChatThread {
-
   const ChatThread({
     required this.id,
     required this.name,

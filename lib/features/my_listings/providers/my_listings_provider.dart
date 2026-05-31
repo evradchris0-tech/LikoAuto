@@ -12,8 +12,11 @@ final myListingsProvider = StreamProvider<List<MyListing>>((ref) {
 
 /// Compte d'annonces actives — utilisé par le badge du profil.
 final activeListingsCountProvider = Provider<int>((ref) {
-  return ref.watch(myListingsProvider).maybeWhen(
-        data: (list) => list.where((l) => l.status == ListingStatus.active).length,
+  return ref
+      .watch(myListingsProvider)
+      .maybeWhen(
+        data: (list) =>
+            list.where((l) => l.status == ListingStatus.active).length,
         orElse: () => 0,
       );
 });

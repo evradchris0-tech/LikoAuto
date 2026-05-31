@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
 
 /// Bouton secondaire — bordure trust, radius 12.
 /// Utilisé pour : Voir tout, Filtrer, actions non principales.
@@ -35,7 +36,10 @@ class SecondaryButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: 6)],
+          if (icon != null) ...[
+            Icon(icon, size: 18),
+            const SizedBox(width: AppSpacing.sm),
+          ],
           Text(label),
         ],
       ),

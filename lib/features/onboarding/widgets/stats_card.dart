@@ -64,7 +64,7 @@ class _StatColumn extends StatelessWidget {
             height: 1,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           item.label.toUpperCase(),
           textAlign: TextAlign.center,
@@ -72,7 +72,7 @@ class _StatColumn extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.95),
             fontWeight: FontWeight.w600,
             letterSpacing: 0.6,
-            fontSize: 11,
+            fontSize: 12,
           ),
         ),
       ],

@@ -14,7 +14,7 @@ import 'package:liko_auto/features/reviews/providers/reviews_provider.dart';
 import 'package:liko_auto/features/reviews/widgets/leave_review_sheet.dart';
 import 'package:liko_auto/features/search/widgets/garage_result_card.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
-import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class GarageDetailScreen extends ConsumerWidget {
   const GarageDetailScreen({required this.card, super.key});
@@ -24,10 +24,14 @@ class GarageDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(garageDetailProvider(card));
-    final publishedReviews = ref
-            .watch(reviewsForTargetProvider(
-              (type: ReviewTargetType.garage, id: card.name),
-            ))
+    final publishedReviews =
+        ref
+            .watch(
+              reviewsForTargetProvider((
+                type: ReviewTargetType.garage,
+                id: card.name,
+              )),
+            )
             .valueOrNull ??
         const <Review>[];
 
@@ -37,7 +41,6 @@ class GarageDetailScreen extends ConsumerWidget {
         slivers: [
           _SliverHeader(detail: detail),
           SliverToBoxAdapter(child: _IdentityBlock(detail: detail)),
-          SliverToBoxAdapter(child: _QuickActions(detail: detail)),
           const SliverToBoxAdapter(child: _SectionTitle(label: 'À propos')),
           SliverToBoxAdapter(child: _AboutBlock(detail: detail)),
           const SliverToBoxAdapter(child: _SectionTitle(label: 'Services')),
@@ -46,8 +49,7 @@ class GarageDetailScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: _HoursBlock(hours: detail.hours)),
           SliverToBoxAdapter(
             child: _SectionTitle(
-              label:
-                  'Avis (${detail.reviewCount + publishedReviews.length})',
+              label: 'Avis (${detail.reviewCount + publishedReviews.length})',
               trailing: _RatingPill(rating: detail.card.rating),
             ),
           ),
@@ -68,7 +70,7 @@ class GarageDetailScreen extends ConsumerWidget {
                   verified: false,
                 ),
                 icon: const Icon(
-                  Icons.star_outline_rounded,
+                  LucideIcons.star,
                   size: 18,
                   color: AppColors.primary,
                 ),
@@ -125,57 +127,24 @@ class _SliverHeader extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: Colors.black.withValues(alpha: 0.3),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-            onPressed: () => context.pop(),
+            icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
+            onPressed: () => context.safePop(),
           ),
         ),
       ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: CircleAvatar(
-            backgroundColor: Colors.black.withValues(alpha: 0.3),
-            child: IconButton(
-              icon: const Icon(Icons.share_rounded, color: Colors.white),
-              onPressed: () =>
-                  AppSnack.info(context, 'Partage : bientôt disponible.'),
-            ),
-          ),
-        ),
-      ],
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          detail.card.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            ColoredBox(
+        background: PageView.builder(
+          itemCount: 3,
+          itemBuilder: (context, index) {
+            return ColoredBox(
               color: AppColors.trust,
               child: Image.asset(
                 detail.card.imageAsset,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    AppColors.trust.withValues(alpha: 0.85),
-                  ],
-                  stops: const [0.4, 1],
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -208,21 +177,21 @@ class _IdentityBlock extends StatelessWidget {
                   ),
                 ),
               ),
-              _OpenChip(isOpen: c.isOpen),
+              _RatingPill(rating: c.rating),
             ],
           ),
           AppSpacing.gapSm,
           Row(
             children: [
               const Icon(
-                Icons.location_on_outlined,
+                LucideIcons.mapPin,
                 size: 16,
                 color: AppColors.neutral,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
-                  '${detail.address} · ${c.distanceKm.toStringAsFixed(1)} km',
+                  detail.address,
                   style: context.textStyles.bodyMedium?.copyWith(
                     color: AppColors.neutral,
                   ),
@@ -237,53 +206,18 @@ class _IdentityBlock extends StatelessWidget {
             children: [
               if (c.isCertified)
                 const _Tag(
-                  icon: Icons.verified_user_rounded,
+                  icon: LucideIcons.shieldCheck,
                   label: 'Certifié',
                   fg: Colors.white,
                   bg: AppColors.primary,
                 ),
               for (final s in c.specialties)
-                _Tag(label: s, fg: AppColors.primary, bg: AppColors.primarySoft),
+                _Tag(
+                  label: s,
+                  fg: AppColors.primary,
+                  bg: AppColors.primarySoft,
+                ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OpenChip extends StatelessWidget {
-  const _OpenChip({required this.isOpen});
-  final bool isOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isOpen ? AppColors.success : AppColors.neutral;
-    final bg = isOpen ? AppColors.successSoft : AppColors.outline;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isOpen
-                ? Icons.bolt_rounded
-                : Icons.do_not_disturb_on_outlined,
-            size: 12,
-            color: color,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            isOpen ? 'Ouvert' : 'Fermé',
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w800,
-              fontSize: 11,
-            ),
           ),
         ],
       ),
@@ -317,112 +251,17 @@ class _Tag extends StatelessWidget {
         children: [
           if (icon != null) ...[
             Icon(icon, size: 12, color: fg),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
           ],
           Text(
             label,
             style: TextStyle(
               color: fg,
               fontWeight: FontWeight.w800,
-              fontSize: 11,
+              fontSize: 12,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Quick actions (Appeler / Itinéraire / Partager) ───────────────────────
-
-class _QuickActions extends StatelessWidget {
-  const _QuickActions({required this.detail});
-  final GarageDetail detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        0,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          _QuickActionButton(
-            icon: Icons.phone_rounded,
-            label: 'Appeler',
-            onTap: () => AppSnack.info(context, detail.phone),
-          ),
-          const _Divider(),
-          _QuickActionButton(
-            icon: Icons.directions_rounded,
-            label: 'Itinéraire',
-            onTap: () =>
-                AppSnack.info(context, 'Itinéraire : bientôt disponible.'),
-          ),
-          const _Divider(),
-          _QuickActionButton(
-            icon: Icons.share_rounded,
-            label: 'Partager',
-            onTap: () =>
-                AppSnack.info(context, 'Partage : bientôt disponible.'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(width: 1, height: 36, color: AppColors.outline);
-  }
-}
-
-class _QuickActionButton extends StatelessWidget {
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            children: [
-              Icon(icon, color: AppColors.primary, size: 22),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.trust,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -478,8 +317,8 @@ class _RatingPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.star_rounded, size: 14, color: AppColors.primary),
-          const SizedBox(width: 4),
+          const Icon(LucideIcons.star, size: 14, color: AppColors.primary),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             rating.toStringAsFixed(1).replaceAll('.', ','),
             style: const TextStyle(
@@ -560,11 +399,7 @@ class _ServiceTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.build_circle_outlined,
-            size: 22,
-            color: AppColors.primary,
-          ),
+          const Icon(LucideIcons.wrench, size: 22, color: AppColors.primary),
           AppSpacing.gapMd,
           Expanded(
             child: Column(
@@ -715,9 +550,9 @@ class _ReviewTile extends StatelessWidget {
                           ),
                         ),
                         if (review.verified) ...[
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppSpacing.xs),
                           const Icon(
-                            Icons.verified_rounded,
+                            LucideIcons.badgeCheck,
                             size: 14,
                             color: AppColors.success,
                           ),
@@ -739,9 +574,7 @@ class _ReviewTile extends StatelessWidget {
                 children: [
                   for (var i = 0; i < 5; i++)
                     Icon(
-                      i < review.rating
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
+                      i < review.rating ? LucideIcons.star : LucideIcons.star,
                       size: 14,
                       color: AppColors.primary,
                     ),
@@ -815,9 +648,9 @@ class _PublishedReviewTile extends StatelessWidget {
                           ),
                         ),
                         if (review.verified) ...[
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppSpacing.xs),
                           const Icon(
-                            Icons.verified_rounded,
+                            LucideIcons.badgeCheck,
                             size: 14,
                             color: AppColors.success,
                           ),
@@ -839,9 +672,7 @@ class _PublishedReviewTile extends StatelessWidget {
                 children: [
                   for (var i = 0; i < 5; i++)
                     Icon(
-                      i < review.rating
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
+                      i < review.rating ? LucideIcons.star : LucideIcons.star,
                       size: 14,
                       color: AppColors.primary,
                     ),
@@ -880,7 +711,7 @@ class _PublishedReviewTile extends StatelessWidget {
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,
-                        fontSize: 11,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -930,11 +761,8 @@ class _BottomBar extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => context.push(AppRoutes.chat),
-                  icon: const Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    size: 18,
-                  ),
+                  onPressed: () => context.go(AppRoutes.chat),
+                  icon: const Icon(LucideIcons.messageCircle, size: 18),
                   label: const Text('Message'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.trust,
@@ -952,7 +780,7 @@ class _BottomBar extends StatelessWidget {
                 flex: 2,
                 child: PrimaryButton(
                   label: 'Prendre RDV',
-                  icon: Icons.event_available_rounded,
+                  icon: LucideIcons.calendarCheck,
                   onPressed: () => context.push(
                     AppRoutes.bookingFlow,
                     extra: BookingFlowArgs(garage: detail.card),

@@ -47,8 +47,10 @@ extension UserSessionX on UserSession {
   bool get isPendingSync => this is PendingSyncSession;
 
   /// Vrai si l'utilisateur est au moins authentifié Firebase (même sans profil NestJS).
-  bool get isSignedIn => this is AuthenticatedSession || this is PendingSyncSession;
+  bool get isSignedIn =>
+      this is AuthenticatedSession || this is PendingSyncSession;
 
-  UserProfile? get profile =>
-      this is AuthenticatedSession ? (this as AuthenticatedSession).profile : null;
+  UserProfile? get profile => this is AuthenticatedSession
+      ? (this as AuthenticatedSession).profile
+      : null;
 }

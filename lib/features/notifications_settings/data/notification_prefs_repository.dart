@@ -31,14 +31,22 @@ class NotificationPrefsRepository {
   int get quietStartHour => _prefs.getInt(_Keys.quietStart) ?? 22;
   int get quietEndHour => _prefs.getInt(_Keys.quietEnd) ?? 7;
 
-  Future<void> setPushEnabled({required bool value}) => _prefs.setBool(_Keys.push, value);
-  Future<void> setNewMessages({required bool value}) => _prefs.setBool(_Keys.messages, value);
-  Future<void> setPriceDrops({required bool value}) => _prefs.setBool(_Keys.priceDrops, value);
-  Future<void> setAppointments({required bool value}) => _prefs.setBool(_Keys.appointments, value);
-  Future<void> setSystemAlerts({required bool value}) => _prefs.setBool(_Keys.system, value);
-  Future<void> setPromotions({required bool value}) => _prefs.setBool(_Keys.promos, value);
-  Future<void> setEmailDigest({required bool value}) => _prefs.setBool(_Keys.emailDigest, value);
-  Future<void> setQuietHoursEnabled({required bool value}) => _prefs.setBool(_Keys.quietOn, value);
+  Future<void> setPushEnabled({required bool value}) =>
+      _prefs.setBool(_Keys.push, value);
+  Future<void> setNewMessages({required bool value}) =>
+      _prefs.setBool(_Keys.messages, value);
+  Future<void> setPriceDrops({required bool value}) =>
+      _prefs.setBool(_Keys.priceDrops, value);
+  Future<void> setAppointments({required bool value}) =>
+      _prefs.setBool(_Keys.appointments, value);
+  Future<void> setSystemAlerts({required bool value}) =>
+      _prefs.setBool(_Keys.system, value);
+  Future<void> setPromotions({required bool value}) =>
+      _prefs.setBool(_Keys.promos, value);
+  Future<void> setEmailDigest({required bool value}) =>
+      _prefs.setBool(_Keys.emailDigest, value);
+  Future<void> setQuietHoursEnabled({required bool value}) =>
+      _prefs.setBool(_Keys.quietOn, value);
   Future<void> setQuietStartHour(int h) => _prefs.setInt(_Keys.quietStart, h);
   Future<void> setQuietEndHour(int h) => _prefs.setInt(_Keys.quietEnd, h);
 
@@ -71,5 +79,5 @@ class NotificationPrefsRepository {
 
 final notificationPrefsRepositoryProvider =
     Provider<NotificationPrefsRepository>((ref) {
-  return NotificationPrefsRepository(ref.watch(sharedPreferencesProvider));
-});
+      return NotificationPrefsRepository(ref.watch(sharedPreferencesProvider));
+    });

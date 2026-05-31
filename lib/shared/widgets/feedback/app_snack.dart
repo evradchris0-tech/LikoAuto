@@ -1,87 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-/// Helper centralisé pour les SnackBars de l'application.
-///
-/// Convention :
-/// - `success` : action positive accomplie (publication, vente, ajout favori)
-/// - `error`   : erreur ou action destructive confirmée
-/// - `info`    : info neutre, retrait passif, message contextuel
-/// - `warning` : avertissement non bloquant (connexion lente, mode dégradé)
-///
-/// Paramètre optionnel `actionLabel` + `onAction` pour un bouton "Voir" /
-/// "Réessayer" / "Annuler" affiché à droite (wireframe 6.1).
 abstract final class AppSnack {
-  static const _floating = SnackBarBehavior.floating;
   static const _duration = Duration(seconds: 3);
-  static const _shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(12)),
+  static const _shape = RoundedRectangleBorder(borderRadius: AppRadius.rButton);
+  static const _margin = EdgeInsets.symmetric(
+    horizontal: AppSpacing.lg,
+    vertical: AppSpacing.sm,
   );
-  static const _margin = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
   static void success(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) {
-    _show(
-      context,
-      message,
-      AppColors.success,
-      Icons.check_circle_rounded,
-      actionLabel,
-      onAction,
-    );
-  }
+  }) => _show(
+    context,
+    message,
+    AppColors.success,
+    LucideIcons.checkCircle,
+    actionLabel,
+    onAction,
+  );
 
   static void error(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) {
-    _show(
-      context,
-      message,
-      AppColors.error,
-      Icons.error_outline_rounded,
-      actionLabel,
-      onAction,
-    );
-  }
+  }) => _show(
+    context,
+    message,
+    AppColors.error,
+    LucideIcons.alertCircle,
+    actionLabel,
+    onAction,
+  );
 
   static void info(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) {
-    _show(
-      context,
-      message,
-      AppColors.trust,
-      Icons.info_outline_rounded,
-      actionLabel,
-      onAction,
-    );
-  }
+  }) => _show(
+    context,
+    message,
+    AppColors.info,
+    LucideIcons.info,
+    actionLabel,
+    onAction,
+  );
 
   static void warning(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) {
-    _show(
-      context,
-      message,
-      AppColors.warning,
-      Icons.warning_amber_rounded,
-      actionLabel,
-      onAction,
-    );
-  }
+  }) => _show(
+    context,
+    message,
+    AppColors.warning,
+    LucideIcons.alertTriangle,
+    actionLabel,
+    onAction,
+  );
 
   static void _show(
     BuildContext context,
@@ -96,22 +81,29 @@ abstract final class AppSnack {
       ..showSnackBar(
         SnackBar(
           backgroundColor: bg,
-          behavior: _floating,
+          behavior: SnackBarBehavior.floating,
           duration: _duration,
           shape: _shape,
           margin: _margin,
           content: Row(
             children: [
               Icon(icon, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   message,
                   style: const TextStyle(
                     color: Colors.white,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
+                    height: 1.4,
                   ),
                 ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              GestureDetector(
+                onTap: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                child: const Icon(LucideIcons.x, color: Colors.white, size: 20),
               ),
             ],
           ),

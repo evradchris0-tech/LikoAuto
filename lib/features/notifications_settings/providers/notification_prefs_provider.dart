@@ -115,7 +115,7 @@ class NotificationPrefsNotifier extends StateNotifier<NotificationPrefs> {
 
 final notificationPrefsProvider =
     StateNotifierProvider<NotificationPrefsNotifier, NotificationPrefs>((ref) {
-  return NotificationPrefsNotifier(
-    ref.watch(notificationPrefsRepositoryProvider),
-  );
-});
+      return NotificationPrefsNotifier(
+        ref.watch(notificationPrefsRepositoryProvider),
+      );
+    });

@@ -3,9 +3,8 @@
 /// En dev : pointer vers localhost ou le tunnel ngrok du backend.
 /// En prod : pointer vers l'URL de production.
 abstract final class AppConfig {
-  // TODO(backend): remplacer par l'URL ngrok de Samuel quand le backend est déployé.
-  static const String _devBaseUrl = 'http://10.0.2.2:3000';
-  static const String _prodBaseUrl = 'https://api.likoauto.com';
+  static const String _devBaseUrl = 'http://147.135.128.19:20342';
+  static const String _prodBaseUrl = 'http://147.135.128.19:20342'; // TODO(Dev): Update when real prod is ready
 
   static const bool _isDebug = !bool.fromEnvironment('dart.vm.product');
   static String get baseUrl => _isDebug ? _devBaseUrl : _prodBaseUrl;
@@ -13,6 +12,7 @@ abstract final class AppConfig {
   // ── Auth (à venir — module non encore documenté dans le spec) ─────────────
   static const String authRegister = '/auth/register';
   static const String authMe = '/auth/me';
+  static const String fcmToken = '/users/fcm-token';
 
   // ── Catalogue ──────────────────────────────────────────────────────────────
   static const String brands = '/brands';

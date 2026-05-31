@@ -7,6 +7,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/sell/providers/sell_form_provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SellStep2Photos extends ConsumerWidget {
   const SellStep2Photos({super.key});
@@ -46,43 +47,48 @@ class SellStep2Photos extends ConsumerWidget {
           ),
         ),
         AppSpacing.gapXl,
-        GestureDetector(
-          onTap: photos.length >= _maxPhotos ? null : () => _pick(ref),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                width: 2,
+        Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: photos.length >= _maxPhotos ? null : () => _pick(ref),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      LucideIcons.camera,
+                      color: AppColors.primary,
+                      size: 32,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.add_a_photo_outlined,
-                    color: AppColors.primary,
-                    size: 32,
+                  AppSpacing.gapMd,
+                  Text(
+                    photos.length >= _maxPhotos
+                        ? 'Limite atteinte ($_maxPhotos)'
+                        : 'Ajouter des photos',
+                    style: context.textStyles.titleMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                AppSpacing.gapMd,
-                Text(
-                  photos.length >= _maxPhotos
-                      ? 'Limite atteinte ($_maxPhotos)'
-                      : 'Ajouter des photos',
-                  style: context.textStyles.titleMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -110,20 +116,25 @@ class SellStep2Photos extends ConsumerWidget {
                   Positioned(
                     top: 4,
                     right: 4,
-                    child: GestureDetector(
-                      onTap: () => ref
-                          .read(sellFormProvider.notifier)
-                          .removePhotoAt(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.black54,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 16,
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: () => ref
+                            .read(sellFormProvider.notifier)
+                            .removePhotoAt(index),
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            LucideIcons.x,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
                       ),
                     ),
@@ -147,7 +158,7 @@ class SellStep2Photos extends ConsumerWidget {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -174,7 +185,7 @@ class _PhotosCounter extends StatelessWidget {
       return Row(
         children: [
           const Icon(
-            Icons.verified_rounded,
+            LucideIcons.badgeCheck,
             color: AppColors.success,
             size: 16,
           ),

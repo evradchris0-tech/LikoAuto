@@ -10,16 +10,18 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [
-  Favorites,
-  ViewHistory,
-  MyListings,
-  Notifications,
-  Bookings,
-  Reviews,
-  BlockedUsers,
-  MutedThreads,
-])
+@DriftDatabase(
+  tables: [
+    Favorites,
+    ViewHistory,
+    MyListings,
+    Notifications,
+    Bookings,
+    Reviews,
+    BlockedUsers,
+    MutedThreads,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

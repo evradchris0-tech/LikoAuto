@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/providers/package_info_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 
@@ -25,8 +27,8 @@ class SupportScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Aide & Support',
@@ -49,37 +51,7 @@ class SupportScreen extends ConsumerWidget {
           const _SectionLabel(label: 'QUESTIONS FRÉQUENTES'),
           for (final cat in _faqCategories) _FaqCategoryCard(category: cat),
           const SizedBox(height: AppSpacing.xl),
-          const _SectionLabel(label: 'AUTRES'),
-          _Card(
-            children: [
-              _MenuTile(
-                icon: Icons.bug_report_outlined,
-                label: 'Signaler un bug',
-                description: 'Décrivez ce qui ne fonctionne pas.',
-                onTap: () => _reportBug(context, pkg.version),
-              ),
-              _MenuTile(
-                icon: Icons.gavel_outlined,
-                label: "Conditions d'utilisation",
-                description: 'Règles de la marketplace.',
-                onTap: () => _showLegalSheet(
-                  context,
-                  title: "Conditions d'utilisation",
-                  body: _termsText,
-                ),
-              ),
-              _MenuTile(
-                icon: Icons.privacy_tip_outlined,
-                label: 'Politique de confidentialité',
-                description: 'Comment nous traitons vos données.',
-                onTap: () => _showLegalSheet(
-                  context,
-                  title: 'Politique de confidentialité',
-                  body: _privacyText,
-                ),
-              ),
-            ],
-          ),
+
           const SizedBox(height: AppSpacing.xl),
           Center(
             child: Column(
@@ -91,7 +63,7 @@ class SupportScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Made in Cameroun · 2026',
                   style: context.textStyles.labelSmall?.copyWith(
@@ -102,123 +74,6 @@ class SupportScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _reportBug(BuildContext context, String version) {
-    final controller = TextEditingController();
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Signaler un bug'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Décrivez le problème rencontré (étapes, écran, message d'erreur).",
-              style: context.textStyles.bodySmall?.copyWith(
-                color: AppColors.neutral,
-              ),
-            ),
-            AppSpacing.gapMd,
-            TextField(
-              controller: controller,
-              autofocus: true,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                hintText: 'Quand je clique sur...',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            AppSpacing.gapSm,
-            Text(
-              'Version : $version',
-              style: context.textStyles.labelSmall?.copyWith(
-                color: AppColors.neutral,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Annuler',
-              style: TextStyle(color: AppColors.neutral),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              AppSnack.success(context, 'Merci, votre rapport est bien noté.');
-            },
-            child: const Text(
-              'Envoyer',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLegalSheet(
-    BuildContext context, {
-    required String title,
-    required String body,
-  }) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.7,
-        maxChildSize: 0.95,
-        builder: (_, scrollCtrl) {
-          return Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.outline,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                AppSpacing.gapMd,
-                Text(
-                  title,
-                  style: context.textStyles.headlineSmall?.copyWith(
-                    color: AppColors.trust,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                AppSpacing.gapMd,
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollCtrl,
-                    child: Text(
-                      body,
-                      style: context.textStyles.bodyMedium?.copyWith(
-                        height: 1.55,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
@@ -242,14 +97,11 @@ class _ContactCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppColors.trust,
-            AppColors.trust.withValues(alpha: 0.85),
-          ],
+          colors: [AppColors.trust, AppColors.trust.withValues(alpha: 0.85)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         boxShadow: [
           BoxShadow(
             color: AppColors.trust.withValues(alpha: 0.2),
@@ -270,10 +122,7 @@ class _ContactCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.support_agent_rounded,
-                  color: Colors.white,
-                ),
+                child: const Icon(LucideIcons.headphones, color: Colors.white),
               ),
               AppSpacing.gapMd,
               Expanded(
@@ -303,28 +152,54 @@ class _ContactCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _ContactButton(
-                  icon: Icons.chat_rounded,
+                  icon: LucideIcons.phone,
+                  label: 'Appel',
+                  onTap: () async {
+                    final uri = Uri.parse('tel:$phone');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    } else {
+                      if (context.mounted) {
+                        AppSnack.error(context, "Impossible de lancer l'appel");
+                      }
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _ContactButton(
+                  icon: LucideIcons.messageCircle,
                   label: 'WhatsApp',
-                  copyValue: whatsApp,
-                  copyMessage: 'Numéro WhatsApp copié',
+                  onTap: () async {
+                    // Nettoyage du numéro WhatsApp (+237699123456 -> 237699123456)
+                    final cleanPhone = whatsApp.replaceAll('+', '').replaceAll(' ', '');
+                    final uri = Uri.parse('whatsapp://send?phone=$cleanPhone');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    } else {
+                      if (context.mounted) {
+                        AppSnack.error(context, "WhatsApp n'est pas installé");
+                      }
+                    }
+                  },
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: _ContactButton(
-                  icon: Icons.phone_rounded,
-                  label: 'Appeler',
-                  copyValue: phone,
-                  copyMessage: 'Numéro copié',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _ContactButton(
-                  icon: Icons.email_rounded,
+                  icon: LucideIcons.mail,
                   label: 'Email',
-                  copyValue: email,
-                  copyMessage: 'Email copié',
+                  onTap: () async {
+                    final uri = Uri.parse('mailto:$email');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    } else {
+                      if (context.mounted) {
+                        AppSnack.error(context, "Aucune application d'email trouvée");
+                      }
+                    }
+                  },
                 ),
               ),
             ],
@@ -339,14 +214,12 @@ class _ContactButton extends StatelessWidget {
   const _ContactButton({
     required this.icon,
     required this.label,
-    required this.copyValue,
-    required this.copyMessage,
+    required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final String copyValue;
-  final String copyMessage;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -354,12 +227,7 @@ class _ContactButton extends StatelessWidget {
       color: Colors.white.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () async {
-          await Clipboard.setData(ClipboardData(text: copyValue));
-          if (context.mounted) {
-            AppSnack.info(context, '$copyMessage : $copyValue');
-          }
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -367,7 +235,7 @@ class _ContactButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, color: Colors.white, size: 22),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 label,
                 style: const TextStyle(
@@ -398,88 +266,16 @@ class _SectionLabel extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Text(
-        label,
-        style: context.textStyles.labelSmall?.copyWith(
-          color: AppColors.neutral,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.6,
-        ),
-      ),
-    );
-  }
-}
-
-class _Card extends StatelessWidget {
-  const _Card({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          for (var i = 0; i < children.length; i++) ...[
-            children[i],
-            if (i < children.length - 1)
-              const Divider(height: 1, indent: 56, color: AppColors.outline),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuTile extends StatelessWidget {
-  const _MenuTile({
-    required this.icon,
-    required this.label,
-    required this.description,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final String description;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: 4,
-      ),
-      leading: Icon(icon, color: AppColors.neutral),
-      title: Text(
-        label,
-        style: const TextStyle(
-          color: AppColors.trust,
-          fontWeight: FontWeight.w700,
-          fontSize: 15,
-        ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 2),
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: Text(
-          description,
-          style: const TextStyle(
+          label,
+          style: context.textStyles.labelSmall?.copyWith(
             color: AppColors.neutral,
-            fontWeight: FontWeight.w500,
-            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
           ),
         ),
-      ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        color: AppColors.outline,
       ),
     );
   }
@@ -508,7 +304,7 @@ class _FaqCategory {
 const _faqCategories = <_FaqCategory>[
   _FaqCategory(
     title: 'Compte & connexion',
-    icon: Icons.person_outline_rounded,
+    icon: LucideIcons.user,
     entries: [
       _FaqEntry(
         'Comment créer un compte ?',
@@ -532,7 +328,7 @@ const _faqCategories = <_FaqCategory>[
   ),
   _FaqCategory(
     title: 'Acheter une voiture',
-    icon: Icons.shopping_cart_outlined,
+    icon: LucideIcons.shoppingCart,
     entries: [
       _FaqEntry(
         'Que signifie le badge VIN vérifié ?',
@@ -556,7 +352,7 @@ const _faqCategories = <_FaqCategory>[
   ),
   _FaqCategory(
     title: 'Vendre une voiture',
-    icon: Icons.sell_outlined,
+    icon: LucideIcons.tag,
     entries: [
       _FaqEntry(
         'Combien de photos dois-je ajouter ?',
@@ -586,7 +382,7 @@ const _faqCategories = <_FaqCategory>[
   ),
   _FaqCategory(
     title: 'Sécurité & paiements',
-    icon: Icons.shield_outlined,
+    icon: LucideIcons.shield,
     entries: [
       _FaqEntry(
         'Liko Auto gère-t-il les paiements ?',
@@ -648,11 +444,7 @@ class _FaqCategoryCard extends StatelessWidget {
                 child: Row(
                   children: [
                     if (i == 0) ...[
-                      Icon(
-                        category.icon,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
+                      Icon(category.icon, size: 18, color: AppColors.primary),
                       AppSpacing.gapSm,
                     ] else
                       const SizedBox(width: 26),
@@ -698,55 +490,3 @@ class _FaqCategoryCard extends StatelessWidget {
     );
   }
 }
-
-// ── Légal ──────────────────────────────────────────────────────────────────
-
-const _termsText =
-    "Conditions d'utilisation — Liko Auto\n\n"
-    '1. Acceptation\n'
-    "En utilisant l'application Liko Auto, vous acceptez les présentes "
-    "conditions d'utilisation.\n\n"
-    '2. Usage de la plateforme\n'
-    'Liko Auto est une marketplace mettant en relation acheteurs et vendeurs '
-    "de véhicules. Liko Auto n'est pas partie aux transactions.\n\n"
-    '3. Compte utilisateur\n'
-    'Vous êtes responsable de la confidentialité de vos identifiants et de '
-    'toute activité réalisée sous votre compte.\n\n'
-    '4. Annonces\n'
-    'Les annonces doivent être conformes à la loi camerounaise. Toute annonce '
-    'frauduleuse, incomplète ou trompeuse sera retirée.\n\n'
-    '5. Responsabilités\n'
-    "Liko Auto ne garantit pas l'exactitude des informations publiées par "
-    'les utilisateurs. Les transactions sont effectuées sous la seule '
-    'responsabilité des parties concernées.\n\n'
-    '6. Modification\n'
-    'Liko Auto se réserve le droit de modifier ces conditions à tout moment. '
-    'Les modifications entrent en vigueur dès leur publication.\n\n'
-    '7. Contact\n'
-    'support@likoauto.cm';
-
-const _privacyText =
-    'Politique de confidentialité — Liko Auto\n\n'
-    '1. Données collectées\n'
-    'Nous collectons : votre numéro de téléphone, votre email (si fourni), '
-    "votre nom affiché, votre photo de profil et l'historique de vos annonces "
-    'et favoris.\n\n'
-    '2. Finalité\n'
-    'Ces données servent uniquement à fournir le service Liko Auto : '
-    "authentification, mise en relation entre utilisateurs, statistiques d'usage "
-    'agrégées et anonymisées.\n\n'
-    '3. Stockage\n'
-    'Vos données sont stockées sur des serveurs sécurisés en Europe '
-    '(Firebase, Google Cloud) avec chiffrement au repos et en transit.\n\n'
-    '4. Partage\n'
-    'Nous ne vendons jamais vos données à des tiers. Le partage avec un '
-    'autre utilisateur (via le chat) reste sous votre contrôle.\n\n'
-    '5. Vos droits\n'
-    'Vous pouvez à tout moment : consulter vos données, les modifier, '
-    'demander leur suppression complète. Utilisez « Supprimer mon compte » '
-    'dans les paramètres ou contactez support@likoauto.cm.\n\n'
-    '6. Cookies & tracking\n'
-    "L'application utilise Firebase Analytics et Crashlytics pour comprendre "
-    "l'usage et corriger les bugs. Aucun tracker publicitaire tiers n'est utilisé.\n\n"
-    '7. Contact DPO\n'
-    'privacy@likoauto.cm';

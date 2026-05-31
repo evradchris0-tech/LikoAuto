@@ -3,6 +3,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/buttons/secondary_button.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// État vide affiché quand aucun résultat ne correspond aux filtres.
 class EmptyResults extends StatelessWidget {
@@ -33,7 +34,7 @@ class EmptyResults extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.search_off_rounded,
+              LucideIcons.searchX,
               size: 48,
               color: AppColors.primary,
             ),
@@ -55,7 +56,7 @@ class EmptyResults extends StatelessWidget {
           AppSpacing.gapXl,
           SecondaryButton(
             label: 'Réinitialiser les filtres',
-            icon: Icons.refresh_rounded,
+            icon: LucideIcons.refreshCw,
             onPressed: onReset,
           ),
         ],

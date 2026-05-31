@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/onboarding/widgets/feature_pill.dart';
 import 'package:liko_auto/features/onboarding/widgets/onboarding_page_layout.dart';
-import 'package:liko_auto/shared/widgets/images/hero_image_placeholder.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-/// Onboarding 3/4 — Trouvez le bon garage en un clic.
+/// Onboarding 3/5 — Trouvez le bon garage en un clic.
 class GaragesPage extends StatelessWidget {
   const GaragesPage({required this.onContinue, super.key});
   final VoidCallback onContinue;
@@ -15,14 +15,31 @@ class GaragesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return OnboardingPageLayout(
       step: 3,
-      totalSteps: 4,
+      totalSteps: 5,
       title: 'Trouvez le bon garage en un clic.',
       body:
-          "Fini les devinettes. Accédez directement aux meilleurs spécialistes de votre quartier pour l'entretien et la réparation.",
+          "Accédez directement aux meilleurs spécialistes de votre quartier pour l'entretien et la réparation.",
       primaryLabel: 'Continuer',
       onPrimary: onContinue,
       visual: const _GaragesVisual(),
-      extra: const _GaragesStatsCard(),
+      extra: const Column(
+        children: [
+          FeaturePill(
+            icon: LucideIcons.badgeCheck,
+            label: 'Garages certifiés & notés',
+          ),
+          AppSpacing.gapMd,
+          FeaturePill(
+            icon: LucideIcons.navigation,
+            label: 'Géolocalisation en temps réel',
+          ),
+          AppSpacing.gapMd,
+          FeaturePill(
+            icon: LucideIcons.calendarDays,
+            label: 'Réservation de RDV intégrée',
+          ),
+        ],
+      ),
     );
   }
 }
@@ -32,41 +49,132 @@ class _GaragesVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 320,
+    return SizedBox(
+      height: 260,
       child: Stack(
         children: [
+          // Fond carte simplifié
           Positioned.fill(
-            child: HeroImagePlaceholder(
-              icon: Icons.map_rounded,
-              label: 'Cameroun · Douala / Yaoundé / Bafoussam',
-              gradientColors: [Color(0xFFCFD7DD), Color(0xFFE8EEF1)],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              child: CustomPaint(painter: _SimpleMapPainter()),
             ),
           ),
-          // Pins simulés
-          Positioned(top: 80, left: 110, child: _Pin()),
-          Positioned(top: 120, left: 210, child: _Pin(filled: false)),
-          Positioned(top: 170, left: 150, child: _Pin()),
-          Positioned(top: 210, left: 250, child: _Pin(filled: false)),
-          // Specialty chips en bas du visuel
+
+          // Pins statiques
+          const Positioned(top: 60, left: 90, child: _Pin(active: false)),
+          const Positioned(top: 95, left: 190, child: _Pin(active: true)),
+          const Positioned(top: 145, left: 125, child: _Pin(active: false)),
+          const Positioned(top: 55, left: 265, child: _Pin(active: false)),
+
+          // Badge ville
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
+            top: AppSpacing.md,
+            left: AppSpacing.md,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppColors.trust,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _SpecialtyChip(
-                    icon: Icons.verified_rounded,
-                    label: 'SPÉCIALISTES TOYOTA',
-                    selected: true,
+                  Icon(LucideIcons.building, size: 12, color: Colors.white),
+                  SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'DOUALA · YAOUNDÉ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                  _SpecialtyChip(label: 'MERCEDES'),
-                  _SpecialtyChip(label: 'BMW'),
+                ],
+              ),
+            ),
+          ),
+
+          // Carte garage sélectionné
+          Positioned(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: AppSpacing.lg,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: AppRadius.rButton,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppColors.primarySoft,
+                    child: Icon(
+                      LucideIcons.wrench,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  AppSpacing.gapSm,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Garage Elite Akwa',
+                          style: TextStyle(
+                            color: AppColors.trust,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          'Toyota · Honda',
+                          style: TextStyle(
+                            color: AppColors.neutral,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.star,
+                            size: 14,
+                            color: AppColors.rating,
+                          ),
+                          SizedBox(width: AppSpacing.xxs),
+                          Text(
+                            '4,9',
+                            style: TextStyle(
+                              color: AppColors.trust,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -78,17 +186,17 @@ class _GaragesVisual extends StatelessWidget {
 }
 
 class _Pin extends StatelessWidget {
-  const _Pin({this.filled = true});
-  final bool filled;
+  const _Pin({required this.active});
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
     return Icon(
-      Icons.location_on_rounded,
-      color: filled
+      LucideIcons.mapPin,
+      color: active
           ? AppColors.primary
           : AppColors.primary.withValues(alpha: 0.45),
-      size: filled ? 32 : 24,
+      size: active ? 32 : 24,
       shadows: const [
         Shadow(blurRadius: 4, color: Colors.black26, offset: Offset(0, 2)),
       ],
@@ -96,123 +204,52 @@ class _Pin extends StatelessWidget {
   }
 }
 
-class _SpecialtyChip extends StatelessWidget {
-  const _SpecialtyChip({required this.label, this.icon, this.selected = false});
+class _SimpleMapPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
 
-  final String label;
-  final IconData? icon;
-  final bool selected;
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()..color = const Color(0xFFE8EEF2),
+    );
+
+    final road = Paint()..color = const Color(0xFFF0F4F7);
+    final block = Paint()..color = const Color(0xFFD4DCE4);
+    final park = Paint()..color = const Color(0xFFCFE8CF);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(w * 0.04, h * 0.35, w * 0.22, h * 0.30),
+        const Radius.circular(6),
+      ),
+      park,
+    );
+
+    for (final r in [
+      Rect.fromLTWH(w * 0.04, h * 0.05, w * 0.18, h * 0.24),
+      Rect.fromLTWH(w * 0.26, h * 0.05, w * 0.14, h * 0.18),
+      Rect.fromLTWH(w * 0.44, h * 0.05, w * 0.20, h * 0.20),
+      Rect.fromLTWH(w * 0.26, h * 0.26, w * 0.14, h * 0.20),
+      Rect.fromLTWH(w * 0.44, h * 0.28, w * 0.20, h * 0.18),
+      Rect.fromLTWH(w * 0.68, h * 0.05, w * 0.26, h * 0.30),
+      Rect.fromLTWH(w * 0.62, h * 0.38, w * 0.32, h * 0.25),
+      Rect.fromLTWH(w * 0.04, h * 0.70, w * 0.88, h * 0.20),
+    ]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(r, const Radius.circular(3)),
+        block,
+      );
+    }
+
+    canvas
+      ..drawRect(Rect.fromLTWH(0, h * 0.29, w, h * 0.05), road)
+      ..drawRect(Rect.fromLTWH(0, h * 0.65, w, h * 0.04), road)
+      ..drawRect(Rect.fromLTWH(w * 0.22, 0, w * 0.04, h), road)
+      ..drawRect(Rect.fromLTWH(w * 0.60, 0, w * 0.04, h), road);
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: selected
-              ? AppColors.primary
-              : AppColors.primary.withValues(alpha: 0.3),
-          width: selected ? 1.5 : 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: AppColors.primary),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: context.textStyles.labelSmall?.copyWith(
-              color: AppColors.trust,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GaragesStatsCard extends StatelessWidget {
-  const _GaragesStatsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: const BoxDecoration(
-        color: AppColors.primarySoft,
-        borderRadius: AppRadius.rCard,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.handyman_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-          AppSpacing.gapMd,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '48 garages certifiés.',
-                  style: context.textStyles.headlineSmall?.copyWith(
-                    color: AppColors.trust,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  'Vérifiés, notés, géolocalisés.',
-                  style: context.textStyles.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-          AppSpacing.gapSm,
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.star_outline_rounded,
-                  size: 16,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '4,7',
-                  style: context.textStyles.labelMedium?.copyWith(
-                    color: AppColors.trust,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

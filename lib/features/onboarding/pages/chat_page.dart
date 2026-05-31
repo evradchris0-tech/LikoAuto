@@ -5,6 +5,7 @@ import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/onboarding/widgets/onboarding_page_layout.dart';
 import 'package:liko_auto/shared/widgets/chat/chat_bubble.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Onboarding 4/4 — Le chat qui remplace le téléphone.
 class ChatOnboardingPage extends StatelessWidget {
@@ -20,8 +21,8 @@ class ChatOnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingPageLayout(
-      step: 4,
-      totalSteps: 4,
+      step: 5,
+      totalSteps: 5,
       title: 'Le chat qui remplace le téléphone.',
       body:
           'Négociez le prix et planifiez vos rendez-vous physiques en toute sécurité via notre messagerie intégrée. Votre numéro personnel reste privé.',
@@ -85,10 +86,7 @@ class _ConversationCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: const Icon(
-              Icons.person_outline_rounded,
-              color: AppColors.trust,
-            ),
+            child: const Icon(LucideIcons.user, color: AppColors.trust),
           ),
           AppSpacing.gapMd,
           Expanded(
@@ -102,7 +100,7 @@ class _ConversationCard extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Row(
                   children: [
                     Container(
@@ -113,7 +111,7 @@ class _ConversationCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       'En ligne',
                       style: context.textStyles.bodySmall?.copyWith(

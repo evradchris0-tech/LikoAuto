@@ -5,6 +5,7 @@ import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/sell/providers/sell_form_provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 // Provider local pour l'option boost (wireframe 3.5)
 final _boostSelectedProvider = StateProvider.autoDispose<bool>((ref) => false);
@@ -37,28 +38,26 @@ class SellStep5Summary extends ConsumerWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.outline.withValues(alpha: 0.5),
-            ),
+            border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
           ),
           child: Column(
             children: [
               _SummaryItem(
-                icon: Icons.image_outlined,
+                icon: LucideIcons.image,
                 label: '${form.photos.length} photos ajoutées',
                 ok: form.hasPhotosMinimum,
               ),
               const Divider(height: 32),
               _SummaryItem(
                 icon: form.isVinValid
-                    ? Icons.verified_rounded
+                    ? LucideIcons.badgeCheck
                     : Icons.directions_car_outlined,
                 label: identifier.isEmpty ? 'Identifiant manquant' : identifier,
                 ok: form.isStep1Valid,
               ),
               const Divider(height: 32),
               _SummaryItem(
-                icon: Icons.tune_rounded,
+                icon: LucideIcons.sliders,
                 label: form.isStep3Valid
                     ? '${form.mileageKm!.toGroupedString()} km · ${form.year} · '
                           '${form.fuel?.name ?? ""} · ${form.gearbox?.name ?? ""}'
@@ -67,7 +66,7 @@ class SellStep5Summary extends ConsumerWidget {
               ),
               const Divider(height: 32),
               _SummaryItem(
-                icon: Icons.payments_outlined,
+                icon: LucideIcons.banknote,
                 label: form.priceFcfa != null && form.priceFcfa! > 0
                     ? '${form.priceFcfa!.toFcfa()}'
                           '${form.isNegotiable ? "  ·  Négociable" : ""}'
@@ -84,7 +83,9 @@ class SellStep5Summary extends ConsumerWidget {
         Text(
           'En publiant cette annonce, vous acceptez nos conditions générales.',
           textAlign: TextAlign.center,
-          style: context.textStyles.bodySmall?.copyWith(color: AppColors.neutral),
+          style: context.textStyles.bodySmall?.copyWith(
+            color: AppColors.neutral,
+          ),
         ),
       ],
     );
@@ -96,89 +97,93 @@ class _BoostCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final boosted = ref.watch(_boostSelectedProvider);
-    return GestureDetector(
-      onTap: () =>
-          ref.read(_boostSelectedProvider.notifier).state = !boosted,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          gradient: boosted
-              ? LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primary.withValues(alpha: 0.8),
-                  ],
-                )
-              : null,
-          color: boosted ? null : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: boosted ? AppColors.primary : AppColors.outline,
-            width: boosted ? 2 : 1,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () => ref.read(_boostSelectedProvider.notifier).state = !boosted,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            gradient: boosted
+                ? LinearGradient(
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withValues(alpha: 0.8),
+                    ],
+                  )
+                : null,
+            color: boosted ? null : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: boosted ? AppColors.primary : AppColors.outline,
+              width: boosted ? 2 : 1,
+            ),
+            boxShadow: boosted
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [],
           ),
-          boxShadow: boosted
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: boosted
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : AppColors.primarySoft,
-                shape: BoxShape.circle,
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: boosted
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : AppColors.primarySoft,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  LucideIcons.rocket,
+                  size: 22,
+                  color: boosted ? Colors.white : AppColors.primary,
+                ),
               ),
-              child: Icon(
-                Icons.rocket_launch_rounded,
-                size: 22,
-                color: boosted ? Colors.white : AppColors.primary,
-              ),
-            ),
-            AppSpacing.gapMd,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Booster cette annonce',
-                    style: TextStyle(
-                      color: boosted ? Colors.white : AppColors.trust,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
+              AppSpacing.gapMd,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Booster cette annonce',
+                      style: TextStyle(
+                        color: boosted ? Colors.white : AppColors.trust,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '3× plus de visibilité • 5 000 FCFA / semaine',
-                    style: TextStyle(
-                      color: boosted
-                          ? Colors.white.withValues(alpha: 0.8)
-                          : AppColors.neutral,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      '3× plus de visibilité • 5 000 FCFA / semaine',
+                      style: TextStyle(
+                        color: boosted
+                            ? Colors.white.withValues(alpha: 0.8)
+                            : AppColors.neutral,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Switch.adaptive(
-              value: boosted,
-              onChanged: (v) =>
-                  ref.read(_boostSelectedProvider.notifier).state = v,
-              activeThumbColor: Colors.white,
-              activeTrackColor: Colors.white.withValues(alpha: 0.3),
-            ),
-          ],
+              Switch.adaptive(
+                value: boosted,
+                onChanged: (v) =>
+                    ref.read(_boostSelectedProvider.notifier).state = v,
+                activeThumbColor: Colors.white,
+                activeTrackColor: Colors.white.withValues(alpha: 0.3),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -200,11 +205,7 @@ class _SummaryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: ok ? AppColors.primary : AppColors.neutral,
-          size: 20,
-        ),
+        Icon(icon, color: ok ? AppColors.primary : AppColors.neutral, size: 20),
         AppSpacing.gapMd,
         Expanded(
           child: Text(
@@ -212,9 +213,9 @@ class _SummaryItem extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Icon(
-          ok ? Icons.check_circle : Icons.error_outline,
+          ok ? LucideIcons.checkCircle : LucideIcons.alertCircle,
           color: ok ? AppColors.success : AppColors.error,
           size: 20,
         ),

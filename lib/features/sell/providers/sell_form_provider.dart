@@ -74,7 +74,8 @@ class SellFormData {
       description!.trim().length >= 10;
 
   /// Retourne une copie avec la marque définie et le modèle effacé.
-  SellFormData withBrand({required int id, required String name}) => SellFormData(
+  SellFormData withBrand({required int id, required String name}) =>
+      SellFormData(
         vin: vin,
         brand: name,
         brandId: id,
@@ -177,7 +178,8 @@ class SellFormNotifier extends StateNotifier<SellFormData> {
   void reset() => state = const SellFormData();
 }
 
-final sellFormProvider =
-    StateNotifierProvider<SellFormNotifier, SellFormData>((ref) {
+final sellFormProvider = StateNotifierProvider<SellFormNotifier, SellFormData>((
+  ref,
+) {
   return SellFormNotifier();
 });

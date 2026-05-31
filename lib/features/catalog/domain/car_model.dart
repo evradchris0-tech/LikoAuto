@@ -12,15 +12,17 @@ class CarModel {
   });
 
   factory CarModel.fromJson(Map<String, dynamic> json) => CarModel(
-        id: json['id'] as int,
-        brandId: json['brand_id'] as int? ??
-            (json['brand'] as Map<String, dynamic>?)?['id'] as int? ?? 0,
-        name: json['name'] as String,
-        brand: json['brand'] != null
-            ? Brand.fromJson(json['brand'] as Map<String, dynamic>)
-            : null,
-        isActive: json['is_active'] as bool? ?? true,
-      );
+    id: json['id'] as int,
+    brandId:
+        json['brand_id'] as int? ??
+        (json['brand'] as Map<String, dynamic>?)?['id'] as int? ??
+        0,
+    name: json['name'] as String,
+    brand: json['brand'] != null
+        ? Brand.fromJson(json['brand'] as Map<String, dynamic>)
+        : null,
+    isActive: json['is_active'] as bool? ?? true,
+  );
 
   final int id;
   final int brandId;
@@ -56,19 +58,19 @@ class ModelVariant {
   });
 
   factory ModelVariant.fromJson(Map<String, dynamic> json) => ModelVariant(
-        id: json['id'] as int,
-        modelId: json['model_id'] as int? ?? 0,
-        year: json['year'] as int,
-        bodyType: json['body_type'] as String,
-        variantName: json['variant_name'] as String?,
-        numDoors: json['num_doors'] as int?,
-        numSeats: json['num_seats'] as int?,
-        transmissionType: json['transmission_type'] as String?,
-        fuelType: json['fuel_type'] as String?,
-        horsepower: json['horsepower'] as int?,
-        engineSize: json['engine_size'] as String?,
-        isActive: json['is_active'] as bool? ?? true,
-      );
+    id: json['id'] as int,
+    modelId: json['model_id'] as int? ?? 0,
+    year: json['year'] as int,
+    bodyType: json['body_type'] as String,
+    variantName: json['variant_name'] as String?,
+    numDoors: json['num_doors'] as int?,
+    numSeats: json['num_seats'] as int?,
+    transmissionType: json['transmission_type'] as String?,
+    fuelType: json['fuel_type'] as String?,
+    horsepower: json['horsepower'] as int?,
+    engineSize: json['engine_size'] as String?,
+    isActive: json['is_active'] as bool? ?? true,
+  );
 
   final int id;
   final int modelId;
@@ -83,5 +85,6 @@ class ModelVariant {
   final String? engineSize;
   final bool isActive;
 
-  String get displayName => variantName != null ? '$year $variantName' : '$year';
+  String get displayName =>
+      variantName != null ? '$year $variantName' : '$year';
 }

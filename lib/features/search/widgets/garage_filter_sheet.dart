@@ -31,6 +31,7 @@ class GarageFilterSheet extends StatefulWidget {
     return showModalBottomSheet<GarageFilters>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.rBottomSheet),
       builder: (_) => GarageFilterSheet(initial: initial),
@@ -154,25 +155,6 @@ class _GarageFilterSheetState extends State<GarageFilterSheet> {
                             }),
                           ),
                       ],
-                    ),
-                  ),
-                  AppSpacing.gapLg,
-                  _Section(
-                    title: 'Disponibilité',
-                    child: SwitchListTile.adaptive(
-                      contentPadding: EdgeInsets.zero,
-                      activeThumbColor: AppColors.primary,
-                      title: Text(
-                        'Ouvert maintenant',
-                        style: context.textStyles.bodyLarge?.copyWith(
-                          color: AppColors.trust,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      value: _filters.openNowOnly,
-                      onChanged: (v) => setState(
-                        () => _filters = _filters.copyWith(openNowOnly: v),
-                      ),
                     ),
                   ),
                 ],

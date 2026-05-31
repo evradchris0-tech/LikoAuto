@@ -1,5 +1,4 @@
 class MessageEntity {
-
   const MessageEntity({
     required this.id,
     required this.text,

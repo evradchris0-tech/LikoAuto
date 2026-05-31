@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ChangeEmailScreen extends ConsumerStatefulWidget {
   const ChangeEmailScreen({super.key});
@@ -50,8 +50,11 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    AppSnack.success(context, 'Un email de confirmation a été envoyé à $email.');
-    context.pop();
+    AppSnack.success(
+      context,
+      'Un email de confirmation a été envoyé à $email.',
+    );
+    context.safePop();
   }
 
   @override
@@ -62,8 +65,8 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           "Changer d'email",
@@ -92,14 +95,12 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
               hintText: 'Mot de passe actuel',
               obscureText: _obscurePassword,
               prefixIcon: const Icon(
-                Icons.lock_outline_rounded,
+                LucideIcons.lock,
                 color: AppColors.neutral,
               ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+                  _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
                   color: AppColors.neutral,
                 ),
                 onPressed: () =>
@@ -112,7 +113,7 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
               hintText: 'Nouvelle adresse email',
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(
-                Icons.email_outlined,
+                LucideIcons.mail,
                 color: AppColors.neutral,
               ),
             ),

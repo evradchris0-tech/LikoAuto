@@ -3,6 +3,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Barre supérieure de la Recherche : champ de saisie + bouton filtres avec
 /// indicateur du nombre de filtres actifs.
@@ -37,7 +38,7 @@ class SearchTopBar extends StatelessWidget {
             child: Container(
               height: 48,
               decoration: const BoxDecoration(
-                color: AppColors.primarySoft,
+                color: AppColors.trustSoft,
                 borderRadius: AppRadius.rButton,
               ),
               child: TextField(
@@ -53,7 +54,7 @@ class SearchTopBar extends StatelessWidget {
                     color: AppColors.neutral,
                   ),
                   prefixIcon: const Icon(
-                    Icons.search_rounded,
+                    LucideIcons.search,
                     color: AppColors.neutral,
                     size: 22,
                   ),
@@ -63,7 +64,7 @@ class SearchTopBar extends StatelessWidget {
                       if (value.text.isEmpty) return const SizedBox.shrink();
                       return IconButton(
                         icon: const Icon(
-                          Icons.close_rounded,
+                          LucideIcons.x,
                           color: AppColors.neutral,
                           size: 18,
                         ),
@@ -72,7 +73,7 @@ class SearchTopBar extends StatelessWidget {
                     },
                   ),
                   filled: true,
-                  fillColor: AppColors.primarySoft,
+                  fillColor: AppColors.trustSoft,
                   border: const OutlineInputBorder(
                     borderRadius: AppRadius.rButton,
                     borderSide: BorderSide.none,
@@ -90,7 +91,7 @@ class SearchTopBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           _FilterButton(activeCount: activeFilters, onPressed: onFilterTap),
         ],
       ),
@@ -118,7 +119,7 @@ class _FilterButton extends StatelessWidget {
             child: const SizedBox(
               width: 48,
               height: 48,
-              child: Icon(Icons.tune_rounded, color: Colors.white, size: 22),
+              child: Icon(LucideIcons.sliders, color: Colors.white, size: 22),
             ),
           ),
         ),
@@ -139,7 +140,7 @@ class _FilterButton extends StatelessWidget {
                 '$activeCount',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   height: 1,
                 ),

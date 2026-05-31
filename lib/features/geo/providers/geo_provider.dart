@@ -8,7 +8,10 @@ final countriesProvider = FutureProvider<List<ApiCountry>>((ref) {
 });
 
 /// Villes filtrées par pays (défaut : Cameroun = 1).
-final citiesProvider = FutureProvider.family<List<ApiCity>, int?>((ref, countryId) {
+final citiesProvider = FutureProvider.family<List<ApiCity>, int?>((
+  ref,
+  countryId,
+) {
   return ref.watch(geoRepositoryProvider).getCities(countryId: countryId);
 });
 

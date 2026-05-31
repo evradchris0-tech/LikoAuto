@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -14,15 +15,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   String _selectedBrand = 'Toutes';
   bool _isVerifiedOnly = false;
 
-  final List<String> _brands = ['Toutes', 'Toyota', 'Mercedes', 'Hyundai', 'Suzuki', 'Ford'];
+  final List<String> _brands = [
+    'Toutes',
+    'Toyota',
+    'Mercedes',
+    'Hyundai',
+    'Suzuki',
+    'Ford',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.surface,
+        borderRadius: AppRadius.rBottomSheet,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -33,16 +41,30 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             children: [
               const Text(
                 'Filtres',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.trust),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.trust,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Réinitialiser', style: TextStyle(color: AppColors.primary)),
+                child: const Text(
+                  'Réinitialiser',
+                  style: TextStyle(color: AppColors.primary),
+                ),
               ),
             ],
           ),
           AppSpacing.gapMd,
-          const Text('MARQUE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.neutral)),
+          const Text(
+            'MARQUE',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppColors.neutral,
+            ),
+          ),
           AppSpacing.gapSm,
           SizedBox(
             height: 40,
@@ -60,40 +82,68 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   selectedColor: AppColors.primarySoft,
                   labelStyle: TextStyle(
                     color: isSelected ? AppColors.primary : AppColors.trust,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 );
               },
             ),
           ),
           AppSpacing.gapLg,
-          const Text('ANNÉE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.neutral)),
+          const Text(
+            'ANNÉE',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppColors.neutral,
+            ),
+          ),
           AppSpacing.gapSm,
           SizedBox(
             height: 40,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              children: ['Toutes', '2024', '2023', '2022', '2021', '2020', '2019'].map((year) {
-                final isSelected = year == 'Toutes'; // Default for demo
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(year),
-                    selected: isSelected,
-                    onSelected: (val) {},
-                  ),
-                );
-              }).toList(),
+              children:
+                  [
+                    'Toutes',
+                    '2024',
+                    '2023',
+                    '2022',
+                    '2021',
+                    '2020',
+                    '2019',
+                  ].map((year) {
+                    final isSelected = year == 'Toutes'; // Default for demo
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(year),
+                        selected: isSelected,
+                        onSelected: (val) {},
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
           AppSpacing.gapLg,
-          const Text('GARAGE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.neutral)),
+          const Text(
+            'GARAGE',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppColors.neutral,
+            ),
+          ),
           AppSpacing.gapSm,
           DropdownButtonFormField<String>(
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.background,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             hint: const Text('Choisir un garage'),
@@ -103,7 +153,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             onChanged: (val) {},
           ),
           AppSpacing.gapLg,
-          const Text('FOURCHETTE DE PRIX (FCFA)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.neutral)),
+          const Text(
+            'FOURCHETTE DE PRIX (FCFA)',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppColors.neutral,
+            ),
+          ),
           RangeSlider(
             values: _priceRange,
             min: 500000,
@@ -119,8 +176,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           AppSpacing.gapMd,
           SwitchListTile(
-            title: const Text('Annonces vérifiées uniquement', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-            subtitle: const Text('Afficher uniquement les véhicules avec VIN vérifié', style: TextStyle(fontSize: 12)),
+            title: const Text(
+              'Annonces vérifiées uniquement',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+            subtitle: const Text(
+              'Afficher uniquement les véhicules avec VIN vérifié',
+              style: TextStyle(fontSize: 12),
+            ),
             value: _isVerifiedOnly,
             activeThumbColor: AppColors.primary,
             onChanged: (val) => setState(() => _isVerifiedOnly = val),
@@ -135,9 +198,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 backgroundColor: AppColors.trust,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('APPLIQUER LES FILTRES', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'APPLIQUER LES FILTRES',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           const SizedBox(height: 10),

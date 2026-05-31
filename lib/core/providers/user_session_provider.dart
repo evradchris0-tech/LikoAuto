@@ -40,10 +40,7 @@ final userSessionProvider = StreamProvider<UserSession>((ref) async* {
     final profile = await repo.fetchUserProfile();
 
     if (profile != null) {
-      yield AuthenticatedSession(
-        firebaseUser: firebaseUser,
-        profile: profile,
-      );
+      yield AuthenticatedSession(firebaseUser: firebaseUser, profile: profile);
     }
     // Si le backend ne répond pas, on reste en PendingSyncSession (mode dégradé).
   }
@@ -51,18 +48,16 @@ final userSessionProvider = StreamProvider<UserSession>((ref) async* {
 
 /// Raccourci — vrai si l'utilisateur a au moins une session Firebase active.
 final isSignedInProvider = Provider<bool>((ref) {
-  return ref.watch(userSessionProvider).maybeWhen(
-        data: (session) => session.isSignedIn,
-        orElse: () => false,
-      );
+  return ref
+      .watch(userSessionProvider)
+      .maybeWhen(data: (session) => session.isSignedIn, orElse: () => false);
 });
 
 /// Raccourci — profil NestJS si disponible, sinon null.
 final userProfileProvider = Provider((ref) {
-  return ref.watch(userSessionProvider).maybeWhen(
-        data: (session) => session.profile,
-        orElse: () => null,
-      );
+  return ref
+      .watch(userSessionProvider)
+      .maybeWhen(data: (session) => session.profile, orElse: () => null);
 });
 
 /// Vérifie une permission PBAC. Retourne false si la session est incomplète.
@@ -71,7 +66,9 @@ final userProfileProvider = Provider((ref) {
 /// final canCreate = ref.watch(hasPermissionProvider(AppPermissions.vehicles.create));
 /// ```
 final hasPermissionProvider = Provider.family<bool, String>((ref, permission) {
-  return ref.watch(userSessionProvider).maybeWhen(
+  return ref
+      .watch(userSessionProvider)
+      .maybeWhen(
         data: (session) => session.hasPermission(permission),
         orElse: () => false,
       );

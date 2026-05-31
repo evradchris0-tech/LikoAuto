@@ -4,7 +4,9 @@ import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/features/my_listings/domain/my_listing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 enum MyListingAction { edit, boost, pause, resume, markSold, delete }
 
@@ -24,7 +26,7 @@ class MyListingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final card = listing.card;
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: AppRadius.rCard,
       child: InkWell(
         onTap: onTap,
@@ -35,10 +37,7 @@ class MyListingCard extends StatelessWidget {
             borderRadius: AppRadius.rCard,
             // Bordure dorée si boosté (wireframe 5.1)
             border: listing.isBoosted
-                ? Border.all(
-                    color: const Color(0xFFD4820A),
-                    width: 1.5,
-                  )
+                ? Border.all(color: AppColors.boost, width: 1.5)
                 : null,
             boxShadow: [
               BoxShadow(
@@ -55,13 +54,13 @@ class MyListingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppRadius.rButton,
                     child: SizedBox(
                       width: 90,
                       height: 90,
                       child: ColoredBox(
                         color: AppColors.background,
-                        child: Image.asset(card.imageAsset, fit: BoxFit.cover),
+                        child: CarImage(url: card.imageAsset),
                       ),
                     ),
                   ),
@@ -78,24 +77,24 @@ class MyListingCard extends StatelessWidget {
                               horizontal: 8,
                               vertical: 3,
                             ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF3CD),
-                              borderRadius: BorderRadius.circular(6),
+                            decoration: const BoxDecoration(
+                              color: AppColors.boostSoft,
+                              borderRadius: AppRadius.rXs,
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.rocket_launch_rounded,
+                                  LucideIcons.rocket,
                                   size: 11,
-                                  color: Color(0xFFD4820A),
+                                  color: AppColors.boost,
                                 ),
-                                SizedBox(width: 4),
+                                SizedBox(width: AppSpacing.xs),
                                 Text(
                                   'BOOSTÉ',
                                   style: TextStyle(
-                                    color: Color(0xFFD4820A),
-                                    fontSize: 9,
+                                    color: AppColors.boost,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 0.4,
                                   ),
@@ -131,11 +130,11 @@ class MyListingCard extends StatelessWidget {
                         Row(
                           children: [
                             const Icon(
-                              Icons.location_on_outlined,
+                              LucideIcons.mapPin,
                               size: 13,
                               color: AppColors.neutral,
                             ),
-                            const SizedBox(width: 3),
+                            const SizedBox(width: AppSpacing.xxs),
                             Expanded(
                               child: Text(
                                 card.location,
@@ -165,7 +164,7 @@ class MyListingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(
-                        Icons.error_outline_rounded,
+                        LucideIcons.alertCircle,
                         size: 16,
                         color: AppColors.error,
                       ),
@@ -188,21 +187,18 @@ class MyListingCard extends StatelessWidget {
               Row(
                 children: [
                   _StatChip(
-                    icon: Icons.remove_red_eye_outlined,
+                    icon: LucideIcons.eye,
                     value: listing.views.toGroupedString(),
                     label: 'vues',
                   ),
                   AppSpacing.gapSm,
                   _StatChip(
-                    icon: Icons.forum_outlined,
+                    icon: LucideIcons.messageSquare,
                     value: listing.contacts.toString(),
                     label: 'contacts',
                   ),
                   const Spacer(),
-                  _ActionsMenu(
-                    status: listing.status,
-                    onSelected: onAction,
-                  ),
+                  _ActionsMenu(status: listing.status, onSelected: onAction),
                 ],
               ),
             ],
@@ -231,12 +227,12 @@ class _StatusPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 11, color: fg),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             status.label,
             style: TextStyle(
               color: fg,
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.2,
             ),
@@ -248,32 +244,18 @@ class _StatusPill extends StatelessWidget {
 
   static (Color, Color, IconData) _style(ListingStatus s) {
     switch (s) {
+      case ListingStatus.draft:
+        return (AppColors.outline, AppColors.neutral, LucideIcons.fileEdit);
       case ListingStatus.active:
-        return (AppColors.successSoft, AppColors.success, Icons.bolt_rounded);
+        return (AppColors.successSoft, AppColors.success, LucideIcons.zap);
       case ListingStatus.pending:
-        return (
-          AppColors.primarySoft,
-          AppColors.primary,
-          Icons.schedule_rounded,
-        );
+        return (AppColors.primarySoft, AppColors.primary, LucideIcons.clock);
       case ListingStatus.sold:
-        return (
-          const Color(0xFFE3EAF3),
-          AppColors.trust,
-          Icons.verified_rounded,
-        );
+        return (AppColors.trustSoft, AppColors.trust, LucideIcons.badgeCheck);
       case ListingStatus.rejected:
-        return (
-          AppColors.errorSoft,
-          AppColors.error,
-          Icons.error_outline_rounded,
-        );
+        return (AppColors.errorSoft, AppColors.error, LucideIcons.alertCircle);
       case ListingStatus.paused:
-        return (
-          AppColors.outline,
-          AppColors.trust,
-          Icons.pause_circle_outline_rounded,
-        );
+        return (AppColors.outline, AppColors.trust, LucideIcons.pauseCircle);
     }
   }
 }
@@ -310,13 +292,13 @@ class _StatChip extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             label,
             style: const TextStyle(
               color: AppColors.neutral,
               fontWeight: FontWeight.w600,
-              fontSize: 11,
+              fontSize: 12,
             ),
           ),
         ],
@@ -334,7 +316,8 @@ class _ActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<MyListingAction>(
-      icon: const Icon(Icons.more_vert_rounded, color: AppColors.trust),
+      color: Colors.white,
+      icon: const Icon(LucideIcons.moreVertical, color: AppColors.primary),
       onSelected: onSelected,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.rCard),
       itemBuilder: (_) => [
@@ -343,16 +326,13 @@ class _ActionsMenu extends StatelessWidget {
             status == ListingStatus.rejected)
           const PopupMenuItem(
             value: MyListingAction.edit,
-            child: _ActionRow(
-              icon: Icons.edit_outlined,
-              label: 'Modifier',
-            ),
+            child: _ActionRow(icon: LucideIcons.edit2, label: 'Modifier'),
           ),
         if (status == ListingStatus.active)
           const PopupMenuItem(
             value: MyListingAction.boost,
             child: _ActionRow(
-              icon: Icons.rocket_launch_outlined,
+              icon: LucideIcons.rocket,
               label: 'Booster',
               accent: true,
             ),
@@ -361,31 +341,28 @@ class _ActionsMenu extends StatelessWidget {
           const PopupMenuItem(
             value: MyListingAction.pause,
             child: _ActionRow(
-              icon: Icons.pause_circle_outline_rounded,
+              icon: LucideIcons.pauseCircle,
               label: 'Mettre en pause',
             ),
           ),
         if (status == ListingStatus.paused)
           const PopupMenuItem(
             value: MyListingAction.resume,
-            child: _ActionRow(
-              icon: Icons.play_circle_outline_rounded,
-              label: 'Réactiver',
-            ),
+            child: _ActionRow(icon: LucideIcons.playCircle, label: 'Réactiver'),
           ),
         if (status == ListingStatus.active || status == ListingStatus.paused)
           const PopupMenuItem(
             value: MyListingAction.markSold,
             child: _ActionRow(
-              icon: Icons.verified_outlined,
+              icon: LucideIcons.badgeCheck,
               label: 'Marquer vendue',
             ),
           ),
-        const PopupMenuDivider(),
+        const PopupMenuDivider(color: AppColors.outline),
         const PopupMenuItem(
           value: MyListingAction.delete,
           child: _ActionRow(
-            icon: Icons.delete_outline_rounded,
+            icon: LucideIcons.trash2,
             label: 'Supprimer',
             destructive: true,
           ),
@@ -412,17 +389,14 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = destructive
         ? AppColors.error
-        : (accent ? AppColors.primary : AppColors.trust);
+        : AppColors.primary;
     return Row(
       children: [
         Icon(icon, size: 18, color: color),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Text(
           label,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.w800),
         ),
       ],
     );

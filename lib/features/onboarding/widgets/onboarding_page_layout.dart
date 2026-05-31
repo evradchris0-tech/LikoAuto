@@ -4,6 +4,8 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/buttons/tertiary_button.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
 class OnboardingPageLayout extends StatefulWidget {
   const OnboardingPageLayout({
     required this.visual,
@@ -238,7 +240,7 @@ class _OnboardingPageLayoutState extends State<OnboardingPageLayout>
                 children: [
                   PrimaryButton(
                     label: widget.primaryLabel,
-                    icon: Icons.arrow_forward_rounded,
+                    icon: LucideIcons.arrowRight,
                     onPressed: widget.onPrimary,
                   ),
                   if (widget.tertiaryLabel != null) ...[

@@ -268,7 +268,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.search,
                 name: 'search',
-                builder: (context, state) => const SearchScreen(),
+                builder: (context, state) => SearchScreen(
+                  initialTab: state.uri.queryParameters['tab'] == 'garages' ? 1 : 0,
+                ),
               ),
             ],
           ),

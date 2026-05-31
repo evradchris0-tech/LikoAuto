@@ -8,9 +8,11 @@ final listingFiltersProvider = StateProvider<ListingFilters>(
 );
 
 /// Liste des annonces publiées (utilisée par HomeScreen + SearchScreen).
-final listingsProvider = FutureProvider.family<List<ApiListing>, ListingFilters>(
-  (ref, filters) => ref.watch(listingsRepositoryProvider).getListings(filters),
-);
+final listingsProvider =
+    FutureProvider.family<List<ApiListing>, ListingFilters>(
+      (ref, filters) =>
+          ref.watch(listingsRepositoryProvider).getListings(filters),
+    );
 
 /// Annonces publiées par défaut — raccourci pour HomeScreen.
 final publishedListingsProvider = FutureProvider<List<ApiListing>>((ref) {

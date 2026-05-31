@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 
 class LikoTextField extends StatelessWidget {
   const LikoTextField({
@@ -18,9 +18,13 @@ class LikoTextField extends StatelessWidget {
     this.textInputAction,
     this.validator,
     this.autofocus = false,
+    this.readOnly = false,
+    this.onTap,
+    this.label,
   });
 
   final String hintText;
+  final String? label;
   final bool obscureText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
@@ -33,11 +37,15 @@ class LikoTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final String? Function(String?)? validator;
   final bool autofocus;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return TextFormField(
-      style: const TextStyle(color: AppColors.trust),
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
@@ -48,25 +56,37 @@ class LikoTextField extends StatelessWidget {
       textInputAction: textInputAction,
       validator: validator,
       autofocus: autofocus,
+      readOnly: readOnly,
+      onTap: onTap,
+      style: tt.bodyLarge?.copyWith(color: cs.onSurface),
       decoration: InputDecoration(
+        labelText: label,
         hintText: hintText,
-        hintStyle: const TextStyle(color: AppColors.neutral),
+        hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
         filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        fillColor: cs.surfaceContainerLowest,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.outline),
-        ),
+        border: const OutlineInputBorder(borderRadius: AppRadius.rButton),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.outline),
+          borderRadius: AppRadius.rButton,
+          borderSide: BorderSide(color: cs.outline),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderRadius: AppRadius.rButton,
+          borderSide: BorderSide(color: cs.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.rButton,
+          borderSide: BorderSide(color: cs.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.rButton,
+          borderSide: BorderSide(color: cs.error, width: 1.5),
         ),
       ),
     );

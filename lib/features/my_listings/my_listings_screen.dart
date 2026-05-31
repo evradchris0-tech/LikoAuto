@@ -11,6 +11,7 @@ import 'package:liko_auto/features/my_listings/domain/my_listing.dart';
 import 'package:liko_auto/features/my_listings/providers/my_listings_provider.dart';
 import 'package:liko_auto/features/my_listings/widgets/my_listing_card.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
   const MyListingsScreen({super.key});
@@ -25,6 +26,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen>
 
   static const _filters = <_TabFilter>[
     _TabFilter('Toutes', null),
+    _TabFilter('Brouillons', ListingStatus.draft),
     _TabFilter('Actives', ListingStatus.active),
     _TabFilter('En attente', ListingStatus.pending),
     _TabFilter('Vendues', ListingStatus.sold),
@@ -52,8 +54,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen>
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Mes annonces',
@@ -67,28 +69,37 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen>
           preferredSize: const Size.fromHeight(48),
           child: ColoredBox(
             color: Colors.white,
-            child: TabBar(
-              controller: _tabs,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.neutral,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              labelStyle: context.textStyles.labelLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 4,
               ),
-              unselectedLabelStyle: context.textStyles.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+              child: TabBar(
+                controller: _tabs,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.neutral,
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicator: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                labelStyle: context.textStyles.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+                unselectedLabelStyle: context.textStyles.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: _filters
+                    .map(
+                      (f) => Tab(
+                        text: '${f.label} (${_countFor(listings, f.status)})',
+                      ),
+                    )
+                    .toList(),
               ),
-              tabs: _filters
-                  .map(
-                    (f) => Tab(
-                      text:
-                          '${f.label} (${_countFor(listings, f.status)})',
-                    ),
-                  )
-                  .toList(),
             ),
           ),
         ),
@@ -107,19 +118,18 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen>
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 4,
-        icon: const Icon(Icons.add_rounded),
+        shape: const StadiumBorder(),
+        icon: const Icon(LucideIcons.plus),
         label: const Text(
           'Nouvelle annonce',
-          style: TextStyle(fontWeight: FontWeight.w800),
+          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
         ),
       ),
     );
   }
 
   int _countFor(List<MyListing> all, ListingStatus? s) {
-    return s == null
-        ? all.length
-        : all.where((l) => l.status == s).length;
+    return s == null ? all.length : all.where((l) => l.status == s).length;
   }
 }
 
@@ -186,10 +196,7 @@ class _ListingsList extends ConsumerWidget {
       case MyListingAction.markSold:
         await actions.changeStatus(l.id, ListingStatus.sold);
         if (context.mounted) {
-          AppSnack.success(
-            context,
-            'Félicitations, annonce marquée vendue !',
-          );
+          AppSnack.success(context, 'Félicitations, annonce marquée vendue !');
         }
         return;
       case MyListingAction.delete:
@@ -235,7 +242,6 @@ class _ListingsList extends ConsumerWidget {
     );
     return res ?? false;
   }
-
 }
 
 class _EmptyState extends StatelessWidget {

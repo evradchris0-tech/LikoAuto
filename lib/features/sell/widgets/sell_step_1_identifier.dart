@@ -8,7 +8,7 @@ import 'package:liko_auto/features/catalog/domain/brand.dart';
 import 'package:liko_auto/features/catalog/domain/car_model.dart';
 import 'package:liko_auto/features/catalog/providers/catalog_provider.dart';
 import 'package:liko_auto/features/sell/providers/sell_form_provider.dart';
-import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SellStep1Identifier extends ConsumerStatefulWidget {
   const SellStep1Identifier({super.key});
@@ -24,7 +24,9 @@ class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
   @override
   void initState() {
     super.initState();
-    _vinCtrl = TextEditingController(text: ref.read(sellFormProvider).vin ?? '');
+    _vinCtrl = TextEditingController(
+      text: ref.read(sellFormProvider).vin ?? '',
+    );
   }
 
   @override
@@ -56,65 +58,127 @@ class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
           ),
         ),
         AppSpacing.gapXl,
-        // Badge RECOMMANDÉ (wireframe 3.1)
-        Row(
-          children: [
-            Text(
-              'Numéro de châssis (VIN)',
-              style: context.textStyles.labelMedium?.copyWith(
-                color: AppColors.trust,
-                fontWeight: FontWeight.w700,
+        // Section VIN — carte claire
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.outline),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Numéro de châssis (VIN)',
+                    style: context.textStyles.labelMedium?.copyWith(
+                      color: AppColors.trust,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.successSoft,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'RECOMMANDÉ',
+                      style: TextStyle(
+                        color: AppColors.success,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.successSoft,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Text(
-                'RECOMMANDÉ',
-                style: TextStyle(
-                  color: AppColors.success,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.4,
+              const SizedBox(height: AppSpacing.sm),
+              TextFormField(
+                controller: _vinCtrl,
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp('[a-zA-Z0-9]')),
+                  LengthLimitingTextInputFormatter(17),
+                  UpperCaseTextFormatter(),
+                ],
+                onChanged: (value) =>
+                    ref.read(sellFormProvider.notifier).setVin(value),
+                style: const TextStyle(
+                  color: AppColors.trust,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  letterSpacing: 1.2,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Ex : JT3HP10V1P0123456',
+                  hintStyle: const TextStyle(
+                    color: AppColors.neutral,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.background,
+                  prefixIcon: const Icon(
+                    LucideIcons.qrCode,
+                    color: AppColors.trust,
+                    size: 22,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.outline),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.outline),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        LikoTextField(
-          controller: _vinCtrl,
-          hintText: 'Ex : JT3HP10V1P0123456',
-          prefixIcon: const Icon(
-            Icons.qr_code_2_rounded,
-            color: AppColors.neutral,
+              const SizedBox(height: AppSpacing.sm),
+              _VinFeedback(form: form),
+            ],
           ),
-          textCapitalization: TextCapitalization.characters,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp('[a-zA-Z0-9]')),
-            LengthLimitingTextInputFormatter(17),
-            UpperCaseTextFormatter(),
-          ],
-          onChanged: (value) {
-            ref.read(sellFormProvider.notifier).setVin(value);
-          },
         ),
-        AppSpacing.gapSm,
-        _VinFeedback(form: form),
         AppSpacing.gapLg,
+        // Séparateur OU
         Row(
           children: [
             const Expanded(child: Divider()),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'OU',
-                style: context.textStyles.labelSmall?.copyWith(
-                  color: AppColors.neutral,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.trustSoft,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'OU',
+                  style: context.textStyles.labelSmall?.copyWith(
+                    color: AppColors.trust,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
@@ -122,30 +186,44 @@ class _SellStep1IdentifierState extends ConsumerState<SellStep1Identifier> {
           ],
         ),
         AppSpacing.gapLg,
-        Text(
-          'Marque',
-          style: context.textStyles.labelMedium?.copyWith(
-            color: AppColors.trust,
-            fontWeight: FontWeight.w700,
+        // Section Marque
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.outline),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Marque',
+                style: context.textStyles.labelMedium?.copyWith(
+                  color: AppColors.trust,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _ApiBrandChips(
+                selectedBrandId: form.brandId,
+                onSelect: (brand) => ref
+                    .read(sellFormProvider.notifier)
+                    .setBrand(id: brand.id, name: brand.name),
+              ),
+              if (form.brandId != null) ...[
+                AppSpacing.gapLg,
+                _ApiModelChips(
+                  brandId: form.brandId!,
+                  selectedModelId: form.modelId,
+                  onSelect: (model) => ref
+                      .read(sellFormProvider.notifier)
+                      .setModel(id: model.id, name: model.name),
+                ),
+              ],
+            ],
           ),
         ),
-        const SizedBox(height: 8),
-        _ApiBrandChips(
-          selectedBrandId: form.brandId,
-          onSelect: (brand) => ref
-              .read(sellFormProvider.notifier)
-              .setBrand(id: brand.id, name: brand.name),
-        ),
-        if (form.brandId != null) ...[
-          AppSpacing.gapLg,
-          _ApiModelChips(
-            brandId: form.brandId!,
-            selectedModelId: form.modelId,
-            onSelect: (model) => ref
-                .read(sellFormProvider.notifier)
-                .setModel(id: model.id, name: model.name),
-          ),
-        ],
       ],
     );
   }
@@ -164,14 +242,16 @@ class _VinFeedback extends StatelessWidget {
     if (vin.isEmpty) {
       return Text(
         '17 caractères, lettres majuscules et chiffres (sauf I, O, Q).',
-        style: context.textStyles.labelSmall?.copyWith(color: AppColors.neutral),
+        style: context.textStyles.labelSmall?.copyWith(
+          color: AppColors.neutral,
+        ),
       );
     }
     if (form.isVinValid) {
       return Row(
         children: [
           const Icon(
-            Icons.verified_rounded,
+            LucideIcons.badgeCheck,
             color: AppColors.success,
             size: 16,
           ),
@@ -188,7 +268,7 @@ class _VinFeedback extends StatelessWidget {
     }
     return Row(
       children: [
-        const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 16),
+        const Icon(LucideIcons.alertCircle, color: AppColors.error, size: 16),
         AppSpacing.gapXs,
         Expanded(
           child: Text(
@@ -209,10 +289,7 @@ class _VinFeedback extends StatelessWidget {
 // ── API brand chips ────────────────────────────────────────────────────────────
 
 class _ApiBrandChips extends ConsumerWidget {
-  const _ApiBrandChips({
-    required this.selectedBrandId,
-    required this.onSelect,
-  });
+  const _ApiBrandChips({required this.selectedBrandId, required this.onSelect});
 
   final int? selectedBrandId;
   final void Function(Brand) onSelect;
@@ -240,27 +317,32 @@ class _ApiBrandChips extends ConsumerWidget {
         runSpacing: 8,
         children: brands.where((b) => b.isActive).map((brand) {
           final isActive = selectedBrandId == brand.id;
-          return GestureDetector(
-            onTap: () => onSelect(brand),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                color: isActive ? AppColors.trust : Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isActive ? AppColors.trust : AppColors.outline,
+          return Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              onTap: () => onSelect(brand),
+              borderRadius: BorderRadius.circular(10),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 10,
                 ),
-              ),
-              child: Text(
-                brand.name,
-                style: TextStyle(
-                  color: isActive ? Colors.white : AppColors.trust,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.trust : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isActive ? AppColors.trust : AppColors.outline,
+                  ),
+                ),
+                child: Text(
+                  brand.name,
+                  style: TextStyle(
+                    color: isActive ? Colors.white : AppColors.trust,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
@@ -297,7 +379,7 @@ class _ApiModelChips extends ConsumerWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         modelsAsync.when(
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
@@ -311,16 +393,18 @@ class _ApiModelChips extends ConsumerWidget {
           ),
           error: (_, __) => Text(
             'Impossible de charger les modèles.',
-            style:
-                context.textStyles.labelSmall?.copyWith(color: AppColors.error),
+            style: context.textStyles.labelSmall?.copyWith(
+              color: AppColors.error,
+            ),
           ),
           data: (models) {
             final active = models.where((m) => m.isActive).toList();
             if (active.isEmpty) {
               return Text(
                 'Aucun modèle disponible pour cette marque.',
-                style: context.textStyles.labelSmall
-                    ?.copyWith(color: AppColors.neutral),
+                style: context.textStyles.labelSmall?.copyWith(
+                  color: AppColors.neutral,
+                ),
               );
             }
             return Wrap(
@@ -328,27 +412,32 @@ class _ApiModelChips extends ConsumerWidget {
               runSpacing: 8,
               children: active.map((model) {
                 final isActive = selectedModelId == model.id;
-                return GestureDetector(
-                  onTap: () => onSelect(model),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isActive ? AppColors.trust : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isActive ? AppColors.trust : AppColors.outline,
+                return Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  child: InkWell(
+                    onTap: () => onSelect(model),
+                    borderRadius: BorderRadius.circular(10),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 10,
                       ),
-                    ),
-                    child: Text(
-                      model.name,
-                      style: TextStyle(
-                        color: isActive ? Colors.white : AppColors.trust,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                      decoration: BoxDecoration(
+                        color: isActive ? AppColors.trust : Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isActive ? AppColors.trust : AppColors.outline,
+                        ),
+                      ),
+                      child: Text(
+                        model.name,
+                        style: TextStyle(
+                          color: isActive ? Colors.white : AppColors.trust,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),

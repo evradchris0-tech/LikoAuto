@@ -6,6 +6,7 @@ import 'package:liko_auto/features/home/widgets/listing_card.dart';
 abstract final class MockVehicles {
   static const List<ListingCardData> all = [
     ListingCardData(
+      id: 0,
       title: 'Toyota RAV4 2020',
       priceFcfa: 14500000,
       location: 'Akwa, Douala',
@@ -16,6 +17,7 @@ abstract final class MockVehicles {
       isPro: true,
     ),
     ListingCardData(
+      id: 0,
       title: 'Hyundai Tucson 2019',
       priceFcfa: 11200000,
       location: 'Bonanjo, Douala',
@@ -26,6 +28,7 @@ abstract final class MockVehicles {
       priceDrop: -500000, // Baisse de 500k (wireframe 5.2)
     ),
     ListingCardData(
+      id: 0,
       title: 'Mercedes GLC 300 2021',
       priceFcfa: 28000000,
       location: 'Bastos, Yaoundé',
@@ -36,6 +39,7 @@ abstract final class MockVehicles {
       isPro: true,
     ),
     ListingCardData(
+      id: 0,
       title: 'Honda CR-V 2019',
       priceFcfa: 9800000,
       location: 'Ngousso, Yaoundé',
@@ -44,6 +48,7 @@ abstract final class MockVehicles {
       photoCount: 6,
     ),
     ListingCardData(
+      id: 0,
       title: 'Toyota Corolla 2018',
       priceFcfa: 8500000,
       location: 'Bonapriso, Douala',
@@ -53,6 +58,7 @@ abstract final class MockVehicles {
       isVinVerified: true,
     ),
     ListingCardData(
+      id: 0,
       title: 'Toyota Hilux 2017',
       priceFcfa: 16500000,
       location: 'Bonabéri, Douala',
@@ -63,6 +69,7 @@ abstract final class MockVehicles {
       isPro: true,
     ),
     ListingCardData(
+      id: 0,
       title: 'BMW X3 2020',
       priceFcfa: 24000000,
       location: 'Bonamoussadi, Douala',
@@ -74,6 +81,7 @@ abstract final class MockVehicles {
       priceDrop: -1500000, // Baisse de 1,5M (wireframe 5.2)
     ),
     ListingCardData(
+      id: 0,
       title: 'Nissan Qashqai 2018',
       priceFcfa: 9500000,
       location: 'Mvog-Ada, Yaoundé',

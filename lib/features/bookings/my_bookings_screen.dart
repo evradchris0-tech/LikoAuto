@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/extensions/number_formatting.dart';
@@ -11,6 +10,7 @@ import 'package:liko_auto/features/bookings/providers/bookings_provider.dart';
 import 'package:liko_auto/features/reviews/domain/review.dart';
 import 'package:liko_auto/features/reviews/widgets/leave_review_sheet.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class MyBookingsScreen extends ConsumerStatefulWidget {
   const MyBookingsScreen({super.key});
@@ -37,21 +37,33 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final all = ref.watch(bookingsProvider).valueOrNull ?? const [];
+    final bookingsAsync = ref.watch(bookingsProvider);
     final now = DateTime.now();
-    final upcoming = all
-        .where((b) =>
-            b.status == BookingStatus.confirmed &&
-            b.scheduledAt.isAfter(now))
-        .toList();
+    final all = bookingsAsync.valueOrNull ?? const [];
+
+    // Fix #1 + #4 : pending inclus, "À venir" trié ASC (le plus proche en premier)
+    final upcoming =
+        all
+            .where(
+              (b) =>
+                  (b.status == BookingStatus.confirmed ||
+                      b.status == BookingStatus.pending) &&
+                  b.scheduledAt.isAfter(now),
+            )
+            .toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+
     final past = all
-        .where((b) =>
-            b.status == BookingStatus.completed ||
-            (b.status == BookingStatus.confirmed &&
-                b.scheduledAt.isBefore(now)))
+        .where(
+          (b) =>
+              b.status == BookingStatus.completed ||
+              (b.status == BookingStatus.confirmed &&
+                  b.scheduledAt.isBefore(now)),
+        )
         .toList();
-    final cancelled =
-        all.where((b) => b.status == BookingStatus.cancelled).toList();
+    final cancelled = all
+        .where((b) => b.status == BookingStatus.cancelled)
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -59,8 +71,8 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Mes rendez-vous',
@@ -73,31 +85,56 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
           preferredSize: const Size.fromHeight(48),
           child: ColoredBox(
             color: Colors.white,
-            child: TabBar(
-              controller: _tabs,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.neutral,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              labelStyle: context.textStyles.labelLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 4,
               ),
-              tabs: [
-                Tab(text: 'À venir (${upcoming.length})'),
-                Tab(text: 'Passés (${past.length})'),
-                Tab(text: 'Annulés (${cancelled.length})'),
-              ],
+              child: TabBar(
+                controller: _tabs,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.neutral,
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicator: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                labelStyle: context.textStyles.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+                unselectedLabelStyle: context.textStyles.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: [
+                  Tab(text: 'À venir (${upcoming.length})'),
+                  Tab(text: 'Passés (${past.length})'),
+                  Tab(text: 'Annulés (${cancelled.length})'),
+                ],
+              ),
             ),
           ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabs,
-        children: [
-          _BookingsList(items: upcoming, kind: _Kind.upcoming),
-          _BookingsList(items: past, kind: _Kind.past),
-          _BookingsList(items: cancelled, kind: _Kind.cancelled),
-        ],
+      // Fix #5 : loader pendant l'initialisation Drift
+      body: bookingsAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+        error: (e, _) => Center(
+          child: Text(
+            'Erreur de chargement : $e',
+            style: const TextStyle(color: AppColors.neutral),
+          ),
+        ),
+        data: (_) => TabBarView(
+          controller: _tabs,
+          children: [
+            _BookingsList(items: upcoming, kind: _Kind.upcoming),
+            _BookingsList(items: past, kind: _Kind.past),
+            _BookingsList(items: cancelled, kind: _Kind.cancelled),
+          ],
+        ),
       ),
     );
   }
@@ -130,30 +167,24 @@ class _BookingsList extends ConsumerWidget {
               : null,
           onReview: kind == _Kind.past
               ? () => showLeaveReviewSheet(
-                    context,
-                    targetType: ReviewTargetType.garage,
-                    targetId: b.garageName,
-                    targetName: b.garageName,
-                    verified: true,
-                  )
+                  context,
+                  targetType: ReviewTargetType.garage,
+                  targetId: b.garageName,
+                  targetName: b.garageName,
+                  verified: true,
+                )
               : null,
         );
       },
     );
   }
 
-  Future<void> _cancel(
-    BuildContext context,
-    WidgetRef ref,
-    Booking b,
-  ) async {
+  Future<void> _cancel(BuildContext context, WidgetRef ref, Booking b) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Annuler ce RDV ?'),
-        content: Text(
-          'Le rendez-vous chez ${b.garageName} sera annulé.',
-        ),
+        content: Text('Le rendez-vous chez ${b.garageName} sera annulé.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -176,17 +207,24 @@ class _BookingsList extends ConsumerWidget {
       ),
     );
     if (ok ?? false) {
-      await ref
-          .read(bookingsActionsProvider)
-          .changeStatus(b.id, BookingStatus.cancelled);
-      if (context.mounted) {
-        AppSnack.info(context, 'Rendez-vous annulé.');
+      final actions = ref.read(bookingsActionsProvider);
+      if (actions == null) {
+        if (context.mounted) {
+          AppSnack.error(
+            context,
+            'Service temporairement indisponible. Réessayez.',
+          );
+        }
+        return;
       }
+      await actions.changeStatus(b.id, BookingStatus.cancelled);
+      if (context.mounted) AppSnack.info(context, 'Rendez-vous annulé.');
     }
   }
 }
 
-class _BookingCard extends StatelessWidget {
+// Fix #8 : StatefulWidget pour bloquer les avis en double
+class _BookingCard extends StatefulWidget {
   const _BookingCard({required this.booking, this.onCancel, this.onReview});
 
   final Booking booking;
@@ -194,8 +232,15 @@ class _BookingCard extends StatelessWidget {
   final VoidCallback? onReview;
 
   @override
+  State<_BookingCard> createState() => _BookingCardState();
+}
+
+class _BookingCardState extends State<_BookingCard> {
+  bool _reviewed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final b = booking;
+    final b = widget.booking;
     final fmt = DateFormat("EEE d MMM · HH'h'mm", 'fr_FR');
     return Container(
       decoration: BoxDecoration(
@@ -216,14 +261,18 @@ class _BookingCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                // Fix #3 + #9 : icône garage à la place de l'image voiture
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: SizedBox(
+                  child: Container(
                     width: 56,
                     height: 56,
-                    child: ColoredBox(
-                      color: AppColors.primarySoft,
-                      child: Image.asset(b.garageImageAsset, fit: BoxFit.cover),
+                    color: AppColors.trustSoft,
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      LucideIcons.wrench,
+                      color: AppColors.trust,
+                      size: 28,
                     ),
                   ),
                 ),
@@ -250,6 +299,24 @@ class _BookingCard extends StatelessWidget {
                           fontSize: 13,
                         ),
                       ),
+                      // Fix #7 : afficher la localisation du garage
+                      Row(
+                        children: [
+                          const Icon(
+                            LucideIcons.mapPin,
+                            size: 11,
+                            color: AppColors.neutral,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            b.garageLocation,
+                            style: const TextStyle(
+                              color: AppColors.neutral,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -260,11 +327,11 @@ class _BookingCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.calendar_today_rounded,
+                  LucideIcons.calendar,
                   size: 14,
                   color: AppColors.neutral,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   fmt.format(b.scheduledAt),
                   style: const TextStyle(
@@ -275,11 +342,11 @@ class _BookingCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 const Icon(
-                  Icons.payments_outlined,
+                  LucideIcons.creditCard,
                   size: 14,
                   color: AppColors.neutral,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 Text(
                   'dès ${b.service.priceFromFcfa.toFcfa()}',
                   style: const TextStyle(
@@ -291,7 +358,7 @@ class _BookingCard extends StatelessWidget {
               ],
             ),
             if (b.note != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -308,14 +375,14 @@ class _BookingCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (onCancel != null) ...[
-              const SizedBox(height: 12),
+            if (widget.onCancel != null) ...[
+              const SizedBox(height: AppSpacing.md),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
-                  onPressed: onCancel,
+                  onPressed: widget.onCancel,
                   icon: const Icon(
-                    Icons.cancel_outlined,
+                    LucideIcons.xCircle,
                     size: 16,
                     color: AppColors.error,
                   ),
@@ -329,33 +396,57 @@ class _BookingCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (onReview != null) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onReview,
-                  icon: const Icon(
-                    Icons.star_outline_rounded,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                  label: const Text(
-                    'Noter le garage',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w800,
+            if (widget.onReview != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              if (_reviewed)
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      LucideIcons.checkCircle,
+                      size: 16,
+                      color: AppColors.success,
                     ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.primary),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'Avis envoyé',
+                      style: TextStyle(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      widget.onReview!();
+                      setState(() => _reviewed = true);
+                    },
+                    icon: const Icon(
+                      LucideIcons.star,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    label: const Text(
+                      'Noter le garage',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primary),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ],
         ),
@@ -381,13 +472,13 @@ class _StatusBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12, color: fg),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             status.label,
             style: TextStyle(
               color: fg,
               fontWeight: FontWeight.w800,
-              fontSize: 11,
+              fontSize: 12,
             ),
           ),
         ],
@@ -398,29 +489,21 @@ class _StatusBadge extends StatelessWidget {
   static (Color, Color, IconData) _style(BookingStatus s) {
     switch (s) {
       case BookingStatus.pending:
-        return (
-          AppColors.primarySoft,
-          AppColors.primary,
-          Icons.schedule_rounded,
-        );
+        return (AppColors.primarySoft, AppColors.primary, LucideIcons.clock);
       case BookingStatus.confirmed:
         return (
           AppColors.successSoft,
           AppColors.success,
-          Icons.check_circle_rounded,
+          LucideIcons.checkCircle,
         );
       case BookingStatus.completed:
         return (
           const Color(0xFFE3EAF3),
           AppColors.trust,
-          Icons.verified_rounded,
+          LucideIcons.badgeCheck,
         );
       case BookingStatus.cancelled:
-        return (
-          AppColors.errorSoft,
-          AppColors.error,
-          Icons.cancel_rounded,
-        );
+        return (AppColors.errorSoft, AppColors.error, LucideIcons.xCircle);
     }
   }
 }
@@ -433,17 +516,14 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final (title, body) = switch (kind) {
       _Kind.upcoming => (
-          'Aucun rendez-vous à venir.',
-          'Réservez chez un garage partenaire depuis la fiche garage.',
-        ),
+        'Aucun rendez-vous à venir.',
+        'Réservez chez un garage partenaire depuis la fiche garage.',
+      ),
       _Kind.past => (
-          'Aucun RDV passé.',
-          'Votre historique de rendez-vous apparaîtra ici.',
-        ),
-      _Kind.cancelled => (
-          'Aucun RDV annulé.',
-          'Tant mieux !',
-        ),
+        'Aucun RDV passé.',
+        'Votre historique de rendez-vous apparaîtra ici.',
+      ),
+      _Kind.cancelled => ('Aucun RDV annulé.', 'Tant mieux !'),
     };
     return Center(
       child: Padding(
@@ -459,7 +539,7 @@ class _EmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.event_available_rounded,
+                LucideIcons.calendarCheck,
                 size: 44,
                 color: AppColors.primary,
               ),

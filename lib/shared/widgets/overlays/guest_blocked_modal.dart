@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Affiche la modale "invité bloqué" (wireframe 6.5) quand un utilisateur non
 /// connecté tente une action réservée aux membres (contacter, favoris...).
@@ -24,10 +26,10 @@ class _GuestBlockedSheet extends StatelessWidget {
   final String actionLabel;
 
   static const _benefits = [
-    (Icons.favorite_rounded, 'Sauvegarder vos favoris'),
-    (Icons.chat_bubble_rounded, 'Contacter les vendeurs'),
-    (Icons.notifications_rounded, 'Alertes prix en temps réel'),
-    (Icons.sell_rounded, 'Déposer une annonce gratuitement'),
+    (LucideIcons.heart, 'Sauvegarder vos favoris'),
+    (LucideIcons.messageCircle, 'Contacter les vendeurs'),
+    (LucideIcons.bell, 'Alertes prix en temps réel'),
+    (LucideIcons.tag, 'Déposer une annonce gratuitement'),
   ];
 
   @override
@@ -35,7 +37,7 @@ class _GuestBlockedSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: AppRadius.rBottomSheet,
       ),
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -65,7 +67,7 @@ class _GuestBlockedSheet extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.lock_rounded,
+              LucideIcons.lock,
               size: 36,
               color: AppColors.primary,
             ),
@@ -79,7 +81,7 @@ class _GuestBlockedSheet extends StatelessWidget {
               fontSize: 22,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Pour "$actionLabel", vous devez être connecté.',
             textAlign: TextAlign.center,
@@ -131,8 +133,8 @@ class _GuestBlockedSheet extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadius.rButton,
                 ),
                 elevation: 0,
               ),
@@ -155,8 +157,8 @@ class _GuestBlockedSheet extends StatelessWidget {
                 foregroundColor: AppColors.trust,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 side: const BorderSide(color: AppColors.outline, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadius.rButton,
                 ),
               ),
               child: const Text(

@@ -4,11 +4,18 @@ import 'package:liko_auto/features/home/widgets/listing_card.dart';
 // ── Enums API ─────────────────────────────────────────────────────────────────
 
 enum ListingStatus {
-  draft, pending, published, rejected, sold, expired, suspended;
+  draft,
+  pending,
+  published,
+  rejected,
+  sold,
+  expired,
+  suspended;
 
-  static ListingStatus fromString(String s) =>
-      ListingStatus.values.firstWhere((e) => e.name == s,
-          orElse: () => ListingStatus.draft);
+  static ListingStatus fromString(String s) => ListingStatus.values.firstWhere(
+    (e) => e.name == s,
+    orElse: () => ListingStatus.draft,
+  );
 }
 
 enum VehicleCondition {
@@ -20,14 +27,16 @@ enum VehicleCondition {
   final String apiValue;
 
   static VehicleCondition fromString(String s) =>
-      VehicleCondition.values.firstWhere((e) => e.apiValue == s,
-          orElse: () => VehicleCondition.foreignUsed);
+      VehicleCondition.values.firstWhere(
+        (e) => e.apiValue == s,
+        orElse: () => VehicleCondition.foreignUsed,
+      );
 
   String get label => switch (this) {
-        VehicleCondition.newCar => 'Neuf',
-        VehicleCondition.foreignUsed => 'Occasion importée',
-        VehicleCondition.locallyUsed => 'Occasion locale',
-      };
+    VehicleCondition.newCar => 'Neuf',
+    VehicleCondition.foreignUsed => 'Occasion importée',
+    VehicleCondition.locallyUsed => 'Occasion locale',
+  };
 }
 
 // ── Photo ─────────────────────────────────────────────────────────────────────
@@ -43,14 +52,14 @@ class ApiPhoto {
   });
 
   factory ApiPhoto.fromJson(Map<String, dynamic> json) => ApiPhoto(
-        id: json['id'] as int,
-        photoUrl: json['photo_url'] as String,
-        thumbnailUrl: json['thumbnail_url'] as String?,
-        isPrimary: json['is_primary'] as bool? ?? false,
-        position: json['position'] as int? ?? 0,
-      );
+    id: json['id'].toString(), // API returns UUID
+    photoUrl: json['publicUrl'] as String? ?? '', // API returns publicUrl
+    thumbnailUrl: json['thumbnailUrl'] as String?,
+    isPrimary: json['isPrimary'] as bool? ?? false,
+    position: json['sortOrder'] as int? ?? 0,
+  );
 
-  final int id;
+  final String id;
   final String photoUrl;
   final String? thumbnailUrl;
   final bool isPrimary;
@@ -146,12 +155,13 @@ class ApiListing {
   factory ApiListing.fromJson(Map<String, dynamic> json) {
     final vehicleJson = json['vehicle'] as Map<String, dynamic>?;
     final cityJson = json['city'] as Map<String, dynamic>?;
-    final photosJson = json['photos'] as List<dynamic>? ?? [];
+    final photosJson =
+        json['media'] as List<dynamic>? ?? []; // API returns 'media'
 
     return ApiListing(
       id: json['id'] as int,
       title: json['title'] as String,
-      price: (json['price'] as num).toInt(),
+      price: double.parse(json['price'].toString()).toInt(),
       currency: json['currency'] as String? ?? 'XAF',
       cityId: json['city_id'] as int,
       countryId: json['country_id'] as int,
@@ -169,11 +179,12 @@ class ApiListing {
       isBoosted: json['is_boosted'] as bool? ?? false,
       fraudFlagged: json['fraud_flagged'] as bool? ?? false,
       cityName: cityJson?['name'] as String?,
-      photos: photosJson
-          .cast<Map<String, dynamic>>()
-          .map(ApiPhoto.fromJson)
-          .toList()
-        ..sort((a, b) => a.position.compareTo(b.position)),
+      photos:
+          photosJson
+              .cast<Map<String, dynamic>>()
+              .map(ApiPhoto.fromJson)
+              .toList()
+            ..sort((a, b) => a.position.compareTo(b.position)),
       publishedAt: json['published_at'] != null
           ? DateTime.tryParse(json['published_at'] as String)
           : null,
@@ -196,20 +207,23 @@ class ApiListing {
   final List<ApiPhoto> photos;
   final DateTime? publishedAt;
 
-  String get primaryPhotoUrl =>
-      photos.firstWhere((p) => p.isPrimary, orElse: () => photos.first).photoUrl;
+  String get primaryPhotoUrl => photos
+      .firstWhere((p) => p.isPrimary, orElse: () => photos.first)
+      .photoUrl;
 
   bool get hasPhotos => photos.isNotEmpty;
 
   /// Convertit vers le modèle d'affichage [ListingCardData].
   ListingCardData toCardData() {
     return ListingCardData(
+      id: id,
       title: title,
       priceFcfa: price,
       location: cityName ?? 'Cameroun',
       mileageKm: vehicle.mileage ?? 0,
       imageAsset: hasPhotos ? primaryPhotoUrl : '',
       photoCount: photos.length,
+      imageUrls: hasPhotos ? photos.map((p) => p.photoUrl).toList() : [],
       year: '${vehicle.year}',
       isVinVerified: vehicle.isVinVerified,
     );
@@ -242,16 +256,16 @@ class CreateListingRequest {
   final CreateVehicleRequest vehicle;
 
   Map<String, dynamic> toJson() => {
-        'seller_id': sellerId,
-        'title': title,
-        if (description != null) 'description': description,
-        'price': price,
-        'currency': currency,
-        'city_id': cityId,
-        'country_id': countryId,
-        'status': status.name,
-        'vehicle': vehicle.toJson(),
-      };
+    'seller_id': sellerId,
+    'title': title,
+    if (description != null) 'description': description,
+    'price': price,
+    'currency': currency,
+    'city_id': cityId,
+    'country_id': countryId,
+    'status': status.name,
+    'vehicle': vehicle.toJson(),
+  };
 }
 
 class CreateVehicleRequest {
@@ -280,15 +294,15 @@ class CreateVehicleRequest {
   final bool isVinVerified;
 
   Map<String, dynamic> toJson() => {
-        'model_id': modelId,
-        'year': year,
-        'condition': condition.apiValue,
-        if (mileage != null) 'mileage': mileage,
-        if (color != null) 'color': color,
-        if (fuelType != null) 'fuel_type': fuelType,
-        if (transmissionType != null) 'transmission_type': transmissionType,
-        if (bodyType != null) 'body_type': bodyType,
-        if (vin != null) 'vin': vin,
-        'is_vin_verified': isVinVerified,
-      };
+    'model_id': modelId,
+    'year': year,
+    'condition': condition.apiValue,
+    if (mileage != null) 'mileage': mileage,
+    if (color != null) 'color': color,
+    if (fuelType != null) 'fuel_type': fuelType,
+    if (transmissionType != null) 'transmission_type': transmissionType,
+    if (bodyType != null) 'body_type': bodyType,
+    if (vin != null) 'vin': vin,
+    'is_vin_verified': isVinVerified,
+  };
 }

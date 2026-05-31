@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Données passées à `PhotoGalleryScreen` via `state.extra`.
 class PhotoGalleryArgs {
@@ -67,8 +70,8 @@ class _PhotoGalleryScreenState extends ConsumerState<PhotoGalleryScreen> {
           elevation: 0,
           foregroundColor: Colors.white,
           leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: () => context.pop(),
+            icon: const Icon(LucideIcons.x),
+            onPressed: () => context.safePop(),
           ),
           title: Text(
             widget.args.title != null
@@ -111,39 +114,36 @@ class _PhotoGalleryScreenState extends ConsumerState<PhotoGalleryScreen> {
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       itemCount: total,
-                      separatorBuilder: (_, __) => const SizedBox(width: 6),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppSpacing.sm),
                       itemBuilder: (_, i) {
                         final isActive = i == _currentIndex;
-                        return GestureDetector(
-                          onTap: () => _pageController.animateToPage(
-                            i,
-                            duration: const Duration(milliseconds: 280),
-                            curve: Curves.easeOutCubic,
-                          ),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 220),
-                            width: isActive ? 66 : 56,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isActive
-                                    ? AppColors.primary
-                                    : Colors.white24,
-                                width: isActive ? 2 : 1,
-                              ),
+                        return Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          child: InkWell(
+                            onTap: () => _pageController.animateToPage(
+                              i,
+                              duration: const Duration(milliseconds: 280),
+                              curve: Curves.easeOutCubic,
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Image.asset(
-                                widget.args.assets[i],
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const ColoredBox(
-                                  color: AppColors.darkSurface,
-                                  child: Icon(
-                                    Icons.broken_image_outlined,
-                                    color: Colors.white24,
-                                    size: 18,
-                                  ),
+                            borderRadius: BorderRadius.circular(8),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 220),
+                              width: isActive ? 66 : 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isActive
+                                      ? AppColors.primary
+                                      : Colors.white24,
+                                  width: isActive ? 2 : 1,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: CarImage(
+                                  url: widget.args.assets[i],
                                 ),
                               ),
                             ),
@@ -180,15 +180,16 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto>
   @override
   void initState() {
     super.initState();
-    _resetCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-    )..addListener(() {
-        _transformCtrl.value = Matrix4Tween(
-          begin: _transformCtrl.value,
-          end: Matrix4.identity(),
-        ).lerp(_resetCtrl.value);
-      });
+    _resetCtrl =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 220),
+        )..addListener(() {
+          _transformCtrl.value = Matrix4Tween(
+            begin: _transformCtrl.value,
+            end: Matrix4.identity(),
+          ).lerp(_resetCtrl.value);
+        });
   }
 
   @override
@@ -212,19 +213,9 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto>
 
   @override
   Widget build(BuildContext context) {
-    final image = Image.asset(
-      widget.asset,
+    final image = CarImage(
+      url: widget.asset,
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => const ColoredBox(
-        color: Colors.black,
-        child: Center(
-          child: Icon(
-            Icons.broken_image_outlined,
-            color: Colors.white38,
-            size: 64,
-          ),
-        ),
-      ),
     );
     return GestureDetector(
       onDoubleTapDown: (d) => _doubleTapDetails = d,

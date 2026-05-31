@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Header "X résultats" + bouton de tri.
 class ResultCountHeader extends StatelessWidget {
@@ -43,11 +44,11 @@ class ResultCountHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
-                      Icons.sort_rounded,
+                      LucideIcons.arrowUpDown,
                       size: 18,
                       color: AppColors.neutral,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Text(
                       sortLabel,
                       style: context.textStyles.labelMedium?.copyWith(

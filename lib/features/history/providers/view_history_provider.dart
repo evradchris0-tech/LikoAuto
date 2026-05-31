@@ -10,10 +10,9 @@ final viewHistoryProvider = StreamProvider<List<ViewedListing>>((ref) {
 });
 
 final viewHistoryCountProvider = Provider<int>((ref) {
-  return ref.watch(viewHistoryProvider).maybeWhen(
-        data: (list) => list.length,
-        orElse: () => 0,
-      );
+  return ref
+      .watch(viewHistoryProvider)
+      .maybeWhen(data: (list) => list.length, orElse: () => 0);
 });
 
 /// Actions sur l'historique (record / remove / clearAll).

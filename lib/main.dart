@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:liko_auto/app/app.dart';
 import 'package:liko_auto/core/db/app_database.dart';
 import 'package:liko_auto/core/db/database_provider.dart';
@@ -20,6 +21,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('fr_FR');
 
   // Edge-to-edge : l'app dessine derrière les barres système (status + nav).
   // Imposé par défaut sur Android 15 (compileSdk 35) ; on l'active explicitement
@@ -39,9 +41,7 @@ Future<void> main() async {
     ),
   );
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

@@ -4,6 +4,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Bannière promotionnelle Home — "Vendez plus vite avec le badge VIN".
 /// Image réelle (hero_promo_banner.png) avec dégradé Trust + badge localisation.
@@ -14,18 +15,22 @@ class PromoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 180,
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        decoration: const BoxDecoration(
-          borderRadius: AppRadius.rCard,
-          color: AppColors.trust,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: AppRadius.rCard,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.rCard,
+        child: Container(
+          height: 180,
+          decoration: const BoxDecoration(
+            borderRadius: AppRadius.rCard,
+            color: AppColors.trust,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
           children: [
             // Image de fond
             Image.asset(
@@ -64,17 +69,17 @@ class PromoBanner extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
-                      Icons.location_on_rounded,
+                      LucideIcons.mapPin,
                       size: 12,
                       color: Colors.white,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Text(
                       '+187 À DOUALA',
                       style: context.textStyles.labelSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
-                        fontSize: 10,
+                        fontSize: 12,
                         letterSpacing: 0.4,
                       ),
                     ),
@@ -120,9 +125,9 @@ class PromoBanner extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         const Icon(
-                          Icons.arrow_forward_rounded,
+                          LucideIcons.arrowRight,
                           size: 16,
                           color: Colors.white,
                         ),
@@ -134,6 +139,7 @@ class PromoBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

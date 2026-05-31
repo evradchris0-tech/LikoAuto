@@ -1,0 +1,863 @@
+{
+  "garages": [
+    {
+      "id": "g1",
+      "name": "Garage Auto Plus",
+      "location": "Akwa, Douala",
+      "address": "27 Rue Joss, Akwa, Douala",
+      "city": "Douala",
+      "district": "Akwa",
+      "phone": "+237 699 12 34 56",
+      "rating": 4.8,
+      "reviewCount": 124,
+      "listingsCount": 15,
+      "isVerified": true,
+      "isCertified": true,
+      "isOpen": true,
+      "distanceKm": 1.2,
+      "about": "Spécialiste de la mécanique automobile depuis 2008, Garage Auto Plus est votre référence à Douala pour l'entretien Toyota et Hyundai. Service agréé, techniciens certifiés, diagnostic électronique de pointe.",
+      "specialties": ["Vidange", "Freinage", "Climatisation", "Diagnostic"],
+      "services": [
+        { "label": "Vidange + filtres", "priceFromFcfa": 15000, "durationMin": 45 },
+        { "label": "Diagnostic électronique", "priceFromFcfa": 25000, "durationMin": 60 },
+        { "label": "Climatisation (recharge gaz)", "priceFromFcfa": 35000, "durationMin": 90 },
+        { "label": "Freinage complet (4 roues)", "priceFromFcfa": 55000, "durationMin": 120 },
+        { "label": "Géométrie + équilibrage", "priceFromFcfa": 20000, "durationMin": 60 },
+        { "label": "Révision complète 50 000 km", "priceFromFcfa": 95000, "durationMin": 180 }
+      ],
+      "hours": [
+        { "day": "Lun – Ven", "range": "07h30 – 18h00" },
+        { "day": "Samedi", "range": "08h00 – 15h00" },
+        { "day": "Dimanche", "range": "Fermé" }
+      ],
+      "reviews": [
+        {
+          "author": "Jean-Pierre Fotso",
+          "rating": 5.0,
+          "body": "Excellent service, personnel professionnel et rapide. Mon Toyota RAV4 est ressorti comme neuf. Je recommande vivement à toute la famille !",
+          "daysAgo": 5,
+          "verified": true
+        },
+        {
+          "author": "Aminatou Nsangou",
+          "rating": 4.5,
+          "body": "Bon garage, délais respectés et prix corrects. Le diagnostic était très complet. Petit bémol : l'attente pour la caisse est un peu longue.",
+          "daysAgo": 14,
+          "verified": true
+        },
+        {
+          "author": "Rodrigue Nganso",
+          "rating": 5.0,
+          "body": "Ont résolu un problème électronique que trois autres garages n'avaient pas su identifier. Bravo à toute l'équipe !",
+          "daysAgo": 28,
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "g2",
+      "name": "Motors Cameroun",
+      "location": "Bonanjo, Douala",
+      "address": "14 Boulevard de la Liberté, Bonanjo, Douala",
+      "city": "Douala",
+      "district": "Bonanjo",
+      "phone": "+237 677 98 45 23",
+      "rating": 4.5,
+      "reviewCount": 89,
+      "listingsCount": 42,
+      "isVerified": true,
+      "isCertified": true,
+      "isOpen": true,
+      "distanceKm": 2.8,
+      "about": "Concessionnaire multimarques basé à Bonanjo depuis 2011. Vente, entretien et réparation toutes marques. Stock permanent de pièces détachées pour Toyota, Mercedes, BMW et Hyundai.",
+      "specialties": ["Toutes marques", "Pièces détachées", "Import", "Carrosserie"],
+      "services": [
+        { "label": "Vidange standard", "priceFromFcfa": 12000, "durationMin": 30 },
+        { "label": "Carrosserie (débosselage)", "priceFromFcfa": 40000, "durationMin": 240 },
+        { "label": "Peinture (panneau)", "priceFromFcfa": 75000, "durationMin": 480 },
+        { "label": "Remplacement pare-brise", "priceFromFcfa": 85000, "durationMin": 120 },
+        { "label": "Suspension + amortisseurs", "priceFromFcfa": 65000, "durationMin": 150 },
+        { "label": "Boîte de vitesses automatique", "priceFromFcfa": 150000, "durationMin": 360 }
+      ],
+      "hours": [
+        { "day": "Lun – Sam", "range": "08h00 – 18h30" },
+        { "day": "Dimanche", "range": "Sur RDV" }
+      ],
+      "reviews": [
+        {
+          "author": "Bertrand Kamga",
+          "rating": 4.0,
+          "body": "Stock de pièces très fourni, j'ai trouvé la courroie de distrib de mon Mercedes en 20 minutes. Prix légèrement élevés mais qualité garantie.",
+          "daysAgo": 7,
+          "verified": true
+        },
+        {
+          "author": "Marie-Claire Mbele",
+          "rating": 5.0,
+          "body": "Carrosserie parfaite après l'accident. Délai tenu, couleur identique à l'original. Très professionnel.",
+          "daysAgo": 21,
+          "verified": true
+        },
+        {
+          "author": "Thierry Ngono",
+          "rating": 4.0,
+          "body": "Bon garage polyvalent. L'équipe est sérieuse même si parfois débordée.",
+          "daysAgo": 45,
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "g3",
+      "name": "Centre Auto Makepe",
+      "location": "Makepe, Douala",
+      "address": "Carrefour Makepe Missoke, Douala",
+      "city": "Douala",
+      "district": "Makepe",
+      "phone": "+237 655 34 78 12",
+      "rating": 4.3,
+      "reviewCount": 56,
+      "listingsCount": 7,
+      "isVerified": true,
+      "isCertified": false,
+      "isOpen": false,
+      "distanceKm": 5.1,
+      "about": "Garage de quartier sérieux à Makepe Missoke. Spécialisé dans la réparation rapide, la vulcanisation et les petits entretiens. Idéal pour les interventions urgentes.",
+      "specialties": ["Vidange", "Pneus", "Électricité", "Dépannage"],
+      "services": [
+        { "label": "Vidange + vidange boîte", "priceFromFcfa": 18000, "durationMin": 60 },
+        { "label": "Montage pneus (unité)", "priceFromFcfa": 3000, "durationMin": 15 },
+        { "label": "Électricité auto (diagnostic)", "priceFromFcfa": 15000, "durationMin": 45 },
+        { "label": "Batterie (pose + test)", "priceFromFcfa": 5000, "durationMin": 20 },
+        { "label": "Courroie de distribution", "priceFromFcfa": 55000, "durationMin": 180 }
+      ],
+      "hours": [
+        { "day": "Lun – Ven", "range": "08h00 – 17h30" },
+        { "day": "Samedi", "range": "08h00 – 13h00" },
+        { "day": "Dimanche", "range": "Fermé" }
+      ],
+      "reviews": [
+        {
+          "author": "Félix Tchiengue",
+          "rating": 4.0,
+          "body": "Bon rapport qualité-prix pour les petits entretiens. Réactif et disponible le samedi matin.",
+          "daysAgo": 3,
+          "verified": false
+        },
+        {
+          "author": "Christelle Feudjio",
+          "rating": 4.5,
+          "body": "Batterie changée en 15 minutes, prix honnête. Patron très sympathique.",
+          "daysAgo": 18,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "g4",
+      "name": "Atelier du Wouri",
+      "location": "Bonabéri, Douala",
+      "address": "Zone Industrielle de Bonabéri, Douala",
+      "city": "Douala",
+      "district": "Bonabéri",
+      "phone": "+237 691 56 23 89",
+      "rating": 4.7,
+      "reviewCount": 201,
+      "listingsCount": 28,
+      "isVerified": true,
+      "isCertified": true,
+      "isOpen": true,
+      "distanceKm": 8.4,
+      "about": "Leader de la mécanique lourde et de l'importation à Douala. Spécialiste 4x4 et pick-up. Reconditionnement moteur, boîte automatique et pont. Agréé Toyota Land Cruiser et Hilux.",
+      "specialties": ["4x4", "Mécanique lourde", "Pick-up", "Moteur"],
+      "services": [
+        { "label": "Révision moteur complète", "priceFromFcfa": 250000, "durationMin": 480 },
+        { "label": "Reconditionnement pont arrière", "priceFromFcfa": 180000, "durationMin": 360 },
+        { "label": "Vidange différentiel 4x4", "priceFromFcfa": 22000, "durationMin": 60 },
+        { "label": "Roulement de roue (unité)", "priceFromFcfa": 35000, "durationMin": 90 },
+        { "label": "Diagnosis Land Cruiser", "priceFromFcfa": 30000, "durationMin": 75 },
+        { "label": "Embrayage complet", "priceFromFcfa": 120000, "durationMin": 240 }
+      ],
+      "hours": [
+        { "day": "Lun – Ven", "range": "07h00 – 18h30" },
+        { "day": "Samedi", "range": "07h00 – 16h00" },
+        { "day": "Dimanche", "range": "Urgences uniquement" }
+      ],
+      "reviews": [
+        {
+          "author": "Paul-Éric Mfoula",
+          "rating": 5.0,
+          "body": "Seul garage de Douala capable de reconditionner mon pont de Land Cruiser 200. Travail de haute qualité, 6 mois de garantie sur les pièces.",
+          "daysAgo": 9,
+          "verified": true
+        },
+        {
+          "author": "Justine Ngassa",
+          "rating": 4.5,
+          "body": "Mon Hilux revient de là-bas transformé. Délai un peu long (3 jours) mais résultat impeccable.",
+          "daysAgo": 32,
+          "verified": true
+        },
+        {
+          "author": "Serge Biya",
+          "rating": 5.0,
+          "body": "Référence absolue pour la mécanique lourde à Douala. Chers mais ça vaut vraiment le coup.",
+          "daysAgo": 61,
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "g5",
+      "name": "Méca Express Bépanda",
+      "location": "Bépanda, Douala",
+      "address": "Carrefour Total Bépanda, Douala",
+      "city": "Douala",
+      "district": "Bépanda",
+      "phone": "+237 650 88 21 44",
+      "rating": 4.0,
+      "reviewCount": 38,
+      "listingsCount": 3,
+      "isVerified": false,
+      "isCertified": false,
+      "isOpen": true,
+      "distanceKm": 6.7,
+      "about": "Garage rapide et économique au cœur de Bépanda. Toutes réparations courantes, dépannage 24h/24 et vente de pièces de seconde main.",
+      "specialties": ["Dépannage", "Pièces occasion", "Rapide", "Toutes marques"],
+      "services": [
+        { "label": "Vidange économique", "priceFromFcfa": 9000, "durationMin": 30 },
+        { "label": "Dépannage sur route", "priceFromFcfa": 15000, "durationMin": 60 },
+        { "label": "Plaquettes de frein (paire)", "priceFromFcfa": 18000, "durationMin": 60 },
+        { "label": "Amortisseurs (paire)", "priceFromFcfa": 45000, "durationMin": 120 }
+      ],
+      "hours": [
+        { "day": "Lun – Sam", "range": "07h00 – 20h00" },
+        { "day": "Dimanche", "range": "08h00 – 18h00" }
+      ],
+      "reviews": [
+        {
+          "author": "Aurélie Eyenga",
+          "rating": 4.0,
+          "body": "Prix imbattables pour une vidange express. Pas de chichi mais travail fait correctement.",
+          "daysAgo": 10,
+          "verified": false
+        },
+        {
+          "author": "Kevin Tsanga",
+          "rating": 4.0,
+          "body": "Dépannage rapide un dimanche soir, chapeau ! Tarif raisonnable pour l'urgence.",
+          "daysAgo": 25,
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "g6",
+      "name": "Elite Auto Services",
+      "location": "Bastos, Yaoundé",
+      "address": "Avenue de l'OUA, Bastos, Yaoundé",
+      "city": "Yaoundé",
+      "district": "Bastos",
+      "phone": "+237 222 20 14 88",
+      "rating": 4.9,
+      "reviewCount": 312,
+      "listingsCount": 11,
+      "isVerified": true,
+      "isCertified": true,
+      "isOpen": true,
+      "distanceKm": 3.5,
+      "about": "Le garage premium de Yaoundé. Spécialisé dans les véhicules de luxe (BMW, Mercedes, Audi, Porsche). Techniciens formés en Europe, outillage de dernière génération, salon d'attente climatisé.",
+      "specialties": ["Luxe", "BMW", "Mercedes", "Diagnostic haute gamme"],
+      "services": [
+        { "label": "Entretien BMW Série 3/5", "priceFromFcfa": 120000, "durationMin": 180 },
+        { "label": "Entretien Mercedes C/E", "priceFromFcfa": 115000, "durationMin": 180 },
+        { "label": "Diagnostic OBD premium", "priceFromFcfa": 45000, "durationMin": 90 },
+        { "label": "Jantes + pneus run-flat", "priceFromFcfa": 90000, "durationMin": 120 },
+        { "label": "Climatisation bi-zone", "priceFromFcfa": 55000, "durationMin": 90 },
+        { "label": "Révision constructeur", "priceFromFcfa": 200000, "durationMin": 360 }
+      ],
+      "hours": [
+        { "day": "Lun – Ven", "range": "08h00 – 18h00" },
+        { "day": "Samedi", "range": "09h00 – 14h00" },
+        { "day": "Dimanche", "range": "Fermé" }
+      ],
+      "reviews": [
+        {
+          "author": "André-Marie Mbida",
+          "rating": 5.0,
+          "body": "Meilleur garage de Yaoundé sans contestation. Mon BMW X5 traité comme chez le concessionnaire officiel. Personnel ultra-pro.",
+          "daysAgo": 4,
+          "verified": true
+        },
+        {
+          "author": "Patricia Ondoa",
+          "rating": 5.0,
+          "body": "Salon d'attente confortable, café offert, et mon Mercedes rendu en avance. C'est ce qu'on appelle le service 5 étoiles.",
+          "daysAgo": 16,
+          "verified": true
+        },
+        {
+          "author": "François-Xavier Samba",
+          "rating": 4.5,
+          "body": "Excellent mais les prix reflètent la qualité. À réserver aux véhicules premium uniquement.",
+          "daysAgo": 40,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "g7",
+      "name": "Garage Nlongkak",
+      "location": "Nlongkak, Yaoundé",
+      "address": "Rue 1.840, Nlongkak, Yaoundé",
+      "city": "Yaoundé",
+      "district": "Nlongkak",
+      "phone": "+237 677 42 19 63",
+      "rating": 4.2,
+      "reviewCount": 72,
+      "listingsCount": 9,
+      "isVerified": true,
+      "isCertified": false,
+      "isOpen": true,
+      "distanceKm": 4.2,
+      "about": "Garage familial bien établi à Nlongkak. Entretien courant, réparations toutes marques et vente de véhicules d'occasion contrôlés. Fiable depuis 2003.",
+      "specialties": ["Toutes marques", "Occasion contrôlée", "Entretien", "Freinage"],
+      "services": [
+        { "label": "Vidange + contrôle général", "priceFromFcfa": 14000, "durationMin": 45 },
+        { "label": "Freins (AV ou AR)", "priceFromFcfa": 28000, "durationMin": 90 },
+        { "label": "Direction assistée (réparation)", "priceFromFcfa": 65000, "durationMin": 180 },
+        { "label": "Remplacement bougie (4 cyl.)", "priceFromFcfa": 18000, "durationMin": 60 },
+        { "label": "Contrôle pré-achat véhicule", "priceFromFcfa": 20000, "durationMin": 60 }
+      ],
+      "hours": [
+        { "day": "Lun – Sam", "range": "07h30 – 18h00" },
+        { "day": "Dimanche", "range": "Fermé" }
+      ],
+      "reviews": [
+        {
+          "author": "Simone Atangana",
+          "rating": 4.0,
+          "body": "Vieux garage mais fiable. Patron honnête, n'essaie pas de vendre des réparations inutiles. Recommandé pour l'entretien courant.",
+          "daysAgo": 6,
+          "verified": false
+        },
+        {
+          "author": "Noël Mvondo",
+          "rating": 4.5,
+          "body": "Contrôle pré-achat très sérieux, m'a évité d'acheter une voiture accidentée. Service précieux !",
+          "daysAgo": 33,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "g8",
+      "name": "Auto Service Biyem-Assi",
+      "location": "Biyem-Assi, Yaoundé",
+      "address": "Carrefour Biyem-Assi, Yaoundé",
+      "city": "Yaoundé",
+      "district": "Biyem-Assi",
+      "phone": "+237 695 77 30 15",
+      "rating": 4.6,
+      "reviewCount": 98,
+      "listingsCount": 6,
+      "isVerified": true,
+      "isCertified": true,
+      "isOpen": false,
+      "distanceKm": 6.1,
+      "about": "Garage moderne à Biyem-Assi avec équipement diagnostic dernière génération. Spécialiste Toyota, Honda et Hyundai. Forfaits entretien annuel disponibles.",
+      "specialties": ["Toyota", "Honda", "Hyundai", "Diagnostic", "Climatisation"],
+      "services": [
+        { "label": "Vidange + rotation pneus", "priceFromFcfa": 16000, "durationMin": 60 },
+        { "label": "Diagnostic complet", "priceFromFcfa": 20000, "durationMin": 45 },
+        { "label": "Climatisation (full service)", "priceFromFcfa": 45000, "durationMin": 120 },
+        { "label": "Transmission automatique", "priceFromFcfa": 95000, "durationMin": 240 },
+        { "label": "Révision 100 000 km", "priceFromFcfa": 130000, "durationMin": 300 }
+      ],
+      "hours": [
+        { "day": "Lun – Ven", "range": "08h00 – 17h30" },
+        { "day": "Samedi", "range": "08h30 – 14h00" },
+        { "day": "Dimanche", "range": "Fermé" }
+      ],
+      "reviews": [
+        {
+          "author": "Carine Fouda",
+          "rating": 5.0,
+          "body": "Forfait annuel Toyota : vidange + révision + contrôle + clim pour 95 000 FCFA. Excellent rapport qualité-prix, je renouvelle chaque année.",
+          "daysAgo": 11,
+          "verified": true
+        },
+        {
+          "author": "Blaise Nkeng",
+          "rating": 4.0,
+          "body": "Très bon diagnostic, très honnête. Légèrement cher mais pas d'arnaque possible avec eux.",
+          "daysAgo": 38,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "g9",
+      "name": "Électro-Auto Essos",
+      "location": "Essos, Yaoundé",
+      "address": "Avenue Kennedy, Essos, Yaoundé",
+      "city": "Yaoundé",
+      "district": "Essos",
+      "phone": "+237 688 12 55 07",
+      "rating": 4.1,
+      "reviewCount": 43,
+      "listingsCount": 2,
+      "isVerified": false,
+      "isCertified": false,
+      "isOpen": true,
+      "distanceKm": 7.3,
+      "about": "Spécialiste de l'électricité automobile à Essos. Alarmes, autoradios, câblage, alternateurs, démarreurs. Intervention rapide pour pannes électriques urgentes.",
+      "specialties": ["Électricité auto", "Alarmes", "Autoradio", "Alternateur"],
+      "services": [
+        { "label": "Diagnostic électrique", "priceFromFcfa": 10000, "durationMin": 30 },
+        { "label": "Installation alarme (fournie)", "priceFromFcfa": 65000, "durationMin": 180 },
+        { "label": "Alternateur (réparation)", "priceFromFcfa": 35000, "durationMin": 120 },
+        { "label": "Démarreur (remplacement)", "priceFromFcfa": 40000, "durationMin": 90 },
+        { "label": "Câblage complet", "priceFromFcfa": 80000, "durationMin": 480 }
+      ],
+      "hours": [
+        { "day": "Lun – Sam", "range": "08h00 – 19h00" },
+        { "day": "Dimanche", "range": "Sur RDV" }
+      ],
+      "reviews": [
+        {
+          "author": "Loïc Abena",
+          "rating": 4.0,
+          "body": "Alarme installée nickel, prix correct. Patron connaît vraiment son affaire sur tout ce qui est électronique.",
+          "daysAgo": 8,
+          "verified": false
+        },
+        {
+          "author": "Hélène Biyong",
+          "rating": 4.0,
+          "body": "Alternateur réparé en 2h alors que d'autres demandaient 2 jours. Satisfaite !",
+          "daysAgo": 27,
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "g10",
+      "name": "Mfoundi Auto 4x4",
+      "location": "Mvog-Ada, Yaoundé",
+      "address": "Rue du Palais, Mvog-Ada, Yaoundé",
+      "city": "Yaoundé",
+      "district": "Mvog-Ada",
+      "phone": "+237 699 88 74 32",
+      "rating": 4.5,
+      "reviewCount": 167,
+      "listingsCount": 19,
+      "isVerified": true,
+      "isCertified": true,
+      "isOpen": true,
+      "distanceKm": 5.9,
+      "about": "Référence yaoundéenne pour les pick-up et 4x4. Importation directe, vente, entretien et préparation hors-route. Pièces Hilux, Prado et Pajero en stock permanent.",
+      "specialties": ["4x4", "Pick-up Hilux", "Prado", "Préparation hors-route"],
+      "services": [
+        { "label": "Entretien Hilux (complet)", "priceFromFcfa": 65000, "durationMin": 150 },
+        { "label": "Rehaussement suspension", "priceFromFcfa": 180000, "durationMin": 480 },
+        { "label": "Pneus tout-terrain (montage)", "priceFromFcfa": 8000, "durationMin": 30 },
+        { "label": "Treuil (installation)", "priceFromFcfa": 120000, "durationMin": 300 },
+        { "label": "Révision Prado 150", "priceFromFcfa": 110000, "durationMin": 240 },
+        { "label": "Toit ouvrant / galerie", "priceFromFcfa": 95000, "durationMin": 360 }
+      ],
+      "hours": [
+        { "day": "Lun – Ven", "range": "07h30 – 18h00" },
+        { "day": "Samedi", "range": "08h00 – 16h00" },
+        { "day": "Dimanche", "range": "Fermé" }
+      ],
+      "reviews": [
+        {
+          "author": "Gustave Abanda",
+          "rating": 5.0,
+          "body": "Mon Hilux prépare maintenant les pistes de l'Adamaoua sans problème. Suspension rehaussée, treuil, galerie… du vrai travail de pro.",
+          "daysAgo": 15,
+          "verified": true
+        },
+        {
+          "author": "Solange Nkoa",
+          "rating": 4.0,
+          "body": "Bonne adresse pour les pièces Prado. Stock réel contrairement à d'autres qui commandent après paiement.",
+          "daysAgo": 42,
+          "verified": true
+        },
+        {
+          "author": "Édouard Bikié",
+          "rating": 4.5,
+          "body": "Connaissent vraiment les 4x4 camerounais. Conseils honnêtes sur ce dont le véhicule a vraiment besoin.",
+          "daysAgo": 70,
+          "verified": false
+        }
+      ]
+    }
+  ],
+
+  "chats": [
+    {
+      "id": "c1",
+      "otherPartyName": "Garage Auto Plus",
+      "otherPartySubtitle": "Revendeur Pro · Akwa, Douala",
+      "otherPartyIsOnline": true,
+      "otherPartyIsVerified": true,
+      "vehicleTitle": "Toyota Prado VXL 2019",
+      "vehiclePrice": "22 500 000 FCFA",
+      "lastMessageAt": "10:48",
+      "messages": [
+        {
+          "id": "m1",
+          "text": "Bonjour, je suis très intéressé par le Toyota Prado VXL 2019. Est-ce qu'il est toujours disponible ?",
+          "isFromMe": true,
+          "timestamp": "10:42"
+        },
+        {
+          "id": "m2",
+          "text": "Bonjour ! Oui, le véhicule est toujours disponible. Il est en excellent état, 1ère main, entretien fait ici chez nous. Kilométrage : 38 000 km.",
+          "isFromMe": false,
+          "timestamp": "10:45"
+        },
+        {
+          "id": "m3",
+          "text": "Super ! Est-ce que je peux venir le voir ce samedi matin vers 10h ?",
+          "isFromMe": true,
+          "timestamp": "10:46"
+        },
+        {
+          "id": "m4",
+          "text": "Pas de problème, samedi 10h c'est parfait. Demandez Jean-Paul à l'accueil. On vous fera un essai routier complet.",
+          "isFromMe": false,
+          "timestamp": "10:48"
+        }
+      ]
+    },
+    {
+      "id": "c2",
+      "otherPartyName": "Jean-Paul Fotso",
+      "otherPartySubtitle": "Vendeur particulier · Bonamoussadi",
+      "otherPartyIsOnline": false,
+      "otherPartyIsVerified": false,
+      "vehicleTitle": "BMW X3 xDrive 2020",
+      "vehiclePrice": "24 000 000 FCFA",
+      "lastMessageAt": "Hier",
+      "messages": [
+        {
+          "id": "m1",
+          "text": "Bonjour M. Fotso, votre BMW X3 m'intéresse. Y a-t-il une marge de négociation sur le prix ?",
+          "isFromMe": true,
+          "timestamp": "15:20"
+        },
+        {
+          "id": "m2",
+          "text": "Bonsoir ! Le prix est déjà en baisse de 1,5M depuis le début. Je peux faire 23 500 000 si vous payez comptant avant fin de semaine.",
+          "isFromMe": false,
+          "timestamp": "17:05"
+        },
+        {
+          "id": "m3",
+          "text": "D'accord, c'est envisageable. Pouvez-vous m'envoyer l'historique d'entretien et le rapport VIN ?",
+          "isFromMe": true,
+          "timestamp": "17:22"
+        },
+        {
+          "id": "m4",
+          "text": "Je vous envoie tout ça demain matin. Le véhicule a été entretenu chez Elite Auto Services à Bastos, ils peuvent confirmer.",
+          "isFromMe": false,
+          "timestamp": "17:35"
+        }
+      ]
+    }
+  ],
+
+  "notification_seeds": [
+    {
+      "id": "N-001",
+      "type": 0,
+      "title": "Garage Auto Plus",
+      "body": "Bonjour, le Toyota Prado VXL 2019 est toujours disponible. Venez le voir ce samedi !",
+      "offsetMinutes": -32,
+      "isRead": false,
+      "payload": { "route": "/chat_detail", "id": "c1" }
+    },
+    {
+      "id": "N-002",
+      "type": 1,
+      "title": "Baisse de prix",
+      "body": "-1 500 000 FCFA sur BMW X3 2020 — Jean-Paul Fotso, Bonamoussadi",
+      "offsetMinutes": -180,
+      "isRead": false,
+      "payload": { "route": "/vehicle_detail", "listingKey": "BMW X3 xDrive 2020__24000000" }
+    },
+    {
+      "id": "N-003",
+      "type": 2,
+      "title": "RDV confirmé",
+      "body": "Auto Plus — Diagnostic électronique, demain 9h00. Demandez Jean-Paul.",
+      "offsetMinutes": -300,
+      "isRead": false,
+      "payload": { "route": "/my_bookings" }
+    },
+    {
+      "id": "N-004",
+      "type": 3,
+      "title": "Annonce approuvée ✓",
+      "body": "Votre Toyota RAV4 2020 Akwa est maintenant en ligne.",
+      "offsetMinutes": -1440,
+      "isRead": true,
+      "payload": { "route": "/my_listings" }
+    },
+    {
+      "id": "N-005",
+      "type": 4,
+      "title": "Annonce refusée",
+      "body": "Nissan Qashqai 2018 — Photo du VIN illisible. Modifiez et renvoyez.",
+      "offsetMinutes": -2040,
+      "isRead": true,
+      "payload": { "route": "/my_listings" }
+    },
+    {
+      "id": "N-006",
+      "type": 5,
+      "title": "Nouvel avis 5 étoiles",
+      "body": "Aurélie F. vous a noté : « Vendeur sérieux, véhicule conforme à la description. »",
+      "offsetMinutes": -5760,
+      "isRead": true
+    },
+    {
+      "id": "N-007",
+      "type": 6,
+      "title": "Mise à jour des conditions",
+      "body": "Nos conditions générales d'utilisation évoluent au 1er juillet 2026.",
+      "offsetMinutes": -11520,
+      "isRead": true,
+      "payload": { "route": "/support" }
+    },
+    {
+      "id": "N-008",
+      "type": 7,
+      "title": "Offre Boost — 20% de réduction",
+      "body": "Ce week-end seulement : mettez votre annonce en avant pour 4 800 FCFA.",
+      "offsetMinutes": -14400,
+      "isRead": true
+    },
+    {
+      "id": "N-009",
+      "type": 0,
+      "title": "Jean-Paul Fotso",
+      "body": "Je vous envoie l'historique d'entretien du BMW X3 ce matin comme promis.",
+      "offsetMinutes": -16,
+      "isRead": false,
+      "payload": { "route": "/chat_detail", "id": "c2" }
+    },
+    {
+      "id": "N-010",
+      "type": 2,
+      "title": "RDV — Rappel",
+      "body": "Votre RDV chez Elite Auto Services Bastos est dans 2h (14h00 aujourd'hui).",
+      "offsetMinutes": -60,
+      "isRead": false,
+      "payload": { "route": "/my_bookings" }
+    }
+  ],
+
+  "booking_seeds": [
+    {
+      "id": "B-001",
+      "garageName": "Garage Auto Plus",
+      "garageLocation": "Akwa, Douala",
+      "garageImageAsset": "assets/images/car_rav4.png",
+      "serviceLabel": "Diagnostic électronique",
+      "servicePriceFromFcfa": 25000,
+      "serviceDurationMin": 60,
+      "scheduledOffsetDays": 1,
+      "scheduledHour": 9,
+      "scheduledMinute": 0,
+      "status": "confirmed",
+      "note": "Vérifier aussi le système de freinage et la climatisation"
+    },
+    {
+      "id": "B-002",
+      "garageName": "Elite Auto Services",
+      "garageLocation": "Bastos, Yaoundé",
+      "garageImageAsset": "assets/images/car_tucson.png",
+      "serviceLabel": "Révision constructeur BMW",
+      "servicePriceFromFcfa": 200000,
+      "serviceDurationMin": 360,
+      "scheduledOffsetDays": 4,
+      "scheduledHour": 14,
+      "scheduledMinute": 0,
+      "status": "confirmed",
+      "note": null
+    },
+    {
+      "id": "B-003",
+      "garageName": "Atelier du Wouri",
+      "garageLocation": "Bonabéri, Douala",
+      "garageImageAsset": "assets/images/car_rav4.png",
+      "serviceLabel": "Vidange différentiel 4x4",
+      "servicePriceFromFcfa": 22000,
+      "serviceDurationMin": 60,
+      "scheduledOffsetDays": -5,
+      "scheduledHour": 10,
+      "scheduledMinute": 30,
+      "status": "completed",
+      "note": null
+    },
+    {
+      "id": "B-004",
+      "garageName": "Auto Service Biyem-Assi",
+      "garageLocation": "Biyem-Assi, Yaoundé",
+      "garageImageAsset": "assets/images/car_tucson.png",
+      "serviceLabel": "Climatisation (full service)",
+      "servicePriceFromFcfa": 45000,
+      "serviceDurationMin": 120,
+      "scheduledOffsetDays": -12,
+      "scheduledHour": 8,
+      "scheduledMinute": 30,
+      "status": "completed",
+      "note": "Mauvaise odeur signalée"
+    },
+    {
+      "id": "B-005",
+      "garageName": "Centre Auto Makepe",
+      "garageLocation": "Makepe, Douala",
+      "garageImageAsset": "assets/images/car_rav4.png",
+      "serviceLabel": "Courroie de distribution",
+      "servicePriceFromFcfa": 55000,
+      "serviceDurationMin": 180,
+      "scheduledOffsetDays": -3,
+      "scheduledHour": 15,
+      "scheduledMinute": 0,
+      "status": "cancelled",
+      "note": "Annulé : véhicule vendu entre-temps"
+    }
+  ],
+  "listings": [
+    {
+      "title": "Toyota RAV4 2020",
+      "priceFcfa": 14500000,
+      "location": "Akwa, Douala",
+      "mileageKm": 42000,
+      "year": "2020",
+      "isVinVerified": true,
+      "isPro": true,
+      "photoCount": 8
+    },
+    {
+      "title": "Hyundai Tucson 2019",
+      "priceFcfa": 11200000,
+      "location": "Bonanjo, Douala",
+      "mileageKm": 65000,
+      "year": "2019",
+      "isVinVerified": true,
+      "isPro": false,
+      "photoCount": 5,
+      "priceDrop": -500000
+    },
+    {
+      "title": "Mercedes-Benz GLC 300 2021",
+      "priceFcfa": 28000000,
+      "location": "Bastos, Yaoundé",
+      "mileageKm": 31000,
+      "year": "2021",
+      "isVinVerified": true,
+      "isPro": true,
+      "photoCount": 12
+    },
+    {
+      "title": "Toyota Hilux Double Cab 2019",
+      "priceFcfa": 16500000,
+      "location": "Bonabéri, Douala",
+      "mileageKm": 88000,
+      "year": "2019",
+      "isVinVerified": true,
+      "isPro": false,
+      "photoCount": 9
+    },
+    {
+      "title": "Honda CR-V 2019",
+      "priceFcfa": 9800000,
+      "location": "Ngousso, Yaoundé",
+      "mileageKm": 78000,
+      "year": "2019",
+      "isVinVerified": false,
+      "isPro": false,
+      "photoCount": 6
+    },
+    {
+      "title": "Toyota Corolla 2018",
+      "priceFcfa": 8500000,
+      "location": "Bonapriso, Douala",
+      "mileageKm": 92000,
+      "year": "2018",
+      "isVinVerified": true,
+      "isPro": false,
+      "photoCount": 14
+    },
+    {
+      "title": "BMW X3 xDrive 2020",
+      "priceFcfa": 24000000,
+      "location": "Bonamoussadi, Douala",
+      "mileageKm": 38000,
+      "year": "2020",
+      "isVinVerified": true,
+      "isPro": true,
+      "photoCount": 11,
+      "priceDrop": -1500000
+    },
+    {
+      "title": "Nissan Qashqai 2018",
+      "priceFcfa": 9500000,
+      "location": "Mvog-Ada, Yaoundé",
+      "mileageKm": 87000,
+      "year": "2018",
+      "isVinVerified": false,
+      "isPro": false,
+      "photoCount": 7
+    },
+    {
+      "title": "Toyota Land Cruiser 200 2017",
+      "priceFcfa": 35000000,
+      "location": "Biyem-Assi, Yaoundé",
+      "mileageKm": 120000,
+      "year": "2017",
+      "isVinVerified": true,
+      "isPro": true,
+      "photoCount": 15
+    },
+    {
+      "title": "Mitsubishi L200 Triton 2020",
+      "priceFcfa": 19500000,
+      "location": "Makepe, Douala",
+      "mileageKm": 54000,
+      "year": "2020",
+      "isVinVerified": true,
+      "isPro": false,
+      "photoCount": 10
+    },
+    {
+      "title": "Kia Sportage 2019",
+      "priceFcfa": 10200000,
+      "location": "Nlongkak, Yaoundé",
+      "mileageKm": 71000,
+      "year": "2019",
+      "isVinVerified": false,
+      "isPro": false,
+      "photoCount": 6,
+      "priceDrop": -300000
+    },
+    {
+      "title": "Ford Ranger Wildtrak 2018",
+      "priceFcfa": 17800000,
+      "location": "Bépanda, Douala",
+      "mileageKm": 99000,
+      "year": "2018",
+      "isVinVerified": true,
+      "isPro": true,
+      "photoCount": 13
+    }
+  ]
+}

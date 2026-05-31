@@ -8,6 +8,7 @@ import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/buttons/secondary_button.dart';
 import 'package:liko_auto/shared/widgets/buttons/tertiary_button.dart';
 import 'package:liko_auto/shared/widgets/cards/app_card.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Écran temporaire pour visualiser le Design System Liko Auto.
 /// Sera supprimé une fois les vrais écrans implémentés.
@@ -21,7 +22,7 @@ class ShowcaseScreen extends StatelessWidget {
         title: const Text('Design System — Liko Auto'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.brightness_6_rounded),
+            icon: const Icon(LucideIcons.sun),
             tooltip: 'Aperçu thème système',
             onPressed: () {},
           ),
@@ -58,7 +59,7 @@ class ShowcaseScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         tooltip: 'Vendre',
-        child: const Icon(Icons.add_rounded, size: 28),
+        child: const Icon(LucideIcons.plus, size: 28),
       ),
     );
   }
@@ -140,7 +141,7 @@ class _Swatch extends StatelessWidget {
             border: Border.all(color: Colors.black12),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Text(name, style: context.textStyles.labelSmall),
         Text(
           '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
@@ -163,7 +164,7 @@ class _ButtonsSection extends StatelessWidget {
         AppSpacing.gapSm,
         PrimaryButton(
           label: 'Contacter via Chat',
-          icon: Icons.chat_bubble_outline_rounded,
+          icon: LucideIcons.messageCircle,
           onPressed: () {},
         ),
         AppSpacing.gapSm,
@@ -175,7 +176,7 @@ class _ButtonsSection extends StatelessWidget {
             AppSpacing.gapSm,
             SecondaryButton(
               label: 'Filtrer',
-              icon: Icons.tune_rounded,
+              icon: LucideIcons.sliders,
               onPressed: () {},
             ),
           ],
@@ -207,11 +208,6 @@ class _BadgesSection extends StatelessWidget {
         AppBadge.certified(),
         AppBadge.negotiable(),
         AppBadge(label: 'Toyota'),
-        AppBadge(
-          label: 'Ouvert',
-          icon: Icons.circle,
-          style: AppBadgeStyle.vinVerified,
-        ),
       ],
     );
   }
@@ -241,7 +237,7 @@ class _ListingCardExample extends StatelessWidget {
             ),
             child: const Center(
               child: Icon(
-                Icons.directions_car_rounded,
+                Icons.directions_car_outlined,
                 size: 80,
                 color: Colors.white70,
               ),
@@ -255,7 +251,7 @@ class _ListingCardExample extends StatelessWidget {
                 const Row(
                   children: [
                     AppBadge.vinVerified(),
-                    SizedBox(width: 8),
+                    SizedBox(width: AppSpacing.sm),
                     AppBadge.negotiable(),
                   ],
                 ),
@@ -274,22 +270,22 @@ class _ListingCardExample extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.location_on_outlined,
+                      LucideIcons.mapPin,
                       size: 16,
                       color: context.colors.onSurfaceVariant,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Text(
                       'Bonapriso, Douala',
                       style: context.textStyles.bodyMedium,
                     ),
                     const Spacer(),
                     Icon(
-                      Icons.photo_library_outlined,
+                      LucideIcons.image,
                       size: 16,
                       color: context.colors.onSurfaceVariant,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Text('14', style: context.textStyles.bodyMedium),
                   ],
                 ),
@@ -313,7 +309,7 @@ class _InputsSection extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Rechercher une voiture, un garage...',
             prefixIcon: Icon(
-              Icons.search_rounded,
+              LucideIcons.search,
               color: context.colors.onSurfaceVariant,
             ),
           ),

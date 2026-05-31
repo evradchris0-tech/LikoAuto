@@ -7,6 +7,7 @@ import 'package:liko_auto/features/reviews/domain/review.dart';
 import 'package:liko_auto/features/reviews/providers/reviews_provider.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Affiche un modal "Instagram" pour laisser un avis sur une cible (garage,
 /// véhicule, vendeur, acheteur).
@@ -111,7 +112,7 @@ class _LeaveReviewSheetState extends ConsumerState<_LeaveReviewSheet> {
             ),
             child: Column(
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Container(
                   width: 40,
                   height: 4,
@@ -197,8 +198,7 @@ class _LeaveReviewSheetState extends ConsumerState<_LeaveReviewSheet> {
                           hintStyle: const TextStyle(color: AppColors.neutral),
                           filled: true,
                           fillColor: AppColors.background,
-                          contentPadding:
-                              const EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 14,
                           ),
@@ -219,7 +219,7 @@ class _LeaveReviewSheetState extends ConsumerState<_LeaveReviewSheet> {
                           child: Row(
                             children: [
                               const Icon(
-                                Icons.verified_rounded,
+                                LucideIcons.badgeCheck,
                                 color: AppColors.success,
                                 size: 18,
                               ),
@@ -247,7 +247,7 @@ class _LeaveReviewSheetState extends ConsumerState<_LeaveReviewSheet> {
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: PrimaryButton(
                       label: 'Publier mon avis',
-                      icon: Icons.send_rounded,
+                      icon: LucideIcons.send,
                       isLoading: _submitting,
                       onPressed: _canSubmit ? _submit : null,
                     ),
@@ -290,7 +290,7 @@ class _Header extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   'pour $targetName',
                   style: const TextStyle(
@@ -302,7 +302,7 @@ class _Header extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close_rounded, color: AppColors.trust),
+            icon: const Icon(LucideIcons.x, color: AppColors.trust),
             onPressed: onClose,
           ),
         ],
@@ -323,21 +323,24 @@ class _StarRating extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 1; i <= 5; i++)
-          GestureDetector(
-            onTap: () => onChanged(i.toDouble()),
-            child: AnimatedScale(
-              scale: rating >= i ? 1.15 : 1.0,
-              duration: const Duration(milliseconds: 180),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(
-                  rating >= i
-                      ? Icons.star_rounded
-                      : Icons.star_border_rounded,
-                  size: 48,
-                  color: rating >= i
-                      ? AppColors.primary
-                      : AppColors.neutral.withValues(alpha: 0.5),
+          Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: () => onChanged(i.toDouble()),
+              customBorder: const CircleBorder(),
+              child: AnimatedScale(
+                scale: rating >= i ? 1.15 : 1.0,
+                duration: const Duration(milliseconds: 180),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(
+                    rating >= i ? LucideIcons.star : LucideIcons.star,
+                    size: 48,
+                    color: rating >= i
+                        ? AppColors.primary
+                        : AppColors.neutral.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
             ),
@@ -367,8 +370,7 @@ class _TagChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             border: Border.all(

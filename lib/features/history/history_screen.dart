@@ -8,6 +8,8 @@ import 'package:liko_auto/core/extensions/number_formatting.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/history/providers/view_history_provider.dart';
+import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -23,8 +25,8 @@ class HistoryScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Historique',
@@ -210,7 +212,7 @@ class _HistoryTile extends StatelessWidget {
                   height: 56,
                   child: ColoredBox(
                     color: AppColors.background,
-                    child: Image.asset(d.imageAsset, fit: BoxFit.cover),
+                    child: CarImage(url: d.imageAsset),
                   ),
                 ),
               ),
@@ -228,7 +230,7 @@ class _HistoryTile extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       d.priceFcfa.toFcfa(),
                       style: context.textStyles.labelMedium?.copyWith(
@@ -236,15 +238,15 @@ class _HistoryTile extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Row(
                       children: [
                         const Icon(
-                          Icons.access_time_rounded,
+                          LucideIcons.clock,
                           size: 12,
                           color: AppColors.neutral,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Text(
                           _relativeTime(viewed.viewedAt),
                           style: context.textStyles.labelSmall?.copyWith(
@@ -259,7 +261,7 @@ class _HistoryTile extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(
-                  Icons.close_rounded,
+                  LucideIcons.x,
                   size: 18,
                   color: AppColors.neutral,
                 ),
@@ -303,7 +305,7 @@ class _EmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.history_rounded,
+                LucideIcons.history,
                 size: 44,
                 color: AppColors.primary,
               ),

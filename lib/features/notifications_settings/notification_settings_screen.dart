@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/notifications_settings/providers/notification_prefs_provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
@@ -21,8 +22,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Notifications',
@@ -45,7 +46,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
           _Card(
             children: [
               _Toggle(
-                icon: Icons.forum_outlined,
+                icon: LucideIcons.messageSquare,
                 label: 'Nouveaux messages',
                 description: 'Quand un acheteur ou vendeur vous écrit.',
                 enabled: pushOn,
@@ -53,7 +54,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 onChanged: (v) => n.setNewMessages(value: v),
               ),
               _Toggle(
-                icon: Icons.trending_down_rounded,
+                icon: LucideIcons.trendingDown,
                 label: 'Baisses de prix',
                 description: 'Sur les annonces de votre liste de favoris.',
                 enabled: pushOn,
@@ -69,7 +70,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 onChanged: (v) => n.setAppointments(value: v),
               ),
               _Toggle(
-                icon: Icons.shield_outlined,
+                icon: LucideIcons.shield,
                 label: 'Alertes système',
                 description: 'Sécurité, vérification VIN, conformité.',
                 enabled: pushOn,
@@ -77,7 +78,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 onChanged: (v) => n.setSystemAlerts(value: v),
               ),
               _Toggle(
-                icon: Icons.local_offer_outlined,
+                icon: LucideIcons.tag,
                 label: 'Promotions Liko Auto',
                 description: 'Offres ponctuelles, jamais de spam.',
                 enabled: pushOn,
@@ -164,14 +165,11 @@ class _MasterToggle extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.8),
-          ],
+          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.25),
@@ -190,9 +188,7 @@ class _MasterToggle extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              value
-                  ? Icons.notifications_active_rounded
-                  : Icons.notifications_off_rounded,
+              value ? LucideIcons.bellRing : LucideIcons.bellOff,
               color: Colors.white,
               size: 26,
             ),
@@ -209,7 +205,7 @@ class _MasterToggle extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   value
                       ? 'Vous recevrez les alertes ci-dessous.'
@@ -249,14 +245,17 @@ class _SectionLabel extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Text(
-        label,
-        style: context.textStyles.labelSmall?.copyWith(
-          color: dimmed
-              ? AppColors.neutral.withValues(alpha: 0.5)
-              : AppColors.neutral,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.6,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label,
+          style: context.textStyles.labelSmall?.copyWith(
+            color: dimmed
+                ? AppColors.neutral.withValues(alpha: 0.5)
+                : AppColors.neutral,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+          ),
         ),
       ),
     );
@@ -373,7 +372,7 @@ class _HourPickerTile extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: 4,
       ),
-      leading: const Icon(Icons.schedule_rounded, color: AppColors.neutral),
+      leading: const Icon(LucideIcons.clock, color: AppColors.neutral),
       title: Text(
         label,
         style: const TextStyle(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 extension AppContextX on BuildContext {
   ThemeData get theme => Theme.of(this);
@@ -7,4 +8,13 @@ extension AppContextX on BuildContext {
   Size get screenSize => MediaQuery.sizeOf(this);
   EdgeInsets get viewPadding => MediaQuery.viewPaddingOf(this);
   bool get isDark => theme.brightness == Brightness.dark;
+
+  /// Navigue vers la page précédente, ou retourne à l'accueil si l'historique est vide.
+  void safePop([String fallbackRoute = '/']) {
+    if (canPop()) {
+      pop();
+    } else {
+      go(fallbackRoute);
+    }
+  }
 }

@@ -81,7 +81,9 @@ class ModerationRepository {
   }
 
   Future<void> blockUser(String userId) async {
-    await _db.into(_db.blockedUsers).insertOnConflictUpdate(
+    await _db
+        .into(_db.blockedUsers)
+        .insertOnConflictUpdate(
           BlockedUsersCompanion.insert(
             userId: userId,
             blockedAt: DateTime.now(),
@@ -90,11 +92,15 @@ class ModerationRepository {
   }
 
   Future<void> unblockUser(String userId) async {
-    await (_db.delete(_db.blockedUsers)..where((t) => t.userId.equals(userId))).go();
+    await (_db.delete(
+      _db.blockedUsers,
+    )..where((t) => t.userId.equals(userId))).go();
   }
 
   Future<void> muteThread(String threadId) async {
-    await _db.into(_db.mutedThreads).insertOnConflictUpdate(
+    await _db
+        .into(_db.mutedThreads)
+        .insertOnConflictUpdate(
           MutedThreadsCompanion.insert(
             threadId: threadId,
             mutedAt: DateTime.now(),
@@ -103,9 +109,9 @@ class ModerationRepository {
   }
 
   Future<void> unmuteThread(String threadId) async {
-    await (_db.delete(_db.mutedThreads)
-          ..where((t) => t.threadId.equals(threadId)))
-        .go();
+    await (_db.delete(
+      _db.mutedThreads,
+    )..where((t) => t.threadId.equals(threadId))).go();
   }
 }
 

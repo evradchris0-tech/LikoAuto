@@ -3,6 +3,9 @@ import 'package:liko_auto/features/home/widgets/listing_card.dart';
 
 /// État éditorial d'une annonce déposée par l'utilisateur.
 enum ListingStatus {
+  /// Enregistrée en tant que brouillon, non publiée.
+  draft,
+
   /// Visible publiquement.
   active,
 
@@ -22,6 +25,8 @@ enum ListingStatus {
 extension ListingStatusX on ListingStatus {
   String get label {
     switch (this) {
+      case ListingStatus.draft:
+        return 'Brouillon';
       case ListingStatus.active:
         return 'Active';
       case ListingStatus.pending:

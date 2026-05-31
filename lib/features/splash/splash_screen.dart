@@ -8,6 +8,7 @@ import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/constants/app_assets.dart';
 import 'package:liko_auto/core/providers/preferences_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/features/biometric/data/biometric_repository.dart';
 
@@ -111,7 +112,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.xl),
                       const Text(
                         'LIKO AUTO',
                         style: TextStyle(
@@ -121,7 +122,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           letterSpacing: 3,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         'La marketplace auto du Cameroun',
                         style: TextStyle(

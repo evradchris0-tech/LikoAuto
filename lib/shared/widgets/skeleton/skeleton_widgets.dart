@@ -50,7 +50,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
         width: widget.width,
         height: widget.height,
         decoration: BoxDecoration(
-          borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
+          borderRadius: widget.borderRadius ?? AppRadius.rSm,
           gradient: LinearGradient(
             begin: Alignment(-1.5 + _shimmer.value * 3, 0),
             end: Alignment(-0.5 + _shimmer.value * 3, 0),
@@ -114,13 +114,13 @@ class SkeletonListingCard extends StatelessWidget {
                       SkeletonBox(
                         width: 40,
                         height: 20,
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        borderRadius: AppRadius.rXs,
                       ),
-                      SizedBox(width: 6),
+                      SizedBox(width: AppSpacing.sm),
                       SkeletonBox(
                         width: 32,
                         height: 20,
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        borderRadius: AppRadius.rXs,
                       ),
                     ],
                   ),
@@ -165,29 +165,13 @@ class SkeletonFilterChips extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         children: const [
-          SkeletonBox(
-            width: 60,
-            height: 36,
-            borderRadius: BorderRadius.all(Radius.circular(999)),
-          ),
-          SizedBox(width: 8),
-          SkeletonBox(
-            width: 90,
-            height: 36,
-            borderRadius: BorderRadius.all(Radius.circular(999)),
-          ),
-          SizedBox(width: 8),
-          SkeletonBox(
-            width: 72,
-            height: 36,
-            borderRadius: BorderRadius.all(Radius.circular(999)),
-          ),
-          SizedBox(width: 8),
-          SkeletonBox(
-            width: 64,
-            height: 36,
-            borderRadius: BorderRadius.all(Radius.circular(999)),
-          ),
+          SkeletonBox(width: 60, height: 36, borderRadius: AppRadius.rPill),
+          SizedBox(width: AppSpacing.sm),
+          SkeletonBox(width: 90, height: 36, borderRadius: AppRadius.rPill),
+          SizedBox(width: AppSpacing.sm),
+          SkeletonBox(width: 72, height: 36, borderRadius: AppRadius.rPill),
+          SizedBox(width: AppSpacing.sm),
+          SkeletonBox(width: 64, height: 36, borderRadius: AppRadius.rPill),
         ],
       ),
     );

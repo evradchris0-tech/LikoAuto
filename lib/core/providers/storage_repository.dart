@@ -17,7 +17,10 @@ class StorageRepository {
 
   /// Upload une image vers Firebase Storage et retourne l'URL de téléchargement.
   /// [path] est le chemin de destination (ex: 'vehicles/uid123/photo1.jpg')
-  Future<String> uploadImage({required File imageFile, required String path}) async {
+  Future<String> uploadImage({
+    required File imageFile,
+    required String path,
+  }) async {
     // OPTION B : Mode Simulation
     // Pour éviter de bloquer le développement sans carte bancaire sur Firebase.
     // Simule un temps d'upload réseau.

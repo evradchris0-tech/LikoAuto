@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/biometric/data/biometric_repository.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Affiche une bottom sheet proposant d'activer la connexion biométrique.
 /// À appeler juste après une connexion réussie si la biométrie est disponible
@@ -25,10 +27,11 @@ class _BiometricSetupSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: AppRadius.rBottomSheet,
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       child: Column(
@@ -46,12 +49,13 @@ class _BiometricSetupSheet extends StatelessWidget {
           Container(
             width: 72,
             height: 72,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primarySoft,
               shape: BoxShape.circle,
             ),
+            alignment: Alignment.center,
             child: const Icon(
-              Icons.fingerprint_rounded,
+              LucideIcons.fingerprint,
               size: 40,
               color: AppColors.primary,
             ),
@@ -77,7 +81,7 @@ class _BiometricSetupSheet extends StatelessWidget {
           ),
           AppSpacing.gapXl,
           PrimaryButton(
-            label: 'Activer l\'empreinte digitale',
+            label: "Activer l'empreinte digitale",
             onPressed: () async {
               await ref
                   .read(biometricRepositoryProvider)

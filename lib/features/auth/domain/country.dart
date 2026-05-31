@@ -5,10 +5,8 @@ import 'package:flutter/foundation.dart';
 class Country {
   const Country({required this.code, required this.name});
 
-  factory Country.fromJson(Map<String, dynamic> json) => Country(
-        code: json['code'] as String,
-        name: json['name'] as String,
-      );
+  factory Country.fromJson(Map<String, dynamic> json) =>
+      Country(code: json['code'] as String, name: json['name'] as String);
 
   final String code; // ISO 3166-1 alpha-2 : 'CM', 'GA', 'CI'...
   final String name; // 'Cameroun', 'Gabon', 'Côte d\'Ivoire'...
@@ -16,8 +14,7 @@ class Country {
   Map<String, dynamic> toJson() => {'code': code, 'name': name};
 
   @override
-  bool operator ==(Object other) =>
-      other is Country && other.code == code;
+  bool operator ==(Object other) => other is Country && other.code == code;
 
   @override
   int get hashCode => code.hashCode;

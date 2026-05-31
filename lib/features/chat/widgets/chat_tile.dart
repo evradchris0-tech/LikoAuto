@@ -5,6 +5,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/chat/domain/chat_thread.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ChatTile extends StatelessWidget {
   const ChatTile({required this.thread, super.key});
@@ -13,19 +14,27 @@ class ChatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(
-        '${AppRoutes.chatDetail}?id=${Uri.encodeComponent(thread.id)}',
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
       ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => context.push(
+            '${AppRoutes.chatDetail}?id=${Uri.encodeComponent(thread.id)}',
+          ),
           borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
             Stack(
               children: [
                 _AvatarWidget(thread: thread),
@@ -61,17 +70,25 @@ class ChatTile extends StatelessWidget {
                         ),
                       ),
                       if (thread.isVerified) ...[
-                        const SizedBox(width: 4),
-                        const Icon(Icons.verified_outlined, size: 16, color: AppColors.trust),
+                        const SizedBox(width: AppSpacing.xs),
+                        const Icon(
+                          LucideIcons.badgeCheck,
+                          size: 16,
+                          color: AppColors.trust,
+                        ),
                       ],
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     thread.lastMessage,
                     style: context.textStyles.bodyMedium?.copyWith(
-                      color: thread.unreadCount > 0 ? AppColors.trust : AppColors.neutral,
-                      fontWeight: thread.unreadCount > 0 ? FontWeight.w700 : FontWeight.normal,
+                      color: thread.unreadCount > 0
+                          ? AppColors.trust
+                          : AppColors.neutral,
+                      fontWeight: thread.unreadCount > 0
+                          ? FontWeight.w700
+                          : FontWeight.normal,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -86,12 +103,16 @@ class ChatTile extends StatelessWidget {
                 Text(
                   thread.time,
                   style: context.textStyles.labelSmall?.copyWith(
-                    color: thread.unreadCount > 0 ? AppColors.primary : AppColors.neutral,
-                    fontWeight: thread.unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
+                    color: thread.unreadCount > 0
+                        ? AppColors.primary
+                        : AppColors.neutral,
+                    fontWeight: thread.unreadCount > 0
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 if (thread.unreadCount > 0) ...[
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm),
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: const BoxDecoration(
@@ -100,7 +121,11 @@ class ChatTile extends StatelessWidget {
                     ),
                     child: Text(
                       thread.unreadCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -108,6 +133,8 @@ class ChatTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      ),
       ),
     );
   }
@@ -133,17 +160,27 @@ class _AvatarWidget extends StatelessWidget {
         color: color ?? AppColors.outline,
         shape: BoxShape.circle,
         image: thread.avatarUrl != null
-            ? DecorationImage(image: NetworkImage(thread.avatarUrl!), fit: BoxFit.cover)
+            ? DecorationImage(
+                image: NetworkImage(thread.avatarUrl!),
+                fit: BoxFit.cover,
+              )
             : null,
       ),
       alignment: Alignment.center,
       child: thread.avatarInitials != null
-          ? Text(thread.avatarInitials!, style: const TextStyle(color: AppColors.trust, fontWeight: FontWeight.bold, fontSize: 18))
+          ? Text(
+              thread.avatarInitials!,
+              style: const TextStyle(
+                color: AppColors.trust,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            )
           : thread.name == 'Liko Auto Info'
-              ? const Icon(Icons.notifications_none, color: Colors.white)
-              : thread.avatarAsset
-                  ? const Icon(Icons.directions_car, color: Colors.white38)
-                  : null,
+          ? const Icon(LucideIcons.bell, color: Colors.white)
+          : thread.avatarAsset
+          ? const Icon(Icons.directions_car_outlined, color: Colors.white38)
+          : null,
     );
   }
 }

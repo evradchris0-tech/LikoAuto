@@ -3,6 +3,7 @@ import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Données fictives d'un garage pour la liste de l'annuaire / recherche.
 class GarageCardData {
@@ -10,20 +11,16 @@ class GarageCardData {
     required this.name,
     required this.specialties,
     required this.rating,
-    required this.distanceKm,
     required this.location,
     required this.imageAsset,
-    required this.isOpen,
     this.isCertified = false,
   });
 
   final String name;
   final List<String> specialties;
   final double rating;
-  final double distanceKm;
   final String location;
   final String imageAsset;
-  final bool isOpen;
   final bool isCertified;
 }
 
@@ -44,29 +41,33 @@ class GarageResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          'Garage ${data.name}, ${data.specialties.join(", ")}, note ${data.rating}, à ${data.distanceKm} kilomètres',
+          'Garage ${data.name}, ${data.specialties.join(", ")}, note ${data.rating}',
       button: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.xs,
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppRadius.rCard,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.trust.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: AppRadius.rCard,
+          child: InkWell(
+            onTap: onTap,
             borderRadius: AppRadius.rCard,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.trust.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -87,7 +88,7 @@ class GarageResultCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => const Center(
                               child: Icon(
-                                Icons.handyman_rounded,
+                                LucideIcons.wrench,
                                 color: AppColors.primary,
                                 size: 36,
                               ),
@@ -98,7 +99,7 @@ class GarageResultCard extends StatelessWidget {
                               top: 6,
                               left: 6,
                               child: _MiniBadge(
-                                icon: Icons.verified_user_rounded,
+                                icon: LucideIcons.shieldCheck,
                                 label: 'Certifié',
                                 color: Colors.white,
                                 bg: AppColors.primary,
@@ -157,7 +158,7 @@ class GarageResultCard extends StatelessWidget {
                                         ?.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w600,
-                                          fontSize: 11,
+                                          fontSize: 12,
                                         ),
                                   ),
                                 ),
@@ -166,35 +167,15 @@ class GarageResultCard extends StatelessWidget {
                           AppSpacing.gapSm,
                           Row(
                             children: [
-                              Icon(
-                                data.isOpen
-                                    ? Icons.circle
-                                    : Icons.do_not_disturb_on_outlined,
-                                size: 10,
-                                color: data.isOpen
-                                    ? AppColors.success
-                                    : AppColors.neutral,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                data.isOpen ? 'Ouvert' : 'Fermé',
-                                style: context.textStyles.bodySmall?.copyWith(
-                                  color: data.isOpen
-                                      ? AppColors.success
-                                      : AppColors.neutral,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
                               const Icon(
-                                Icons.location_on_outlined,
+                                LucideIcons.mapPin,
                                 size: 13,
                                 color: AppColors.neutral,
                               ),
-                              const SizedBox(width: 2),
+                              const SizedBox(width: AppSpacing.xxs),
                               Expanded(
                                 child: Text(
-                                  '${data.location} · ${data.distanceKm.toStringAsFixed(1)} km',
+                                  data.location,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: context.textStyles.bodySmall?.copyWith(
@@ -227,11 +208,11 @@ class GarageResultCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(
-                        Icons.chat_bubble_outline_rounded,
+                        LucideIcons.messageCircle,
                         size: 18,
                         color: AppColors.primary,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(
                         'Contacter via chat',
                         style: context.textStyles.labelLarge?.copyWith(
@@ -247,6 +228,7 @@ class GarageResultCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -277,12 +259,12 @@ class _MiniBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 11, color: color),
-          const SizedBox(width: 3),
+          const SizedBox(width: AppSpacing.xxs),
           Text(
             label,
             style: TextStyle(
               color: color,
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -307,8 +289,8 @@ class _RatingChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.star_rounded, size: 14, color: AppColors.primary),
-          const SizedBox(width: 2),
+          const Icon(LucideIcons.star, size: 14, color: AppColors.primary),
+          const SizedBox(width: AppSpacing.xxs),
           Text(
             rating.toStringAsFixed(1).replaceAll('.', ','),
             style: const TextStyle(

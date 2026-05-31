@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/favorites/providers/favorites_provider.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -20,11 +22,11 @@ class FavoritesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Row(
           children: [
@@ -36,15 +38,12 @@ class FavoritesScreen extends ConsumerWidget {
               ),
             ),
             if (favorites.isNotEmpty) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
                 child: Text(
                   '${favorites.length}',
@@ -74,9 +73,7 @@ class FavoritesScreen extends ConsumerWidget {
           ? const _EmptyState()
           : AnimationLimiter(
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.md,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 itemCount: favorites.length,
                 separatorBuilder: (_, __) => AppSpacing.gapSm,
                 itemBuilder: (context, index) {
@@ -92,9 +89,7 @@ class FavoritesScreen extends ConsumerWidget {
                           direction: DismissDirection.endToStart,
                           background: const _SwipeBackground(),
                           onDismissed: (_) {
-                            ref
-                                .read(favoritesActionsProvider)
-                                .remove(item);
+                            ref.read(favoritesActionsProvider).remove(item);
                             AppSnack.info(
                               context,
                               'Annonce retirée des favoris',
@@ -175,13 +170,10 @@ class _SwipeBackground extends StatelessWidget {
         children: [
           Text(
             'Retirer',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
-          SizedBox(width: 8),
-          Icon(Icons.delete_outline_rounded, color: Colors.white),
+          SizedBox(width: AppSpacing.sm),
+          Icon(LucideIcons.trash2, color: Colors.white),
         ],
       ),
     );
@@ -207,7 +199,7 @@ class _EmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.favorite_border_rounded,
+                LucideIcons.heart,
                 size: 44,
                 color: AppColors.primary,
               ),

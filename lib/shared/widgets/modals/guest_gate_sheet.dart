@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Modale invité bloqué (wireframe 6.5).
 /// Affichée quand un invité tente d'accéder à une action réservée.
@@ -23,9 +25,8 @@ class GuestGateSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => GuestGateSheet(
-        reason: reason ?? 'accéder à cette fonctionnalité',
-      ),
+      builder: (_) =>
+          GuestGateSheet(reason: reason ?? 'accéder à cette fonctionnalité'),
     );
   }
 
@@ -34,7 +35,7 @@ class GuestGateSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: AppRadius.rBottomSheet,
       ),
       child: SafeArea(
         top: false,
@@ -65,7 +66,7 @@ class GuestGateSheet extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.lock_outline_rounded,
+                  LucideIcons.lock,
                   size: 32,
                   color: AppColors.primary,
                 ),
@@ -90,15 +91,15 @@ class GuestGateSheet extends StatelessWidget {
               ),
               AppSpacing.gapLg,
               const _BenefitRow(
-                icon: Icons.favorite_border_rounded,
+                icon: LucideIcons.heart,
                 label: 'Sauvegarder vos favoris',
               ),
               const _BenefitRow(
-                icon: Icons.forum_outlined,
+                icon: LucideIcons.messageSquare,
                 label: 'Discuter avec les vendeurs',
               ),
               const _BenefitRow(
-                icon: Icons.notifications_none_rounded,
+                icon: LucideIcons.bell,
                 label: 'Recevoir des alertes prix',
               ),
               AppSpacing.gapXl,
@@ -111,26 +112,35 @@ class GuestGateSheet extends StatelessWidget {
                 },
               ),
               AppSpacing.gapMd,
-              TextButton(
-                onPressed: () {
-                  context
-                    ..pop()
-                    ..push(AppRoutes.login);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.trust,
-                ),
-                child: const Text(
-                  'Déjà un compte ? Se connecter',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    context
+                      ..pop()
+                      ..push(AppRoutes.login);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.trust,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(
+                      color: AppColors.outline,
+                      width: 1.5,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: AppRadius.rButton,
+                    ),
+                  ),
+                  child: const Text(
+                    'Se connecter',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                  ),
                 ),
               ),
               AppSpacing.gapSm,
               TextButton(
-                onPressed: () => context.pop(),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.neutral,
-                ),
+                onPressed: () => context.safePop(),
+                style: TextButton.styleFrom(foregroundColor: AppColors.neutral),
                 child: const Text('Continuer en invité'),
               ),
             ],

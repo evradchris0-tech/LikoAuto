@@ -10,6 +10,7 @@ import 'package:liko_auto/features/biometric/data/biometric_repository.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 import 'package:liko_auto/shared/widgets/modals/biometric_setup_sheet.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   const OtpVerificationScreen({
@@ -22,11 +23,15 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String verificationId;
 
   @override
-  ConsumerState<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  ConsumerState<OtpVerificationScreen> createState() =>
+      _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
-  final List<TextEditingController> _controllers = List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
 
@@ -61,10 +66,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authRepositoryProvider).verifyOTP(
-        verificationId: widget.verificationId,
-        smsCode: code,
-      );
+      await ref
+          .read(authRepositoryProvider)
+          .verifyOTP(verificationId: widget.verificationId, smsCode: code);
       if (!mounted) return;
       await _maybePromptBiometric();
       if (mounted) context.go(AppRoutes.home);
@@ -92,8 +96,8 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
       ),
       body: SafeArea(
@@ -112,10 +116,21 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
               AppSpacing.gapSm,
               RichText(
                 text: TextSpan(
-                  style: context.textStyles.bodyLarge?.copyWith(color: AppColors.neutral, height: 1.5),
+                  style: context.textStyles.bodyLarge?.copyWith(
+                    color: AppColors.neutral,
+                    height: 1.5,
+                  ),
                   children: [
-                    const TextSpan(text: 'Nous avons envoyé un code à 6 chiffres au\n'),
-                    TextSpan(text: widget.phoneNumber, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.trust)),
+                    const TextSpan(
+                      text: 'Nous avons envoyé un code à 6 chiffres au\n',
+                    ),
+                    TextSpan(
+                      text: widget.phoneNumber,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.trust,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -131,13 +146,26 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       maxLength: 1,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.trust),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.trust,
+                      ),
                       decoration: InputDecoration(
                         counterText: '',
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       onChanged: (val) => _onDigitChanged(val, index),
                     ),
@@ -153,8 +181,15 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
               AppSpacing.gapXl,
               Center(
                 child: TextButton(
-                  onPressed: () {}, // TODO(api): implémenter renvoi SMS
-                  child: const Text('Renvoyer le code', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  onPressed: () =>
+                      AppSnack.info(context, 'Renvoi du SMS (Sprint 2)'),
+                  child: const Text(
+                    'Renvoyer le code',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -7,6 +7,7 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/onboarding/pages/chat_page.dart';
 import 'package:liko_auto/features/onboarding/pages/garages_page.dart';
+import 'package:liko_auto/features/onboarding/pages/role_selection_page.dart';
 import 'package:liko_auto/features/onboarding/pages/vin_page.dart';
 import 'package:liko_auto/features/onboarding/pages/welcome_page.dart';
 
@@ -23,7 +24,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _controller = PageController();
   int _index = 0;
-  static const _totalPages = 4;
+  static const _totalPages = 5;
 
   @override
   void dispose() {
@@ -82,6 +83,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   WelcomePage(onContinue: _next),
                   VinPage(onContinue: _next),
                   GaragesPage(onContinue: _next),
+                  RoleSelectionPage(onContinue: _next),
                   ChatOnboardingPage(onStart: _finish, onLogin: _goLogin),
                 ],
               ),
@@ -94,11 +96,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({
-    required this.currentIndex,
-    required this.total,
-    this.onSkip,
-  });
+  const _TopBar({required this.currentIndex, required this.total, this.onSkip});
 
   final int currentIndex;
   final int total;

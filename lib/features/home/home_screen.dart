@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, document_ignores
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,17 +7,20 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
-import 'package:liko_auto/core/fixtures/mock_garages.dart';
-import 'package:liko_auto/core/providers/city_provider.dart';
+import 'package:liko_auto/core/providers/user_role_provider.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
+import 'package:liko_auto/features/garages/domain/garage_entity.dart';
+import 'package:liko_auto/features/garages/providers/garages_provider.dart';
 import 'package:liko_auto/features/home/providers/home_listings_provider.dart';
-import 'package:liko_auto/features/home/widgets/city_picker_bottom_sheet.dart';
 import 'package:liko_auto/features/home/widgets/home_skeleton.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:liko_auto/features/home/widgets/promo_banner.dart';
 import 'package:liko_auto/features/notifications_inbox/providers/notifications_inbox_provider.dart';
 import 'package:liko_auto/features/search/widgets/garage_result_card.dart';
+import 'package:liko_auto/shared/widgets/feedback/error_state_widget.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 // ── Catégories véhicules ───────────────────────────────────────────────────
 
@@ -35,28 +40,28 @@ class _VehicleCategory {
 
 const _kCategories = <_VehicleCategory>[
   _VehicleCategory(
-    label: 'Pick-up',
-    icon: Icons.local_shipping_rounded,
-    count: 18,
-    filter: 'hilux',
+    label: 'Toyota',
+    icon: LucideIcons.car,
+    count: 45,
+    filter: 'toyota',
   ),
   _VehicleCategory(
-    label: 'Berline',
-    icon: Icons.directions_car_rounded,
-    count: 13,
-    filter: 'corolla',
+    label: 'Mercedes',
+    icon: LucideIcons.car,
+    count: 12,
+    filter: 'mercedes',
   ),
   _VehicleCategory(
-    label: 'SUV',
-    icon: Icons.directions_car_filled_rounded,
-    count: 17,
-    filter: 'rav4',
+    label: 'Hyundai',
+    icon: LucideIcons.car,
+    count: 28,
+    filter: 'hyundai',
   ),
   _VehicleCategory(
-    label: 'À importer',
-    icon: Icons.flight_land_rounded,
-    count: 42,
-    filter: 'bmw',
+    label: 'Ford',
+    icon: LucideIcons.car,
+    count: 15,
+    filter: 'ford',
   ),
 ];
 
@@ -89,29 +94,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  void _showCityPicker() {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const CityPickerBottomSheet(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final city = ref.watch(selectedCityProvider);
     final listingsAsync = ref.watch(homeListingsProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final authState = ref.watch(authStateChangesProvider);
+    final role = ref.watch(userRoleProvider);
     final user = authState.valueOrNull;
 
     final firstName = () {
-      final name = user?.displayName?.trim() ?? '';
-      if (name.isNotEmpty) return name.split(' ').first;
+      final dn = user?.displayName?.trim() ?? '';
+      if (dn.isNotEmpty) return dn.split(' ').first;
+      final email = user?.email?.trim() ?? '';
+      if (email.isNotEmpty) return email.split('@').first;
       return 'vous';
     }();
+
+    final greetingSubtitle = switch (role) {
+      UserRole.buyer => 'Quelle voiture cherchez-vous ?',
+      UserRole.seller => 'Gérez et publiez vos annonces',
+      UserRole.garage => 'Votre espace professionnel',
+    };
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -121,74 +124,105 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           _HomeAppBar(
             isScrolled: _isScrolled,
-            city: city,
             unreadCount: unreadCount,
-            onCityTap: _showCityPicker,
             onNotifTap: () => context.push(AppRoutes.notificationsInbox),
             onMenuTap: () => Scaffold.of(context).openDrawer(),
+            firstName: firstName,
+            subtitle: greetingSubtitle,
           ),
           Expanded(
             child: listingsAsync.when(
               loading: () => const HomeSkeleton(),
-              error: (err, _) => Center(child: Text('Erreur : $err')),
+              error: (err, _) => ErrorStateWidget(
+                message: err.toString(),
+                onRetry: () => ref.invalidate(homeListingsProvider),
+              ),
               data: (listings) {
                 final filtered = _activeCategory == null
                     ? listings
                     : listings
-                        .where(
-                          (l) => l.title
-                              .toLowerCase()
-                              .contains(_activeCategory!.toLowerCase()),
-                        )
-                        .toList();
+                          .where(
+                            (l) => l.title.toLowerCase().contains(
+                              _activeCategory!.toLowerCase(),
+                            ),
+                          )
+                          .toList();
 
                 return AnimationLimiter(
-                  child: CustomScrollView(
+                  child: Scrollbar(
                     controller: _scrollCtrl,
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: _GreetingSection(
-                          firstName: firstName,
-                          onSearchTap: () => context.go(AppRoutes.search),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: _CategoriesRow(
-                          active: _activeCategory,
-                          onSelect: (f) => setState(
-                            () => _activeCategory =
-                                _activeCategory == f ? null : f,
+                    thumbVisibility: true,
+                    child: CustomScrollView(
+                      controller: _scrollCtrl,
+                      slivers: [
+                        // Greeting section was moved to app bar
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: AppSpacing.lg,
+                              right: AppSpacing.lg,
+                              top: AppSpacing.xl,
+                            ),
+                            child: PromoBanner(),
                           ),
                         ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: _EstimerCta(
-                          onTap: () =>
-                              AppSnackPlaceholder.showEstimer(context),
+                        SliverToBoxAdapter(
+                          child: role == UserRole.buyer
+                              ? _EstimerCta(
+                                  onTap: () =>
+                                      AppSnackPlaceholder.showEstimer(context),
+                                )
+                              : _PublishCta(
+                                  onTap: () => context.push(AppRoutes.sell),
+                                  isGarage: role == UserRole.garage,
+                                ),
                         ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: _SectionHeader(
-                          title: 'Dernières annonces',
-                          onMore: () => context.go(AppRoutes.search),
+                        SliverToBoxAdapter(
+                          child: _SectionHeader(
+                            title: 'Catégories',
+                            onMore: () => context.go(AppRoutes.search),
+                          ),
                         ),
-                      ),
-                      if (filtered.isEmpty)
-                        const SliverToBoxAdapter(child: _EmptyCategory())
-                      else
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return AnimationConfiguration.staggeredList(
-                                position: index,
-                                duration: const Duration(milliseconds: 320),
-                                child: SlideAnimation(
-                                  verticalOffset: 30,
-                                  child: FadeInAnimation(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: AppSpacing.xs,
-                                      ),
+                        SliverToBoxAdapter(
+                          child: _CategoriesRow(
+                            active: _activeCategory,
+                            onSelect: (cat) {
+                              setState(() {
+                                _activeCategory = _activeCategory == cat
+                                    ? null
+                                    : cat;
+                              });
+                            },
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: _SectionHeader(
+                            title: 'Dernières annonces',
+                            onMore: () => context.go(AppRoutes.search),
+                          ),
+                        ),
+                        if (filtered.isEmpty)
+                          SliverToBoxAdapter(
+                            child: _EmptyCategory(
+                              hasFilter: _activeCategory != null,
+                            ),
+                          )
+                        else
+                          SliverToBoxAdapter(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: filtered.length > 3
+                                  ? 3
+                                  : filtered.length,
+                              itemBuilder: (context, index) {
+                                return AnimationConfiguration.staggeredList(
+                                  position: index,
+                                  duration: const Duration(milliseconds: 320),
+                                  child: SlideAnimation(
+                                    verticalOffset: 30,
+                                    child: FadeInAnimation(
                                       child: ListingCard(
                                         data: filtered[index],
                                         onTap: () => context.push(
@@ -198,21 +232,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                            childCount: filtered.length,
+                                );
+                              },
+                            ),
+                          ),
+                        SliverToBoxAdapter(
+                          child: _SectionHeader(
+                            title: 'Garages près de vous',
+                            onMore: () => context.go('${AppRoutes.search}?tab=garages'),
                           ),
                         ),
-                      SliverToBoxAdapter(
-                        child: _SectionHeader(
-                          title: 'Garages près de vous',
-                          onMore: () => context.go(AppRoutes.search),
-                        ),
-                      ),
-                      const SliverToBoxAdapter(child: _GaragesRow()),
-                      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl * 2)),
-                    ],
+                        const SliverToBoxAdapter(child: _GaragesRow()),
+                        const SliverToBoxAdapter(child: SizedBox(height: 140)),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -252,19 +285,19 @@ abstract final class AppSnackPlaceholder {
 class _HomeAppBar extends StatelessWidget {
   const _HomeAppBar({
     required this.isScrolled,
-    required this.city,
     required this.unreadCount,
-    required this.onCityTap,
     required this.onNotifTap,
     required this.onMenuTap,
+    required this.firstName,
+    required this.subtitle,
   });
 
   final bool isScrolled;
-  final String city;
   final int unreadCount;
-  final VoidCallback onCityTap;
   final VoidCallback onNotifTap;
   final VoidCallback onMenuTap;
+  final String firstName;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -273,7 +306,7 @@ class _HomeAppBar extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           boxShadow: isScrolled
               ? [
                   BoxShadow(
@@ -289,74 +322,72 @@ class _HomeAppBar extends StatelessWidget {
             horizontal: AppSpacing.xs,
             vertical: AppSpacing.xs,
           ),
-          child: Row(
+          child: Stack(
+            alignment: Alignment.centerLeft,
             children: [
-              IconButton(
-                onPressed: onMenuTap,
-                icon: const Icon(Icons.menu_rounded, color: AppColors.trust),
-              ),
-              const Spacer(),              GestureDetector(
-                onTap: onCityTap,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(LucideIcons.menu, color: AppColors.trust),
+                    onPressed: onMenuTap,
                   ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(999),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Bonjour $firstName !',
+                          style: context.textStyles.titleMedium?.copyWith(
+                            color: AppColors.trust,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          style: context.textStyles.labelSmall?.copyWith(
+                            color: AppColors.neutral,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
+                  const SizedBox(width: 8),
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.location_on_rounded,
-                        size: 12,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        city,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 14,
-                        color: AppColors.primary,
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          IconButton(
+                            onPressed: onNotifTap,
+                            icon: const Icon(
+                              LucideIcons.bell,
+                              color: AppColors.trust,
+                            ),
+                          ),
+                          if (unreadCount > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                width: 9,
+                                height: 9,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  IconButton(
-                    onPressed: onNotifTap,
-                    icon: const Icon(
-                      Icons.notifications_outlined,
-                      color: AppColors.trust,
-                    ),
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        width: 9,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.5),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ],
@@ -367,21 +398,17 @@ class _HomeAppBar extends StatelessWidget {
   }
 }
 
-// ── Greeting + search bar ──────────────────────────────────────────────────
+// ── Greeting ───────────────────────────────────────────────────────────────
 
 class _GreetingSection extends StatelessWidget {
-  const _GreetingSection({
-    required this.firstName,
-    required this.onSearchTap,
-  });
+  const _GreetingSection({required this.firstName, required this.subtitle});
 
   final String firstName;
-  final VoidCallback onSearchTap;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
+    return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.md,
@@ -398,40 +425,11 @@ class _GreetingSection extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
-            'Quelle voiture cherchez-vous ?',
+            subtitle,
             style: context.textStyles.bodyMedium?.copyWith(
               color: AppColors.neutral,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          GestureDetector(
-            onTap: onSearchTap,
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.outline),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: AppSpacing.md),
-                  const Icon(
-                    Icons.search_rounded,
-                    color: AppColors.neutral,
-                    size: 22,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Toyota, Mercedes, quartier...',
-                    style: context.textStyles.bodyMedium?.copyWith(
-                      color: AppColors.neutral,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
@@ -451,7 +449,6 @@ class _CategoriesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -487,54 +484,81 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 80,
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.trust : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isActive ? AppColors.trust : AppColors.outline,
+          width: 1.5,
         ),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.trust : Colors.white,
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: AppColors.trust.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : [
+                BoxShadow(
+                  color: AppColors.neutral.withValues(alpha: 0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                )
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isActive ? AppColors.trust : AppColors.outline,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                category.icon,
+                size: 18,
+                color: isActive ? Colors.white : AppColors.trust,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                category.label,
+                style: TextStyle(
+                  color: isActive ? Colors.white : AppColors.trust,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : AppColors.trustSoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${category.count}',
+                  style: TextStyle(
+                    color: isActive ? Colors.white : AppColors.trust,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              category.icon,
-              size: 24,
-              color: isActive ? Colors.white : AppColors.trust,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              category.label,
-              style: TextStyle(
-                color: isActive ? Colors.white : AppColors.trust,
-                fontWeight: FontWeight.w700,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              '${category.count} ann.',
-              style: TextStyle(
-                color: isActive
-                    ? Colors.white.withValues(alpha: 0.75)
-                    : AppColors.neutral,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 // ── Estimer ma voiture CTA ─────────────────────────────────────────────────
@@ -554,7 +578,86 @@ class _EstimerCta extends StatelessWidget {
         0,
       ),
       child: Material(
-        color: AppColors.trust,
+        color: AppColors.trustSoft,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.trust.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    LucideIcons.calculator,
+                    color: AppColors.trust,
+                    size: 20,
+                  ),
+                ),
+                AppSpacing.gapMd,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Estimer ma voiture',
+                        style: context.textStyles.bodyLarge?.copyWith(
+                          color: AppColors.trust,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        'Prix de marché en quelques secondes',
+                        style: context.textStyles.labelSmall?.copyWith(
+                          color: AppColors.trust.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  LucideIcons.arrowRight,
+                  color: AppColors.trust,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Publier CTA (seller / garage) ──────────────────────────────────────────
+
+class _PublishCta extends StatelessWidget {
+  const _PublishCta({required this.onTap, required this.isGarage});
+
+  final VoidCallback onTap;
+  final bool isGarage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Material(
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           onTap: onTap,
@@ -573,8 +676,8 @@ class _EstimerCta extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.calculate_outlined,
+                  child: Icon(
+                    isGarage ? LucideIcons.store : LucideIcons.plus,
                     color: Colors.white,
                     size: 20,
                   ),
@@ -585,14 +688,16 @@ class _EstimerCta extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Estimer ma voiture',
+                        isGarage
+                            ? 'Publier une annonce garage'
+                            : 'Publier une nouvelle annonce',
                         style: context.textStyles.bodyLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
-                        'Prix de marché en quelques secondes',
+                        "Touchez des milliers d'acheteurs",
                         style: context.textStyles.labelSmall?.copyWith(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontWeight: FontWeight.w500,
@@ -602,7 +707,7 @@ class _EstimerCta extends StatelessWidget {
                   ),
                 ),
                 const Icon(
-                  Icons.arrow_forward_rounded,
+                  LucideIcons.arrowRight,
                   color: Colors.white,
                   size: 18,
                 ),
@@ -663,37 +768,66 @@ class _SectionHeader extends StatelessWidget {
 
 // ── Garages carousel ───────────────────────────────────────────────────────
 
-class _GaragesRow extends StatelessWidget {
+class _GaragesRow extends ConsumerWidget {
   const _GaragesRow();
 
   @override
-  Widget build(BuildContext context) {
-    final garages = MockGarages.all.take(4).toList();
-    return SizedBox(
-      height: 150,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        itemCount: garages.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (_, index) => _GarageSmallCard(garage: garages[index]),
-      ),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref
+        .watch(garagesProvider)
+        .when(
+          loading: () => const SizedBox(
+            height: 150,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (garages) {
+            if (garages.isEmpty) return const SizedBox.shrink();
+            return SizedBox(
+              height: 150,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                itemCount: garages.length.clamp(0, 4),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (_, index) {
+                  final g = garages[index];
+                  return _GarageSmallCard(
+                    garage: g,
+                    onTap: () {
+                      final cardData = GarageCardData(
+                        name: g.name,
+                        specialties: g.specialties.isNotEmpty ? g.specialties : ['Général'],
+                        rating: g.rating,
+                        location: g.location,
+                        imageAsset: 'assets/images/car_rav4.png',
+                        isCertified: g.isCertified,
+                      );
+                      context.push(AppRoutes.garageDetail, extra: cardData);
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        );
   }
 }
 
 class _GarageSmallCard extends StatelessWidget {
-  const _GarageSmallCard({required this.garage});
+  const _GarageSmallCard({required this.garage, required this.onTap});
 
-  final GarageCardData garage;
+  final GarageEntity garage;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 175,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -703,9 +837,17 @@ class _GarageSmallCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           Row(
             children: [
               Container(
@@ -716,12 +858,12 @@ class _GarageSmallCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.handyman_rounded,
+                  LucideIcons.wrench,
                   color: AppColors.primary,
                   size: 18,
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.sm),
               if (garage.isCertified)
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -756,42 +898,22 @@ class _GarageSmallCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              const Icon(
-                Icons.star_rounded,
-                size: 12,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: 2),
+              const Icon(LucideIcons.star, size: 12, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.xxs),
               Text(
                 garage.rating.toStringAsFixed(1),
                 style: const TextStyle(
                   color: AppColors.trust,
                   fontWeight: FontWeight.w700,
-                  fontSize: 11,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: garage.isOpen ? AppColors.success : AppColors.neutral,
-                ),
-              ),
-              const SizedBox(width: 3),
-              Text(
-                garage.isOpen ? 'Ouvert' : 'Fermé',
-                style: TextStyle(
-                  color:
-                      garage.isOpen ? AppColors.success : AppColors.neutral,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 10,
+                  fontSize: 12,
                 ),
               ),
             ],
           ),
         ],
+      ),
+      ),
+      ),
       ),
     );
   }
@@ -800,7 +922,9 @@ class _GarageSmallCard extends StatelessWidget {
 // ── Empty category state ───────────────────────────────────────────────────
 
 class _EmptyCategory extends StatelessWidget {
-  const _EmptyCategory();
+  const _EmptyCategory({this.hasFilter = false});
+
+  final bool hasFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -809,14 +933,12 @@ class _EmptyCategory extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.search_off_rounded,
-            size: 48,
-            color: AppColors.neutral,
-          ),
+          const Icon(LucideIcons.searchX, size: 48, color: AppColors.neutral),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Aucune annonce dans cette catégorie.',
+            hasFilter
+                ? 'Aucune annonce dans cette catégorie.'
+                : 'Aucune annonce disponible pour le moment.',
             style: context.textStyles.bodyMedium?.copyWith(
               color: AppColors.neutral,
             ),

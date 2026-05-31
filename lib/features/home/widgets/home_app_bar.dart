@@ -1,11 +1,17 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/branding/liko_logo.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({
-    required this.isScrolled, required this.city, required this.unreadNotifs, required this.onCityTap, required this.onNotifTap, super.key,
+    required this.isScrolled,
+    required this.city,
+    required this.unreadNotifs,
+    required this.onCityTap,
+    required this.onNotifTap,
+    super.key,
   });
 
   final bool isScrolled;
@@ -49,55 +55,59 @@ class HomeAppBar extends StatelessWidget {
                   width: 48,
                   child: IconButton(
                     onPressed: () => Scaffold.of(context).openDrawer(),
-                    icon: const Icon(Icons.menu_rounded, color: AppColors.trust),
+                    icon: const Icon(LucideIcons.menu, color: AppColors.trust),
                   ),
                 ),
                 // Logo (centered in available space)
-                const Expanded(
-                  child: Center(
-                    child: LikoLogo.app(),
-                  ),
-                ),
+                const Expanded(child: Center(child: LikoLogo.app())),
                 // Actions (City + Notif)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    GestureDetector(
-                      onTap: onCityTap,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppColors.primarySoft,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.25),
+                    Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(999),
+                      child: InkWell(
+                        onTap: onCityTap,
+                        borderRadius: BorderRadius.circular(999),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.location_on_rounded,
-                              size: 13,
-                              color: AppColors.primary,
+                          decoration: BoxDecoration(
+                            color: AppColors.primarySoft,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.25),
                             ),
-                            const SizedBox(width: 3),
-                            Text(
-                              city,
-                              style: const TextStyle(
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                LucideIcons.mapPin,
+                                size: 13,
                                 color: AppColors.primary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
                               ),
-                            ),
-                            const SizedBox(width: 3),
-                            const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: 14,
-                              color: AppColors.primary,
-                            ),
-                          ],
+                              const SizedBox(width: AppSpacing.xxs),
+                              Text(
+                                city,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.xxs),
+                              const Icon(
+                                LucideIcons.chevronDown,
+                                size: 14,
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

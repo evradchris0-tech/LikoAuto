@@ -1,14 +1,15 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:liko_auto/app/router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
-import 'package:liko_auto/core/fixtures/mock_garages.dart';
-import 'package:liko_auto/core/fixtures/mock_vehicles.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
+import 'package:liko_auto/features/garages/domain/garage_entity.dart';
+import 'package:liko_auto/features/garages/providers/garages_provider.dart';
+import 'package:liko_auto/features/home/providers/home_listings_provider.dart';
 import 'package:liko_auto/features/home/widgets/listing_card.dart';
+import 'package:liko_auto/features/notifications_inbox/providers/notifications_inbox_provider.dart';
 import 'package:liko_auto/features/search/models/search_filters.dart';
 import 'package:liko_auto/features/search/tabs/garages_tab.dart';
 import 'package:liko_auto/features/search/tabs/vehicles_tab.dart';
@@ -16,16 +17,20 @@ import 'package:liko_auto/features/search/widgets/garage_filter_sheet.dart';
 import 'package:liko_auto/features/search/widgets/garage_result_card.dart';
 import 'package:liko_auto/features/search/widgets/search_top_bar.dart';
 import 'package:liko_auto/features/search/widgets/vehicle_filter_sheet.dart';
+import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Onglet 2 du shell — Rechercher (Voitures | Garages) avec toggle Liste/Carte.
-class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+class SearchScreen extends ConsumerStatefulWidget {
+  const SearchScreen({this.initialTab = 0, super.key});
+  
+  final int initialTab;
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen>
+class _SearchScreenState extends ConsumerState<SearchScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final _searchController = TextEditingController();
@@ -34,13 +39,10 @@ class _SearchScreenState extends State<SearchScreen>
   GarageFilters _garageFilters = GarageFilters.empty;
   String _query = '';
 
-  // Toggle Liste / Carte (wireframe 2.2)
-  bool _isMapView = false;
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this)
+    _tabController = TabController(initialIndex: widget.initialTab, length: 2, vsync: this)
       ..addListener(() {
         if (mounted) setState(() {});
       });
@@ -65,10 +67,16 @@ class _SearchScreenState extends State<SearchScreen>
         context,
         initial: _vehicleFilters,
       );
-      if (r != null && mounted) setState(() => _vehicleFilters = r);
+      if (r != null && mounted) {
+        setState(() => _vehicleFilters = r);
+        AppSnack.success(context, 'Filtre appliqué');
+      }
     } else {
       final r = await GarageFilterSheet.show(context, initial: _garageFilters);
-      if (r != null && mounted) setState(() => _garageFilters = r);
+      if (r != null && mounted) {
+        setState(() => _garageFilters = r);
+        AppSnack.success(context, 'Filtre appliqué');
+      }
     }
   }
 
@@ -83,9 +91,9 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   // ── Filtrage en mémoire ─────────────────────────────────────────────────
-  List<ListingCardData> get _filteredVehicles {
+  List<ListingCardData> _filteredVehicles(List<ListingCardData> all) {
     final q = _query.trim().toLowerCase();
-    return MockVehicles.all.where((v) {
+    return all.where((v) {
       if (q.isNotEmpty &&
           !v.title.toLowerCase().contains(q) &&
           !v.location.toLowerCase().contains(q)) {
@@ -112,72 +120,126 @@ class _SearchScreenState extends State<SearchScreen>
     }).toList();
   }
 
-  List<GarageCardData> get _filteredGarages {
+  List<GarageCardData> _filteredGarages(List<GarageEntity> garages) {
     final q = _query.trim().toLowerCase();
-    return MockGarages.all.where((g) {
-      if (q.isNotEmpty &&
-          !g.name.toLowerCase().contains(q) &&
-          !g.location.toLowerCase().contains(q) &&
-          !g.specialties.any((s) => s.toLowerCase().contains(q))) {
-        return false;
-      }
-      final f = _garageFilters;
-      if (f.specialty != null &&
-          !g.specialties.any(
-            (s) => s.toLowerCase() == f.specialty!.toLowerCase(),
-          )) {
-        return false;
-      }
-      if (f.city != null &&
-          !g.location.toLowerCase().contains(f.city!.toLowerCase())) {
-        return false;
-      }
-      if (f.minRating != null && g.rating < f.minRating!) return false;
-      if (f.openNowOnly && !g.isOpen) return false;
-      return true;
-    }).toList();
+    return garages
+        .where((g) {
+          if (q.isNotEmpty &&
+              !g.name.toLowerCase().contains(q) &&
+              !g.location.toLowerCase().contains(q) &&
+              !g.specialties.any((s) => s.toLowerCase().contains(q))) {
+            return false;
+          }
+          final f = _garageFilters;
+          if (f.specialty != null &&
+              !g.specialties.any(
+                (s) => s.toLowerCase() == f.specialty!.toLowerCase(),
+              )) {
+            return false;
+          }
+          if (f.city != null &&
+              !g.location.toLowerCase().contains(f.city!.toLowerCase())) {
+            return false;
+          }
+          if (f.minRating != null && g.rating < f.minRating!) return false;
+          return true;
+        })
+        .map(
+          (g) => GarageCardData(
+            name: g.name,
+            specialties: g.specialties,
+            rating: g.rating,
+
+            location: g.location,
+            imageAsset: 'assets/images/car_rav4.png',
+            isCertified: g.isCertified,
+          ),
+        )
+        .toList();
   }
 
   int get _activeFiltersCount => _tabController.index == 0
       ? _vehicleFilters.activeCount
       : _garageFilters.activeCount;
 
-  int get _currentResultCount => _tabController.index == 0
-      ? _filteredVehicles.length
-      : _filteredGarages.length;
-
   @override
   Widget build(BuildContext context) {
+    final allGarages =
+        ref.watch(garagesProvider).valueOrNull ?? const <GarageEntity>[];
+    final allListings =
+        ref.watch(homeListingsProvider).valueOrNull ??
+        const <ListingCardData>[];
+    final filteredGarages = _filteredGarages(allGarages);
+    final filteredVehicles = _filteredVehicles(allListings);
+    final currentResultCount = _tabController.index == 0
+        ? filteredVehicles.length
+        : filteredGarages.length;
+
+    final unreadCount = ref.watch(unreadNotificationsCountProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            Padding(
+            // Header : burger + titre + ville + cloche
+            Container(
+              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
+                AppSpacing.xs,
+                AppSpacing.xs,
+                AppSpacing.sm,
                 AppSpacing.xs,
               ),
               child: Row(
                 children: [
-                  Text(
-                    'Rechercher',
-                    style: context.textStyles.headlineLarge?.copyWith(
-                      color: AppColors.trust,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 26,
+                  IconButton(
+                    icon: const Icon(LucideIcons.menu, color: AppColors.trust),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Rechercher',
+                        style: context.textStyles.headlineSmall?.copyWith(
+                          color: AppColors.trust,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  // Toggle Liste / Carte (wireframe 2.2)
-                  if (_tabController.index == 0)
-                    _ListMapToggle(
-                      isMapView: _isMapView,
-                      onToggle: (v) => setState(() => _isMapView = v),
-                    ),
+                  // Cloche notifs
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      IconButton(
+                        onPressed: () =>
+                            context.push(AppRoutes.notificationsInbox),
+                        icon: const Icon(LucideIcons.bell),
+                        color: AppColors.trust,
+                        iconSize: 24,
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 9,
+                            height: 9,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -190,116 +252,27 @@ class _SearchScreenState extends State<SearchScreen>
                   : 'Spécialité, quartier...',
             ),
             _Tabs(controller: _tabController),
-            // Compteur résultats avec ville (wireframe 2.2)
             _ResultsBar(
-              count: _currentResultCount,
+              count: currentResultCount,
               city: _vehicleFilters.city ?? 'Douala',
             ),
             Expanded(
-              child: _isMapView && _tabController.index == 0
-                  ? _MapView(vehicles: _filteredVehicles)
-                  : TabBarView(
-                      controller: _tabController,
-                      children: [
-                        VehiclesTab(
-                          results: _filteredVehicles,
-                          filters: _vehicleFilters,
-                          onResetFilters: _resetFilters,
-                        ),
-                        GaragesTab(
-                          results: _filteredGarages,
-                          filters: _garageFilters,
-                          onResetFilters: _resetFilters,
-                        ),
-                      ],
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Toggle Liste / Carte (wireframe 2.2) ─────────────────────────────────────
-
-class _ListMapToggle extends StatelessWidget {
-  const _ListMapToggle({
-    required this.isMapView,
-    required this.onToggle,
-  });
-
-  final bool isMapView;
-  final ValueChanged<bool> onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.primarySoft,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(3),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ToggleBtn(
-            icon: Icons.view_list_rounded,
-            label: 'Liste',
-            selected: !isMapView,
-            onTap: () => onToggle(false),
-          ),
-          _ToggleBtn(
-            icon: Icons.map_rounded,
-            label: 'Carte',
-            selected: isMapView,
-            onTap: () => onToggle(true),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ToggleBtn extends StatelessWidget {
-  const _ToggleBtn({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.trust : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 15,
-              color: selected ? Colors.white : AppColors.trust,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.white : AppColors.trust,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  VehiclesTab(
+                    results: filteredVehicles,
+                    filters: _vehicleFilters,
+                    onResetFilters: _resetFilters,
+                    onTap: (data) =>
+                        context.push(AppRoutes.vehicleDetail, extra: data),
+                  ),
+                  GaragesTab(
+                    results: filteredGarages,
+                    filters: _garageFilters,
+                    onResetFilters: _resetFilters,
+                  ),
+                ],
               ),
             ),
           ],
@@ -309,7 +282,7 @@ class _ToggleBtn extends StatelessWidget {
   }
 }
 
-// ── Compteur résultats (wireframe 2.2) ───────────────────────────────────────
+// ── Compteur résultats ──────────────────────────────────────────────────────
 
 class _ResultsBar extends StatelessWidget {
   const _ResultsBar({required this.count, required this.city});
@@ -326,155 +299,16 @@ class _ResultsBar extends StatelessWidget {
         AppSpacing.lg,
         0,
       ),
-      child: Row(
-        children: [
-          Text(
-            '$count résultat${count > 1 ? 's' : ''}',
-            style: const TextStyle(
-              color: AppColors.trust,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-            ),
-          ),
-          const Text(
-            ' à ',
-            style: TextStyle(color: AppColors.neutral, fontSize: 13),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.location_on_rounded,
-                  size: 12,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 3),
-                Text(
-                  city,
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: Text(
+        '$count résultat${count > 1 ? 's' : ''}',
+        style: const TextStyle(
+          color: AppColors.trust,
+          fontWeight: FontWeight.w800,
+          fontSize: 13,
+        ),
       ),
     );
   }
-}
-
-// ── Vue carte OSM (wireframe 2.2) ────────────────────────────────────────────
-
-class _MapView extends StatelessWidget {
-  const _MapView({required this.vehicles});
-
-  final List<ListingCardData> vehicles;
-
-  // Positions mock autour de Douala
-  static const _mockPositions = [
-    LatLng(4.0511, 9.7085),
-    LatLng(4.0638, 9.7238),
-    LatLng(4.0420, 9.6950),
-    LatLng(4.0750, 9.7300),
-    LatLng(4.0330, 9.7150),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return FlutterMap(
-      options: const MapOptions(
-        initialCenter: LatLng(4.0511, 9.7085),
-      ),
-      children: [
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.likoauto.app',
-        ),
-        MarkerLayer(
-          markers: [
-            for (var i = 0; i < vehicles.length && i < _mockPositions.length; i++)
-              Marker(
-                point: _mockPositions[i],
-                width: 120,
-                height: 56,
-                child: _VehicleMarker(vehicle: vehicles[i]),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _VehicleMarker extends StatelessWidget {
-  const _VehicleMarker({required this.vehicle});
-
-  final ListingCardData vehicle;
-
-  @override
-  Widget build(BuildContext context) {
-    final price =
-        '${vehicle.priceFcfa ~/ 1000000}M FCFA';
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.trust,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.trust.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Text(
-            price,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-            ),
-          ),
-        ),
-        const CustomPaint(
-          size: Size(12, 6),
-          painter: _TrianglePainter(color: AppColors.trust),
-        ),
-      ],
-    );
-  }
-}
-
-class _TrianglePainter extends CustomPainter {
-  const _TrianglePainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = ui.Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _Tabs extends StatelessWidget {
@@ -491,7 +325,7 @@ class _Tabs extends StatelessWidget {
         AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primarySoft,
+        color: AppColors.trustSoft,
         borderRadius: BorderRadius.circular(999),
       ),
       child: TabBar(
@@ -520,8 +354,8 @@ class _Tabs extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.directions_car_rounded, size: 17),
-                SizedBox(width: 6),
+                Icon(Icons.directions_car_outlined, size: 17),
+                SizedBox(width: AppSpacing.sm),
                 Text('Voitures'),
               ],
             ),
@@ -532,8 +366,8 @@ class _Tabs extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.handyman_rounded, size: 17),
-                SizedBox(width: 6),
+                Icon(LucideIcons.wrench, size: 17),
+                SizedBox(width: AppSpacing.sm),
                 Text('Garages'),
               ],
             ),

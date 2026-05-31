@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ChangePhoneScreen extends ConsumerStatefulWidget {
   const ChangePhoneScreen({super.key});
@@ -41,7 +41,7 @@ class _ChangePhoneScreenState extends ConsumerState<ChangePhoneScreen> {
 
       if (!mounted) return;
       AppSnack.success(context, 'Numéro mis à jour.');
-      context.pop();
+      context.safePop();
     } on Exception catch (_) {
       if (!mounted) return;
       AppSnack.error(context, 'Erreur inattendue. Réessayez.');
@@ -58,8 +58,8 @@ class _ChangePhoneScreenState extends ConsumerState<ChangePhoneScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Changer de numéro',
@@ -99,9 +99,9 @@ class _ChangePhoneScreenState extends ConsumerState<ChangePhoneScreen> {
                         color: AppColors.trust,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Container(width: 1, height: 24, color: AppColors.outline),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                   ],
                 ),
               ),

@@ -12,6 +12,7 @@ import 'package:liko_auto/core/theme/app_colors.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/auth/providers/auth_repository.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class AccountSettingsScreen extends ConsumerStatefulWidget {
   const AccountSettingsScreen({super.key});
@@ -21,8 +22,7 @@ class AccountSettingsScreen extends ConsumerStatefulWidget {
       _AccountSettingsScreenState();
 }
 
-class _AccountSettingsScreenState
-    extends ConsumerState<AccountSettingsScreen> {
+class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
   File? _localAvatar;
 
   @override
@@ -35,8 +35,8 @@ class _AccountSettingsScreenState
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Text(
           'Paramètres du compte',
@@ -87,7 +87,7 @@ class _Content extends ConsumerWidget {
         _SettingsCard(
           children: [
             _Tile(
-              icon: Icons.person_outline_rounded,
+              icon: LucideIcons.user,
               label: 'Nom affiché',
               value: user?.displayName?.trim().isNotEmpty ?? false
                   ? user!.displayName!
@@ -95,7 +95,7 @@ class _Content extends ConsumerWidget {
               onTap: () => _editDisplayName(context, ref, user),
             ),
             const _Tile(
-              icon: Icons.workspace_premium_outlined,
+              icon: LucideIcons.badgeCheck,
               label: 'Rôle',
               value: 'Vendeur Particulier',
               trailing: _ReadOnlyChip(),
@@ -108,7 +108,7 @@ class _Content extends ConsumerWidget {
         _SettingsCard(
           children: [
             _Tile(
-              icon: Icons.email_outlined,
+              icon: LucideIcons.mail,
               label: 'Email',
               value: user?.email ?? 'Aucun email',
               trailing: user?.emailVerified ?? false
@@ -117,7 +117,7 @@ class _Content extends ConsumerWidget {
               onTap: () => context.push(AppRoutes.changeEmail),
             ),
             _Tile(
-              icon: Icons.phone_outlined,
+              icon: LucideIcons.smartphone,
               label: 'Téléphone',
               value: user?.phoneNumber ?? 'Non lié',
               trailing: user?.phoneNumber != null
@@ -132,13 +132,13 @@ class _Content extends ConsumerWidget {
         _SettingsCard(
           children: [
             _Tile(
-              icon: Icons.lock_outline_rounded,
+              icon: LucideIcons.lock,
               label: 'Changer le mot de passe',
               value: 'Recevoir un lien par email',
               onTap: () => _sendPasswordReset(context, ref, user),
             ),
             _Tile(
-              icon: Icons.logout_rounded,
+              icon: LucideIcons.logOut,
               label: 'Se déconnecter',
               value: 'Sur cet appareil',
               destructive: true,
@@ -151,14 +151,14 @@ class _Content extends ConsumerWidget {
         const _SettingsCard(
           children: [
             _Tile(
-              icon: Icons.language_rounded,
+              icon: LucideIcons.globe,
               label: 'Langue',
               value: 'Français',
               trailing: _ReadOnlyChip(label: 'Bientôt'),
               onTap: null,
             ),
             _Tile(
-              icon: Icons.brightness_6_rounded,
+              icon: LucideIcons.sun,
               label: 'Thème',
               value: 'Système',
               trailing: _ReadOnlyChip(label: 'Bientôt'),
@@ -171,7 +171,7 @@ class _Content extends ConsumerWidget {
         _SettingsCard(
           children: [
             _Tile(
-              icon: Icons.delete_forever_outlined,
+              icon: LucideIcons.trash2,
               label: 'Supprimer mon compte',
               value: 'Action irréversible',
               destructive: true,
@@ -356,18 +356,12 @@ class _AvatarPicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(
-                Icons.photo_camera_outlined,
-                color: AppColors.primary,
-              ),
+              leading: const Icon(LucideIcons.camera, color: AppColors.primary),
               title: const Text('Prendre une photo'),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
-              leading: const Icon(
-                Icons.photo_library_outlined,
-                color: AppColors.primary,
-              ),
+              leading: const Icon(LucideIcons.image, color: AppColors.primary),
               title: const Text('Choisir dans la galerie'),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
@@ -408,11 +402,11 @@ class _AvatarPicker extends StatelessWidget {
                           fit: BoxFit.cover,
                         )
                       : (url != null
-                          ? DecorationImage(
-                              image: NetworkImage(url),
-                              fit: BoxFit.cover,
-                            )
-                          : null),
+                            ? DecorationImage(
+                                image: NetworkImage(url),
+                                fit: BoxFit.cover,
+                              )
+                            : null),
                 ),
                 alignment: Alignment.center,
                 child: localFile == null && url == null
@@ -439,7 +433,7 @@ class _AvatarPicker extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.all(8),
                       child: Icon(
-                        Icons.photo_camera_rounded,
+                        LucideIcons.camera,
                         color: Colors.white,
                         size: 18,
                       ),
@@ -463,11 +457,15 @@ class _AvatarPicker extends StatelessWidget {
   }
 
   String _initials(String src) {
-    final parts = src.trim().split(RegExp(r'[\s@]+'));
+    final parts = src
+        .trim()
+        .split(RegExp(r'[\s@]+'))
+        .where((s) => s.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
-    return (parts.first.characters.first + parts[1].characters.first)
-        .toUpperCase();
+    final first = parts.first;
+    if (parts.length == 1) return first.isEmpty ? '?' : first[0].toUpperCase();
+    return '${first[0]}${parts[1][0]}'.toUpperCase();
   }
 }
 
@@ -486,12 +484,15 @@ class _SectionLabel extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Text(
-        label,
-        style: context.textStyles.labelSmall?.copyWith(
-          color: destructive ? AppColors.error : AppColors.neutral,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.6,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label,
+          style: context.textStyles.labelSmall?.copyWith(
+            color: destructive ? AppColors.error : AppColors.neutral,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+          ),
         ),
       ),
     );
@@ -575,11 +576,8 @@ class _Tile extends StatelessWidget {
         children: [
           if (trailing != null) trailing!,
           if (onTap != null) ...[
-            const SizedBox(width: 4),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.outline,
-            ),
+            const SizedBox(width: AppSpacing.xs),
+            const Icon(LucideIcons.chevronRight, color: AppColors.outline),
           ],
         ],
       ),
@@ -601,14 +599,14 @@ class _VerifiedChip extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.verified_rounded, color: AppColors.success, size: 12),
-          SizedBox(width: 3),
+          Icon(LucideIcons.badgeCheck, color: AppColors.success, size: 12),
+          SizedBox(width: AppSpacing.xxs),
           Text(
             'Vérifié',
             style: TextStyle(
               color: AppColors.success,
               fontWeight: FontWeight.w800,
-              fontSize: 10,
+              fontSize: 12,
             ),
           ),
         ],
@@ -635,7 +633,7 @@ class _ReadOnlyChip extends StatelessWidget {
         style: const TextStyle(
           color: AppColors.trust,
           fontWeight: FontWeight.w800,
-          fontSize: 10,
+          fontSize: 12,
         ),
       ),
     );

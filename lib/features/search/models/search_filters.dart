@@ -65,24 +65,17 @@ class VehicleFilters {
 
 @immutable
 class GarageFilters {
-  const GarageFilters({
-    this.specialty,
-    this.city,
-    this.minRating,
-    this.openNowOnly = false,
-  });
+  const GarageFilters({this.specialty, this.city, this.minRating});
 
   final String? specialty;
   final String? city;
   final double? minRating;
-  final bool openNowOnly;
 
   int get activeCount {
     var n = 0;
     if (specialty != null) n++;
     if (city != null) n++;
     if (minRating != null) n++;
-    if (openNowOnly) n++;
     return n;
   }
 
@@ -90,7 +83,6 @@ class GarageFilters {
     String? specialty,
     String? city,
     double? minRating,
-    bool? openNowOnly,
     bool clearSpecialty = false,
     bool clearCity = false,
     bool clearMinRating = false,
@@ -99,7 +91,6 @@ class GarageFilters {
       specialty: clearSpecialty ? null : (specialty ?? this.specialty),
       city: clearCity ? null : (city ?? this.city),
       minRating: clearMinRating ? null : (minRating ?? this.minRating),
-      openNowOnly: openNowOnly ?? this.openNowOnly,
     );
   }
 

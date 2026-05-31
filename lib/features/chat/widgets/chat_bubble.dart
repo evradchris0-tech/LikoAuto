@@ -1,7 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/chat/domain/message_entity.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ChatBubble extends StatelessWidget {
   const ChatBubble({required this.message, super.key});
@@ -12,7 +14,9 @@ class ChatBubble extends StatelessWidget {
     return Align(
       alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: message.isMe ? AppColors.primarySoft : Colors.white,
@@ -25,31 +29,37 @@ class ChatBubble extends StatelessWidget {
           border: message.isMe ? null : Border.all(color: AppColors.outline),
         ),
         child: Column(
-          crossAxisAlignment: message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: message.isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Text(
               message.text,
               style: context.textStyles.bodyMedium?.copyWith(
-                color: message.isMe ? AppColors.primary : AppColors.trust,
+                color: message.isMe ? AppColors.trust : AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   message.time,
                   style: TextStyle(
-                    color: message.isMe ? AppColors.primary.withValues(alpha: 0.6) : AppColors.neutral,
-                    fontSize: 10,
+                    color: message.isMe
+                        ? AppColors.trust.withValues(alpha: 0.6)
+                        : AppColors.neutral,
+                    fontSize: 12,
                   ),
                 ),
                 if (message.isMe) ...[
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   Icon(
-                    message.isRead ? Icons.done_all : Icons.check,
+                    message.isRead ? LucideIcons.checkCheck : LucideIcons.check,
                     size: 12,
-                    color: message.isRead ? AppColors.primary : AppColors.primary.withValues(alpha: 0.6),
+                    color: message.isRead
+                        ? AppColors.trust
+                        : AppColors.trust.withValues(alpha: 0.5),
                   ),
                 ],
               ],

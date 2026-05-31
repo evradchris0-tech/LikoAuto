@@ -4,18 +4,19 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liko_auto/core/extensions/context_extensions.dart';
 import 'package:liko_auto/core/theme/app_colors.dart';
+import 'package:liko_auto/core/theme/app_radius.dart';
 import 'package:liko_auto/core/theme/app_spacing.dart';
 import 'package:liko_auto/features/notifications_inbox/domain/app_notification.dart';
 import 'package:liko_auto/features/notifications_inbox/providers/notifications_inbox_provider.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class NotificationsInboxScreen extends ConsumerWidget {
   const NotificationsInboxScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items =
-        ref.watch(notificationsInboxProvider).valueOrNull ?? const [];
+    final items = ref.watch(notificationsInboxProvider).valueOrNull ?? const [];
     final unread = items.where((n) => !n.isRead).length;
     final actions = ref.read(notificationsActionsProvider);
 
@@ -25,8 +26,8 @@ class NotificationsInboxScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.trust),
+          onPressed: () => context.safePop(),
         ),
         title: Row(
           children: [
@@ -38,20 +39,19 @@ class NotificationsInboxScreen extends ConsumerWidget {
               ),
             ),
             if (unread > 0) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
                 child: Text(
                   '$unread',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 11,
+                    fontSize: 12,
                   ),
                 ),
               ),
@@ -62,17 +62,19 @@ class NotificationsInboxScreen extends ConsumerWidget {
           if (items.isNotEmpty) ...[
             if (unread > 0)
               TextButton(
-                onPressed: actions.markAllRead,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                ),
+                onPressed: actions?.markAllRead,
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
                 child: const Text(
                   'Tout lire',
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: AppColors.trust),
+              color: Colors.white,
+              icon: const Icon(
+                LucideIcons.moreVertical,
+                color: AppColors.primary,
+              ),
               onSelected: (v) async {
                 if (v == 'clear') {
                   await _confirmClear(context, ref);
@@ -83,14 +85,11 @@ class NotificationsInboxScreen extends ConsumerWidget {
                   value: 'clear',
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.delete_sweep_outlined,
-                        color: AppColors.error,
-                      ),
-                      SizedBox(width: 12),
+                      Icon(LucideIcons.trash2, color: AppColors.error),
+                      SizedBox(width: AppSpacing.md),
                       Text(
                         'Tout effacer',
-                        style: TextStyle(color: AppColors.error),
+                        style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -117,7 +116,7 @@ class NotificationsInboxScreen extends ConsumerWidget {
                         child: _NotificationTile(
                           notification: n,
                           onTap: () => _open(context, ref, n),
-                          onDismiss: () => actions.delete(n.id),
+                          onDismiss: () => actions?.delete(n.id),
                         ),
                       ),
                     ),
@@ -133,7 +132,7 @@ class NotificationsInboxScreen extends ConsumerWidget {
     WidgetRef ref,
     AppNotification n,
   ) async {
-    await ref.read(notificationsActionsProvider).markRead(n.id);
+    await ref.read(notificationsActionsProvider)?.markRead(n.id);
     if (!context.mounted) return;
     final route = n.payload['route'] as String?;
     if (route != null) {
@@ -173,7 +172,7 @@ class NotificationsInboxScreen extends ConsumerWidget {
       ),
     );
     if (ok ?? false) {
-      await ref.read(notificationsActionsProvider).clearAll();
+      await ref.read(notificationsActionsProvider)?.clearAll();
     }
   }
 }
@@ -217,8 +216,8 @@ class _NotificationTile extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.delete_outline_rounded, color: Colors.white),
+            SizedBox(width: AppSpacing.sm),
+            Icon(LucideIcons.trash2, color: Colors.white),
           ],
         ),
       ),
@@ -267,8 +266,9 @@ class _NotificationTile extends StatelessWidget {
                                 n.title,
                                 style: TextStyle(
                                   color: AppColors.trust,
-                                  fontWeight:
-                                      unread ? FontWeight.w800 : FontWeight.w600,
+                                  fontWeight: unread
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
                                   fontSize: 15,
                                 ),
                               ),
@@ -284,7 +284,7 @@ class _NotificationTile extends StatelessWidget {
                               ),
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.xxs),
                         Text(
                           n.body,
                           maxLines: 2,
@@ -296,13 +296,13 @@ class _NotificationTile extends StatelessWidget {
                             height: 1.4,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           _relativeTime(n.createdAt),
                           style: const TextStyle(
                             color: AppColors.neutral,
                             fontWeight: FontWeight.w600,
-                            fontSize: 11,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -347,7 +347,7 @@ class _EmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.notifications_none_rounded,
+                LucideIcons.bell,
                 size: 44,
                 color: AppColors.primary,
               ),

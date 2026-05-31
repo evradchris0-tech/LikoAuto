@@ -78,9 +78,8 @@ class Notifications extends Table {
   BoolColumn get isRead => boolean().withDefault(const Constant(false))();
 
   /// Payload arbitraire (route cible, IDs, etc.) sérialisé en JSON.
-  TextColumn get payload => text()
-      .map(const JsonMapConverter())
-      .withDefault(const Constant('{}'))();
+  TextColumn get payload =>
+      text().map(const JsonMapConverter()).withDefault(const Constant('{}'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -114,8 +113,9 @@ class Reviews extends Table {
   TextColumn get authorName => text()();
   RealColumn get rating => real()();
   TextColumn get body => text().nullable()();
-  TextColumn get tags =>
-      text().map(const StringListConverter()).withDefault(const Constant('[]'))();
+  TextColumn get tags => text()
+      .map(const StringListConverter())
+      .withDefault(const Constant('[]'))();
   BoolColumn get verified => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
 

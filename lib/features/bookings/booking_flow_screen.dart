@@ -17,6 +17,7 @@ import 'package:liko_auto/features/search/widgets/garage_result_card.dart';
 import 'package:liko_auto/shared/widgets/buttons/primary_button.dart';
 import 'package:liko_auto/shared/widgets/feedback/app_snack.dart';
 import 'package:liko_auto/shared/widgets/inputs/liko_text_field.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class BookingFlowArgs {
   const BookingFlowArgs({required this.garage});
@@ -37,11 +38,13 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
   DateTime? _date;
   int? _slotMinutes; // minutes since midnight
   final _noteCtrl = TextEditingController();
+  final _scrollController = ScrollController();
   bool _submitting = false;
 
   @override
   void dispose() {
     _noteCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -68,10 +71,12 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
       scheduledAt: scheduledAt,
       note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
     );
-    await ref.read(bookingsActionsProvider).create(booking);
+    await ref.read(bookingsActionsProvider)?.create(booking);
     // Push une notification de confirmation
     final fmt = DateFormat("EEEE d MMMM 'à' HH'h'mm", 'fr_FR');
-    await ref.read(notificationsActionsProvider).push(
+    await ref
+        .read(notificationsActionsProvider)
+        ?.push(
           AppNotification(
             id: 'N-${booking.id}',
             type: NotifType.appointment,
@@ -93,120 +98,144 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
     final garage = widget.args.garage;
     final detail = ref.watch(garageDetailProvider(garage));
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.trust),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Prendre un RDV',
-          style: context.textStyles.headlineSmall?.copyWith(
-            color: AppColors.trust,
-            fontWeight: FontWeight.w800,
+    return PopScope(
+      canPop: _step == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_step > 0) {
+          setState(() => _step--);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(LucideIcons.x, color: AppColors.trust),
+            onPressed: () {
+              if (_step > 0) {
+                setState(() => _step--);
+              } else {
+                context.safePop();
+              }
+            },
           ),
-        ),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(
-            value: (_step + 1) / 3,
-            backgroundColor: AppColors.outline.withValues(alpha: 0.3),
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(AppColors.primary),
-            minHeight: 4,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _GarageHeader(garage: garage),
-            AppSpacing.gapLg,
-            Text(
-              'Étape ${_step + 1} sur 3',
-              style: context.textStyles.labelSmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
+          title: Text(
+            'Prendre un RDV',
+            style: context.textStyles.headlineSmall?.copyWith(
+              color: AppColors.trust,
+              fontWeight: FontWeight.w800,
             ),
-            AppSpacing.gapSm,
-            if (_step == 0)
-              _StepService(
-                services: detail.services,
-                selected: _service,
-                onSelect: (s) => setState(() => _service = s),
-              )
-            else if (_step == 1)
-              _StepDateSlot(
-                date: _date,
-                slotMinutes: _slotMinutes,
-                durationMin: _service!.durationMin,
-                onDateChanged: (d) => setState(() {
-                  _date = d;
-                  _slotMinutes = null;
-                }),
-                onSlotChanged: (m) => setState(() => _slotMinutes = m),
-              )
-            else
-              _StepSummary(
-                garage: garage,
-                service: _service!,
-                scheduledAt: DateTime(
-                  _date!.year,
-                  _date!.month,
-                  _date!.day,
-                  _slotMinutes! ~/ 60,
-                  _slotMinutes! % 60,
-                ),
-                noteCtrl: _noteCtrl,
+          ),
+          centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: LinearProgressIndicator(
+              value: (_step + 1) / 3,
+              backgroundColor: AppColors.outline.withValues(alpha: 0.3),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
               ),
-          ],
+              minHeight: 4,
+            ),
+          ),
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              if (_step > 0) ...[
-                OutlinedButton(
-                  onPressed: () => setState(() => _step--),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                    side: const BorderSide(color: AppColors.outline),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+        body: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _GarageHeader(garage: garage),
+                AppSpacing.gapLg,
+                Text(
+                  'Étape ${_step + 1} sur 3',
+                  style: context.textStyles.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                AppSpacing.gapSm,
+                if (_step == 0)
+                  _StepService(
+                    services: detail.services,
+                    selected: _service,
+                    onSelect: (s) => setState(() => _service = s),
+                  )
+                else if (_step == 1)
+                  _StepDateSlot(
+                    date: _date,
+                    slotMinutes: _slotMinutes,
+                    durationMin: _service!.durationMin,
+                    onDateChanged: (d) => setState(() {
+                      _date = d;
+                      _slotMinutes = null;
+                    }),
+                    onSlotChanged: (m) => setState(() => _slotMinutes = m),
+                  )
+                else
+                  _StepSummary(
+                    garage: garage,
+                    service: _service!,
+                    scheduledAt: DateTime(
+                      _date!.year,
+                      _date!.month,
+                      _date!.day,
+                      _slotMinutes! ~/ 60,
+                      _slotMinutes! % 60,
+                    ),
+                    noteCtrl: _noteCtrl,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                if (_step > 0) ...[
+                  OutlinedButton(
+                    onPressed: () => setState(() => _step--),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.all(16),
+                      side: const BorderSide(color: AppColors.outline),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Icon(
+                      LucideIcons.arrowLeft,
+                      color: AppColors.trust,
                     ),
                   ),
-                  child: const Icon(Icons.arrow_back, color: AppColors.trust),
-                ),
-                AppSpacing.gapMd,
-              ],
-              Expanded(
-                child: PrimaryButton(
-                  label: _step == 2 ? 'Confirmer le RDV' : 'Continuer',
-                  icon: _step == 2
-                      ? Icons.event_available_rounded
-                      : Icons.arrow_forward_rounded,
-                  isLoading: _submitting,
-                  onPressed: _canContinue
-                      ? () {
-                          if (_step < 2) {
-                            setState(() => _step++);
-                          } else {
-                            _confirm();
+                  AppSpacing.gapMd,
+                ],
+                Expanded(
+                  child: PrimaryButton(
+                    label: _step == 2 ? 'Confirmer le RDV' : 'Continuer',
+                    icon: _step == 2
+                        ? LucideIcons.calendarCheck
+                        : LucideIcons.arrowRight,
+                    isLoading: _submitting,
+                    onPressed: _canContinue
+                        ? () {
+                            if (_step < 2) {
+                              setState(() => _step++);
+                            } else {
+                              _confirm();
+                            }
                           }
-                        }
-                      : null,
+                        : null,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -350,7 +379,7 @@ class _ServiceTile extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                Icons.build_circle_outlined,
+                LucideIcons.wrench,
                 color: selected ? AppColors.primary : AppColors.neutral,
                 size: 24,
               ),
@@ -440,12 +469,19 @@ class _StepDateSlot extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: CalendarDatePicker(
-            initialDate: date ?? firstDate,
-            firstDate: firstDate,
-            lastDate: lastDate,
-            onDateChanged: onDateChanged,
-            selectableDayPredicate: (d) => d.weekday != DateTime.sunday,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(
+                context,
+              ).colorScheme.copyWith(onSurface: AppColors.trust),
+            ),
+            child: CalendarDatePicker(
+              initialDate: date ?? firstDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              onDateChanged: onDateChanged,
+              selectableDayPredicate: (d) => d.weekday != DateTime.sunday,
+            ),
           ),
         ),
         if (date != null) ...[
@@ -491,9 +527,8 @@ class _SlotsGrid extends StatelessWidget {
     const start = 8 * 60; // 08:00
     final end = isSaturday ? 14 * 60 : 18 * 60;
     final now = DateTime.now();
-    final isToday = day.year == now.year &&
-        day.month == now.month &&
-        day.day == now.day;
+    final isToday =
+        day.year == now.year && day.month == now.month && day.day == now.day;
     final nowMinutes = now.hour * 60 + now.minute;
 
     final slots = <int>[];
@@ -533,7 +568,8 @@ class _SlotChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    final label = '${h.toString().padLeft(2, '0')}h'
+    final label =
+        '${h.toString().padLeft(2, '0')}h'
         '${m.toString().padLeft(2, '0')}';
     final Color bg;
     final Color fg;
@@ -616,25 +652,25 @@ class _StepSummary extends StatelessWidget {
           child: Column(
             children: [
               _SummaryRow(
-                icon: Icons.handyman_rounded,
+                icon: LucideIcons.wrench,
                 label: 'Service',
                 value: service.label,
               ),
               const Divider(height: 24),
               _SummaryRow(
-                icon: Icons.calendar_today_rounded,
+                icon: LucideIcons.calendar,
                 label: 'Date',
                 value: fmt.format(scheduledAt),
               ),
               const Divider(height: 24),
               _SummaryRow(
-                icon: Icons.timer_outlined,
+                icon: LucideIcons.timer,
                 label: 'Durée estimée',
                 value: '${service.durationMin} min',
               ),
               const Divider(height: 24),
               _SummaryRow(
-                icon: Icons.payments_outlined,
+                icon: LucideIcons.banknote,
                 label: 'Prix dès',
                 value: service.priceFromFcfa.toFcfa(),
               ),
